@@ -1,31 +1,31 @@
 var teams = [];
 var rankings = {};
 
-var load = function(data) {
-            teams = [];
-            rankings = {};
-            $.each(data.entries, function (i, e) {
-                teams.push(e.team.name);
-                rankings[e.team.name] = {};
-                rankings[e.team.name].name = e.team.name;
-                rankings[e.team.name].position = e.pos;
-                rankings[e.team.name].ranking = e.pts;
-            })
-            $('#irbDate').text(data.effective.label);
-            $('#standings').find('tr.ranking').remove();
-            $.each(rankings, function (i, r) {
-                $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
-            });
-            $('#right').css('margin-left', $('#left').width());
-            $('#loading').hide();
-            $('#left').show();
-            $('#right').show();
+var load = function (data) {
+    teams = [];
+    rankings = {};
+    $.each(data.entries, function (i, e) {
+        teams.push(e.team.name);
+        rankings[e.team.name] = {};
+        rankings[e.team.name].name = e.team.name;
+        rankings[e.team.name].position = e.pos;
+        rankings[e.team.name].ranking = e.pts;
+    })
+    $('#irbDate').text(data.effective.label);
+    $('#standings').find('tr.ranking').remove();
+    $.each(rankings, function (i, r) {
+        $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td></td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
+    });
+    $('#right').css('margin-left', $('#left').width());
+    $('#loading').hide();
+    $('#left').show();
+    $('#right').show();
 
-            addFixture();
-            addFixture();
-            addFixture();
-            addFixture();
-            addFixture();
+    addFixture();
+    addFixture();
+    addFixture();
+    addFixture();
+    addFixture();
 };
 
 var addFixture = function () {
@@ -113,11 +113,11 @@ var calculate = function () {
         var positionDiff = i+1 - r.oldPosition;
         var positionString = '';
         if (positionDiff > 0) {
-            positionString = '<span style="color: #900">&darr; (' + r.oldPosition + ')</span>';
+            positionString = '<span style="color: #900">&darr;(' + r.oldPosition + ')</span>';
         } else if (positionDiff < 0) {
-            positionString = '<span style="color: #090">&uarr; (' + r.oldPosition + ')</span>';
+            positionString = '<span style="color: #090">&uarr;(' + r.oldPosition + ')</span>';
         }
-        $('#standings').append($('<tr class="ranking"><td>' + (i + 1) + '</td><td>' + positionString + '</td><td>' + r.name + '</td><td>' + r.newRanking.toFixed(2) + rankingString + '</td></tr>'));
+        $('#standings').append($('<tr class="ranking"><td>' + (i + 1) + '</td><td>' + positionString + '</td><td>' + r.name + '</td><td>' + r.newRanking.toFixed(2) + '</td><td>' + rankingString + '</td></tr>'));
     });
     $('#right').css('margin-left', $('#left').width());
 }
