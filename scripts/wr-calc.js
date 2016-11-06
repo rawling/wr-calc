@@ -14,7 +14,7 @@ var load = function(data) {
             $('#irbDate').text(data.effective.label);
             $('#standings').find('tr.ranking').remove();
             $.each(rankings, function (i, r) {
-                $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
+                $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td></td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
             });
             $('#right').css('margin-left', $('#left').width());
             $('#loading').hide();
@@ -113,11 +113,11 @@ var calculate = function () {
         var positionDiff = i+1 - r.oldPosition;
         var positionString = '';
         if (positionDiff > 0) {
-            positionString = '<span style="color: #900">&darr; (' + r.oldPosition + ')</span>';
+            positionString = '<span style="color: #900">&darr;(' + r.oldPosition + ')</span>';
         } else if (positionDiff < 0) {
-            positionString = '<span style="color: #090">&uarr; (' + r.oldPosition + ')</span>';
+            positionString = '<span style="color: #090">&uarr;(' + r.oldPosition + ')</span>';
         }
-        $('#standings').append($('<tr class="ranking"><td>' + (i + 1) + '</td><td>' + positionString + '</td><td>' + r.name + '</td><td>' + r.newRanking.toFixed(2) + rankingString + '</td></tr>'));
+        $('#standings').append($('<tr class="ranking"><td>' + (i + 1) + '</td><td>' + positionString + '</td><td>' + r.name + '</td><td>' + r.newRanking.toFixed(2) + '</td><td>' + rankingString + '</td></tr>'));
     });
     $('#right').css('margin-left', $('#left').width());
 }
