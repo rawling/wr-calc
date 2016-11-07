@@ -16,13 +16,11 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     $.each(rankings, function (i, r) {
         $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td></td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
     });
-    $('#right').css('margin-left', $('#left').width());
 
     loadFixture();
 
-    $('#loading').hide();
-    $('#left').show();
-    $('#right').show();
+    $('#loadingLeft').hide();
+    $('#loadedLeft').show();
 });
 
 var addFixture = function () {
@@ -156,6 +154,9 @@ loadFixture = function(  ) {
 
         addFixture();
 
+        $('#right').css('margin-left', $('#left').width());
+        $('#loadingRight').hide();
+        $('#loadedRight').show();
     });
 
 }
