@@ -1,7 +1,7 @@
 var teams = [];
 var rankings = {};
 
-var load = function (data) {
+$.get('http://cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     teams = [];
     rankings = {};
     $.each(data.entries, function (i, e) {
@@ -23,8 +23,7 @@ var load = function (data) {
     $('#loading').hide();
     $('#left').show();
     $('#right').show();
-
-};
+});
 
 var addFixture = function () {
     var row = $('<tr class="fixture"><td><select class="homeTeam"><option /></select></td><td><input type="text" class="homeScore" size="3" /></td><td><input type="text" class="awayScore" size="3" /></td><td><select class="awayTeam"><option /></select></td><td><input type="checkbox" class="noHome" /></td><td><input type="checkbox" class="isRwc" /></td><td><button class="remove">x</button></td></tr>');
