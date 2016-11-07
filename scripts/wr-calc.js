@@ -1,7 +1,7 @@
 var teams = [];
 var rankings = {};
 
-var load = function (data) {
+$.get('http://cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     teams = [];
     rankings = {};
     $.each(data.entries, function (i, e) {
@@ -17,16 +17,13 @@ var load = function (data) {
         $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td></td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
     });
     $('#right').css('margin-left', $('#left').width());
+
+    loadFixture();
+
     $('#loading').hide();
     $('#left').show();
     $('#right').show();
-
-    addFixture();
-    addFixture();
-    addFixture();
-    addFixture();
-    addFixture();
-};
+});
 
 var addFixture = function () {
     var row = $('<tr class="fixture"><td><select class="homeTeam"><option /></select></td><td><input type="text" class="homeScore" size="3" /></td><td><input type="text" class="awayScore" size="3" /></td><td><select class="awayTeam"><option /></select></td><td><input type="checkbox" class="noHome" /></td><td><input type="checkbox" class="isRwc" /></td><td><button class="remove">x</button></td></tr>');
@@ -121,3 +118,65 @@ var calculate = function () {
     });
     $('#right').css('margin-left', $('#left').width());
 }
+
+
+loadFixture = function(  ) {
+    var now  = new Date();
+    var from = formatDate( now );
+    var to   =  formatDate( now.addDays( 7 ) );
+
+    var url = "http://cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
+
+    $.get( url ).done( function( data ) {
+
+        $.each(data.content, function (i, e) {
+
+            // MRU ( maybe ) is only for MENS
+            if( e.events[0].sport == 'mru' ) {
+
+                // test if both Country into TEAMS array
+                if( $.inArray( e.teams[0].name, teams ) != -1 && $.inArray( e.teams[1].name, teams ) != -1 ) {
+
+                    addFixture();
+
+                    // home INPUT
+                    $('#fixtures TR:last TD:nth(0) INPUT').val( e.teams[0].name );
+
+                    // home SELECT
+                    $('#fixtures TR:last TD:nth(0) SELECT').val( e.teams[0].name );
+
+                    // away INPUT
+                    $('#fixtures TR:last TD:nth(3) INPUT').val( e.teams[1].name );
+
+                    // away SELECT
+                    $('#fixtures TR:last TD:nth(3) SELECT').val( e.teams[1].name );
+                }
+            }
+        });
+
+        addFixture();
+
+    });
+
+}
+
+
+var formatDate = function(date) {
+    var d     = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day   = '' + d.getDate(),
+        year  = d.getFullYear();
+
+    return [year, month, day].join('-');
+}
+
+
+Date.prototype.addDays = function (d) {
+    if (d) {
+        var t = this.getTime();
+        t = t + (d * 86400000);
+        this.setTime(t);
+    }
+    return this;
+};
+
