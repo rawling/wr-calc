@@ -16,18 +16,20 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     $.each(rankings, function (i, r) {
         $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td></td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
     });
-    $('#right').css('margin-left', $('#left').width());
 
     loadFixture();
 
-    $('#loading').hide();
-    $('#left').show();
-    $('#right').show();
+    $('#loadingLeft').hide();
+    $('#loadedLeft').show();
 });
 
-var addFixture = function () {
-    var row = $('<tr class="fixture"><td><select class="homeTeam"><option /></select></td><td><input type="text" class="homeScore" size="3" /></td><td><input type="text" class="awayScore" size="3" /></td><td><select class="awayTeam"><option /></select></td><td><input type="checkbox" class="noHome" /></td><td><input type="checkbox" class="isRwc" /></td><td><button class="remove">x</button></td></tr>');
-    $('#fixtures').append(row);
+var addFixture = function (top) {
+    var row = $('<tr class="fixture"><td><select class="homeTeam"><option /></select></td><td><input type="number" class="homeScore" min="0" /></td><td><input type="number" class="awayScore" min="0" /></td><td><select class="awayTeam"><option /></select></td><td><input type="checkbox" class="noHome" /></td><td><input type="checkbox" class="isRwc" /></td><td><button class="remove">x</button></td></tr>');
+    if (top) {
+        $('#fixtures').prepend(row);
+    } else {
+        $('#fixtures').append(row);
+    }
     var home = $(row).find('.homeTeam');
     var away = $(row).find('.awayTeam');
     var remove = $(row).find('.remove');
@@ -156,6 +158,9 @@ loadFixture = function(  ) {
 
         addFixture();
 
+        $('#right').css('margin-left', $('#left').width());
+        $('#loadingRight').hide();
+        $('#loadedRight').show();
     });
 
 }
