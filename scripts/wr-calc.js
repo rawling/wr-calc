@@ -24,7 +24,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
 });
 
 var addFixture = function () {
-    var row = $('<tr class="fixture"><td><select class="homeTeam"><option /></select></td><td><input type="text" class="homeScore" size="3" /></td><td><input type="text" class="awayScore" size="3" /></td><td><select class="awayTeam"><option /></select></td><td><input type="checkbox" class="noHome" /></td><td><input type="checkbox" class="isRwc" /></td><td><button class="remove">x</button></td></tr>');
+    var row = $('<tr class="fixture"><td><select class="homeTeam"><option /></select></td><td><input type="number" class="homeScore" min="0" /></td><td><input type="number" class="awayScore" min="0" /></td><td><select class="awayTeam"><option /></select></td><td><input type="checkbox" class="noHome" /></td><td><input type="checkbox" class="isRwc" /></td><td><button class="remove">x</button></td></tr>');
     $('#fixtures').append(row);
     var home = $(row).find('.homeTeam');
     var away = $(row).find('.awayTeam');
