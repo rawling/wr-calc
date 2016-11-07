@@ -23,9 +23,13 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     $('#loadedLeft').show();
 });
 
-var addFixture = function () {
+var addFixture = function (top) {
     var row = $('<tr class="fixture"><td><select class="homeTeam"><option /></select></td><td><input type="number" class="homeScore" min="0" /></td><td><input type="number" class="awayScore" min="0" /></td><td><select class="awayTeam"><option /></select></td><td><input type="checkbox" class="noHome" /></td><td><input type="checkbox" class="isRwc" /></td><td><button class="remove">x</button></td></tr>');
-    $('#fixtures').append(row);
+    if (top) {
+        $('#fixtures').prepend(row);
+    } else {
+        $('#fixtures').append(row);
+    }
     var home = $(row).find('.homeTeam');
     var away = $(row).find('.awayTeam');
     var remove = $(row).find('.remove');

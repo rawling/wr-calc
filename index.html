@@ -26,8 +26,14 @@
         <p id='loadingRight'>Loading next week's fixtures from World Rugby...</p>
         <div id="loadedRight" style="display: none;">
             <h4>Results</h4>
-            <table id="fixtures">
-                <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
+            <div>
+                <button onclick='addFixture(true);'>Add row</button>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
+                </thead>
+                <tbody id="fixtures"></tbody>
             </table>
             <div>
                 <button onclick='addFixture();'>Add row</button>
