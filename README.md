@@ -3,6 +3,12 @@ World Rugby rankings calculator
 
 ## Release notes
 
+### 0.4
+- Test new staging workflow
+- Show separate loading messages for rankings and fixtures
+- Use numeric inputs for scores
+- ADd aiblity to add rows above loaded fixtures
+
 ### 0.3
 
 - Automatically populate with a week of upcoming fixtures (thanks to [marcoas](https://github.com/rawling/wr-calc/pull/2))
