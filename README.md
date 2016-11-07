@@ -1,13 +1,16 @@
 # wr-calc
 World Rugby rankings calculator
 
+Development and testing takes place at ['wr-calc-stage'](https://github.com/rawling/wr-calc-stage).
+Changes are pushed to ['wr-calc'](https://github.com/rawling/wr-calc) once stable.
+
 ## Release notes
 
 ### 0.4
 - Test new staging workflow
 - Show separate loading messages for rankings and fixtures
 - Use numeric inputs for scores
-- ADd aiblity to add rows above loaded fixtures
+- Add ability to add rows above loaded fixtures
 
 ### 0.3
 
