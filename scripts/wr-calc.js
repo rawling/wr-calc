@@ -1,7 +1,7 @@
 var teams = [];
 var rankings = {};
 
-$.get('http://cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
+$.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     teams = [];
     rankings = {};
     $.each(data.entries, function (i, e) {
@@ -125,7 +125,7 @@ loadFixture = function(  ) {
     var from = formatDate( now );
     var to   =  formatDate( now.addDays( 7 ) );
 
-    var url = "http://cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
+    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
 
     $.get( url ).done( function( data ) {
 
