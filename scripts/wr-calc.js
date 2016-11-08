@@ -1,18 +1,131 @@
 var teams = [];
-var rankings = {};
+
+function ViewModel() {
+    this.originalRankings = ko.observable();
+    this.originalDate = ko.observable(); 
+    this.fixtures = ko.observableArray();
+    this.shownRankings = ko.observable();
+    this.fixturesLoaded = ko.observable(false);
+
+    this.calculatedRankings = ko.computed(function() {
+        var originalRankings = this.originalRankings();
+        var fixtures = this.fixtures();
+
+        if (!originalRankings || !fixtures) {
+            return null;
+        }
+
+        var calculatedRankings = {};
+        $.each(originalRankings, function (k, v) {
+            var nr = {};
+            nr.name = v.name;
+            nr.oldPosition = v.position;
+            nr.oldRanking = v.ranking;
+            nr.newRanking = v.ranking;
+            nr.id = v.id;
+            calculatedRankings[v.id] = nr;
+        });
+
+        $.each(fixtures, function (index, fixture) {
+            var home = calculatedRankings[fixture.homeId()];
+            var away = calculatedRankings[fixture.awayId()];
+            var homeScore = parseInt(fixture.homeScore());
+            var awayScore = parseInt(fixture.awayScore());
+            var noHome = fixture.noHome();
+            var isRwc = fixture.isRwc();
+            if (home &&
+                away &&
+                home != away &&
+                !isNaN(homeScore) &&
+                !isNaN(awayScore)) {
+                var homeRanking = home.newRanking;
+                if (!noHome) {
+                    homeRanking = homeRanking + 3;
+                }
+                var rankingDiff = homeRanking - away.newRanking;
+                var cappedDiff = Math.min(10, Math.max(-10, rankingDiff));
+                var drawChange = cappedDiff / 10;
+                var homeChange;
+                if (homeScore > awayScore + 15) {
+                    homeChange = 1.5 * (1 - drawChange);
+                } else if (homeScore > awayScore) {
+                    homeChange = 1 - drawChange;
+                } else if (homeScore == awayScore) {
+                    homeChange = 0 - drawChange;
+                } else if (homeScore < awayScore - 15) {
+                    homeChange = 1.5 * (-1 - drawChange);
+                } else {
+                    homeChange = -1 - drawChange;
+                }
+                if (isRwc) {
+                    homeChange = homeChange * 2;
+                }
+                var awayChange = -homeChange;
+                home.newRanking = home.newRanking + homeChange;
+                away.newRanking = away.newRanking + awayChange;
+            }
+        });
+
+        var sorted = [];
+        $.each(calculatedRankings, function (i, r) {
+            sorted.push(r);
+        });
+        sorted.sort(function (a, b) { return b.newRanking - a.newRanking; });
+
+        $.each(sorted, function (i, r) {
+            r.newPosition = i + 1;
+            if (r.newPosition > r.oldPosition) {
+                r.oldPositionDisplay = '<span style="color: #090">(&uarr;' + r.oldPosition + ')</span>';
+            } else if (r.newPosition < r.oldPosition) {
+                r.oldPositionDisplay = '<span style="color: #900">(&darr;' + r.oldPosition + ')</span>';
+            } else {
+                r.oldPositionDisplay = null;
+            }
+
+            if (r.newRanking > r.oldRanking) {
+                r.rankingDiffDisplay = '<span style="color: #090">(+' + (r.newRanking - r.oldRanking).toFixed(2) + ')</span>';
+            } else if (r.newRanking < r.oldRanking) {
+                r.rankingDiffDisplay = '<span style="color: #900">(-' + (r.oldRanking - r.newRanking).toFixed(2) + ')</span>';
+            } else {
+                r.rankingDiffDisplay = null;
+            }
+        });
+
+        setTimeout(function () {
+            $('#right').css('margin-left', $('#left').width());
+        }, 10);
+        return sorted;
+    }, this);
+
+    return this;
+};
+
+function FixtureViewModel() {
+    this.homeId = ko.observable();
+    this.awayId = ko.observable();
+    this.homeScore = ko.observable();
+    this.awayScore = ko.observable();
+
+    this.noHome = ko.observable();
+    this.isRwc = ko.observable();
+
+    return this;
+};
+
+var viewModel = new ViewModel();
+ko.applyBindings(viewModel);
 
 $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     teams = [];
-    rankings = {};
+    var rankings = {};
     $.each(data.entries, function (i, e) {
         teams.push({ id: e.team.id, name: e.team.name });
         rankings[e.team.id] = {};
+        rankings[e.team.id].id = e.team.id;
         rankings[e.team.id].name = e.team.name;
         rankings[e.team.id].position = e.pos;
         rankings[e.team.id].ranking = e.pts;
-    })
-    $('#irbDate').text(data.effective.label);
-    $('#standings').find('tr.ranking').remove();
+    });
 
     var sorted = [];
     $.each(rankings, function (i, r) {
@@ -20,114 +133,23 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     });
     sorted.sort(function (a, b) { return b.ranking - a.ranking; });
 
-    $.each(sorted, function (i, r) {
-        $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td></td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
-    });
+    viewModel.originalRankings(sorted);
+    viewModel.originalDate(data.effective.label);
+    viewModel.shownRankings('original');
 
     loadFixture();
-
-    $('#loadingLeft').hide();
-    $('#loadedLeft').show();
 });
 
 var addFixture = function (top) {
-    var row = $('<tr class="fixture"><td><select class="homeTeam"><option /></select></td><td><input type="number" class="homeScore" min="0" /></td><td><input type="number" class="awayScore" min="0" /></td><td><select class="awayTeam"><option /></select></td><td><input type="checkbox" class="noHome" /></td><td><input type="checkbox" class="isRwc" /></td><td><button class="remove">x</button></td></tr>');
+    var fixture = new FixtureViewModel();
     if (top) {
-        $('#fixtures').prepend(row);
+        viewModel.fixtures.unshift(fixture);
     } else {
-        $('#fixtures').append(row);
+        viewModel.fixtures.push(fixture);
     }
-    var home = $(row).find('.homeTeam');
-    var away = $(row).find('.awayTeam');
-    var remove = $(row).find('.remove');
-    $.each(teams, function (k, v) {
-        $(home).append($('<option></option>').attr('value', v.id).text(v.name));
-        $(away).append($('<option></option>').attr('value', v.id).text(v.name));
-        $(home).combobox();
-        $(away).combobox();
-        $(remove).click(function() { $(this).parent().parent().detach(); });
-    });
-}
 
-var calculate = function () {
-    var newRankings = {};
-    $.each(rankings, function (k, v) {
-        var nr = {};
-        nr.name = v.name;
-        nr.oldPosition = v.position;
-        nr.oldRanking = v.ranking;
-        nr.newRanking = v.ranking;
-        newRankings[k] = nr;
-    });
-    $.each($('#fixtures').find('tr.fixture'), function (k, v) {
-        var row = $(v);
-        var homeTeam = newRankings[row.find('select.homeTeam').val()];
-        var awayTeam = newRankings[row.find('select.awayTeam').val()];
-        var homeScore = parseInt(row.find('input.homeScore').val());
-        var awayScore = parseInt(row.find('input.awayScore').val());
-        var noHome = row.find('input.noHome').prop('checked');
-        var isRwc = row.find('input.isRwc').prop('checked');
-        if (typeof (homeTeam) != "undefined" &&
-            typeof (awayTeam) != "undefined" &&
-            homeTeam != awayTeam &&
-            !isNaN(homeScore) &&
-            !isNaN(awayScore)) {
-            row.attr('style', 'background: #dfd;');
-            var homeRanking = homeTeam.newRanking;
-            if (!noHome) {
-                homeRanking = homeRanking + 3;
-            }
-            var rankingDiff = homeRanking - awayTeam.newRanking;
-            var cappedDiff = Math.min(10, Math.max(-10, rankingDiff));
-            var drawChange = cappedDiff / 10;
-            var homeChange;
-            if (homeScore > awayScore + 15) {
-                homeChange = 1.5 * (1 - drawChange);
-            } else if (homeScore > awayScore) {
-                homeChange = 1 - drawChange;
-            } else if (homeScore == awayScore) {
-                homeChange = 0 - drawChange;
-            } else if (homeScore < awayScore - 15) {
-                homeChange = 1.5 * (-1 - drawChange);
-            } else {
-                homeChange = -1 - drawChange;
-            }
-            if (isRwc) {
-                homeChange = homeChange * 2;
-            }
-            var awayChange = -homeChange;
-            homeTeam.newRanking = homeTeam.newRanking + homeChange;
-            awayTeam.newRanking = awayTeam.newRanking + awayChange;
-        } else {
-            row.attr('style', 'background: #fdd;');
-        }
-    });
-    $('#standings').find('tr.ranking').remove();
-    var sorted = [];
-    $.each(newRankings, function (i, r) {
-        sorted.push(r);
-    });
-    sorted.sort(function (a, b) { return b.newRanking - a.newRanking; });
-    $.each(sorted, function (i, r) {
-        var rankingDiff = r.newRanking - r.oldRanking;
-        var rankingString = '';
-        if (rankingDiff > 0) {
-            rankingString = ' <span style="color: #090">(+' + (rankingDiff.toFixed(2)) + ')</span>';
-        } else if (rankingDiff < 0) {
-            rankingString = ' <span style="color: #900">(' + rankingDiff.toFixed(2) + ')</span>';
-        }
-        var positionDiff = i+1 - r.oldPosition;
-        var positionString = '';
-        if (positionDiff > 0) {
-            positionString = '<span style="color: #900">&darr;(' + r.oldPosition + ')</span>';
-        } else if (positionDiff < 0) {
-            positionString = '<span style="color: #090">&uarr;(' + r.oldPosition + ')</span>';
-        }
-        $('#standings').append($('<tr class="ranking"><td>' + (i + 1) + '</td><td>' + positionString + '</td><td>' + r.name + '</td><td>' + r.newRanking.toFixed(2) + '</td><td>' + rankingString + '</td></tr>'));
-    });
-    $('#right').css('margin-left', $('#left').width());
+    return fixture;
 }
-
 
 loadFixture = function(  ) {
     var now  = new Date();
@@ -138,38 +160,23 @@ loadFixture = function(  ) {
 
     $.get( url ).done( function( data ) {
 
+        var rankings = viewModel.originalRankings();
         $.each(data.content, function (i, e) {
 
             // both Country into RANKINGS array ?
             if(rankings[e.teams[0].id] && rankings[e.teams[1].id]) {
-
-                addFixture();
-
-                // home INPUT
-                $('#fixtures TR:last TD:nth(0) INPUT').val( e.teams[0].name );
-
-                // home SELECT
-                $('#fixtures TR:last TD:nth(0) SELECT').val( e.teams[0].id );
-
-                // away INPUT
-                $('#fixtures TR:last TD:nth(3) INPUT').val( e.teams[1].name );
-
-                // away SELECT
-                $('#fixtures TR:last TD:nth(3) SELECT').val( e.teams[1].id );
-
-                // rankingsWeight == 2 (maybe) is for World Cup only
-                if( e.events[0].rankingsWeight == 2 ) {
-                	$('#fixtures TR:last .isRwc').attr('checked', true);
-                }
+                var fixture = addFixture();
+                fixture.homeId(e.teams[0].id);
+                fixture.awayId(e.teams[1].id);
+                fixture.noHome(false);
+                fixture.isRwc(e.events[0].rankingsWeight == 2);
             }
-
         });
 
         addFixture();
 
+        viewModel.shownRankings('calculated');
         $('#right').css('margin-left', $('#left').width());
-        $('#loadingRight').hide();
-        $('#loadedRight').show();
     });
 
 }
