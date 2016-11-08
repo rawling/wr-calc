@@ -18,13 +18,13 @@
             <input type="radio" name="rankings" value="calculated" data-bind="checked: shownRankings">Calculated
         </div>
 
-        <div data-bind="if: ($data.shownRankings() === 'original' && $data.originalRankings())">
+        <div data-bind="if: ($data.shownRankings() === 'original' && $data.sortedRankings())">
             <h4><a href="http://www.worldrugby.org/rankings/mru">World Rugby</a> rankings as of <span data-bind="text: originalDate"></span></h4>
             <table>
                 <thead>
                     <tr style="text-align: left;"><th>#</th><th>Team</th><th>Points</th></tr>
                 </thead>
-                <tbody data-bind="foreach: originalRankings">
+                <tbody data-bind="foreach: sortedRankings">
                     <tr class="ranking">
                         <td data-bind="text: position"></td>
                         <td data-bind="text: name"></td>
@@ -67,10 +67,10 @@
                 </thead>
                 <tbody data-bind="foreach: fixtures">
                     <tr>
-                        <td><input type="text" data-bind="value: homeId"></input></td>
+                        <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
                         <td><input type="number" min="0" data-bind="value: homeScore" /></td>
                         <td><input type="number" min="0" data-bind="value: awayScore" /></td>
-                        <td><input type="text" data-bind="value: awayId"></input></td>
+                        <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
                         <td><input type="checkbox" data-bind="checked: noHome" /></td>
                         <td><input type="checkbox" data-bind="checked: isRwc" /></td>
                     </tr>

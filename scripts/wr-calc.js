@@ -1,8 +1,8 @@
-var teams = [];
-
 function ViewModel() {
     this.originalRankings = ko.observable();
-    this.originalDate = ko.observable(); 
+    this.sortedRankings = ko.observable();
+    this.originalDate = ko.observable();
+    this.teams = ko.observableArray();
     this.fixtures = ko.observableArray();
     this.shownRankings = ko.observable();
     this.fixturesLoaded = ko.observable(false);
@@ -116,16 +116,16 @@ var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
 $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
-    teams = [];
     var rankings = {};
     $.each(data.entries, function (i, e) {
-        teams.push({ id: e.team.id, name: e.team.name });
+        viewModel.teams.push({ id: e.team.id, name: e.team.name });
         rankings[e.team.id] = {};
         rankings[e.team.id].id = e.team.id;
         rankings[e.team.id].name = e.team.name;
         rankings[e.team.id].position = e.pos;
         rankings[e.team.id].ranking = e.pts;
     });
+    viewModel.originalRankings(rankings);
 
     var sorted = [];
     $.each(rankings, function (i, r) {
@@ -133,7 +133,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     });
     sorted.sort(function (a, b) { return b.ranking - a.ranking; });
 
-    viewModel.originalRankings(sorted);
+    viewModel.sortedRankings(sorted);
     viewModel.originalDate(data.effective.label);
     viewModel.shownRankings('original');
 
