@@ -127,33 +127,30 @@ loadFixture = function(  ) {
     var from = formatDate( now );
     var to   =  formatDate( now.addDays( 7 ) );
 
-    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
+    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&sports=mru";
 
     $.get( url ).done( function( data ) {
 
         $.each(data.content, function (i, e) {
 
-            // MRU ( maybe ) is only for MENS
-            if( e.events[0].sport == 'mru' ) {
+            // both Country into TEAMS array ?
+            if( $.inArray( e.teams[0].name, teams ) != -1 && $.inArray( e.teams[1].name, teams ) != -1 ) {
 
-                // test if both Country into TEAMS array
-                if( $.inArray( e.teams[0].name, teams ) != -1 && $.inArray( e.teams[1].name, teams ) != -1 ) {
+                addFixture();
 
-                    addFixture();
+                // home INPUT
+                $('#fixtures TR:last TD:nth(0) INPUT').val( e.teams[0].name );
 
-                    // home INPUT
-                    $('#fixtures TR:last TD:nth(0) INPUT').val( e.teams[0].name );
+                // home SELECT
+                $('#fixtures TR:last TD:nth(0) SELECT').val( e.teams[0].name );
 
-                    // home SELECT
-                    $('#fixtures TR:last TD:nth(0) SELECT').val( e.teams[0].name );
+                // away INPUT
+                $('#fixtures TR:last TD:nth(3) INPUT').val( e.teams[1].name );
 
-                    // away INPUT
-                    $('#fixtures TR:last TD:nth(3) INPUT').val( e.teams[1].name );
-
-                    // away SELECT
-                    $('#fixtures TR:last TD:nth(3) SELECT').val( e.teams[1].name );
-                }
+                // away SELECT
+                $('#fixtures TR:last TD:nth(3) SELECT').val( e.teams[1].name );
             }
+
         });
 
         addFixture();
@@ -184,4 +181,3 @@ Date.prototype.addDays = function (d) {
     }
     return this;
 };
-
