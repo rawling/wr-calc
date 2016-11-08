@@ -1,10 +1,14 @@
 # wr-calc
 World Rugby rankings calculator
 
-Development and testing takes place at ['wr-calc-stage'](https://github.com/rawling/wr-calc-stage).
-Changes are pushed to ['wr-calc'](https://github.com/rawling/wr-calc) once stable.
+Development and testing takes place at [`wr-calc-stage`](https://github.com/rawling/wr-calc-stage).  
+Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stable.
 
 ## Release notes
+
+### 0.5
+- Detect RWC matches (thanks to [marcoas](https://github.com/rawling/wr-calc-stage/pull/1))
+- Change team IDs from name to IDs from API
 
 ### 0.4
 - Test new staging workflow
