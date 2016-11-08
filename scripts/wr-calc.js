@@ -149,6 +149,11 @@ loadFixture = function(  ) {
 
                 // away SELECT
                 $('#fixtures TR:last TD:nth(3) SELECT').val( e.teams[1].name );
+
+                // rankingsWeight == 2 (maybe) is for World Cup only
+                if( e.events[0].rankingsWeight == 2 ) {
+                	$('#fixtures TR:last .isRwc').attr('checked', true);
+                }
             }
 
         });
