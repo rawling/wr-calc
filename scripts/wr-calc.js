@@ -5,15 +5,22 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     teams = [];
     rankings = {};
     $.each(data.entries, function (i, e) {
-        teams.push(e.team.name);
-        rankings[e.team.name] = {};
-        rankings[e.team.name].name = e.team.name;
-        rankings[e.team.name].position = e.pos;
-        rankings[e.team.name].ranking = e.pts;
+        teams.push({ id: e.team.id, name: e.team.name });
+        rankings[e.team.id] = {};
+        rankings[e.team.id].name = e.team.name;
+        rankings[e.team.id].position = e.pos;
+        rankings[e.team.id].ranking = e.pts;
     })
     $('#irbDate').text(data.effective.label);
     $('#standings').find('tr.ranking').remove();
+
+    var sorted = [];
     $.each(rankings, function (i, r) {
+        sorted.push(r);
+    });
+    sorted.sort(function (a, b) { return b.ranking - a.ranking; });
+
+    $.each(sorted, function (i, r) {
         $('#standings').append($('<tr class="ranking"><td>' + r.position + '</td><td></td><td>' + r.name + '</td><td>' + r.ranking.toFixed(2) + '</td><td></td></tr>'));
     });
 
@@ -34,8 +41,8 @@ var addFixture = function (top) {
     var away = $(row).find('.awayTeam');
     var remove = $(row).find('.remove');
     $.each(teams, function (k, v) {
-        $(home).append($('<option></option>').attr('value', v).text(v));
-        $(away).append($('<option></option>').attr('value', v).text(v));
+        $(home).append($('<option></option>').attr('value', v.id).text(v.name));
+        $(away).append($('<option></option>').attr('value', v.id).text(v.name));
         $(home).combobox();
         $(away).combobox();
         $(remove).click(function() { $(this).parent().parent().detach(); });
@@ -50,7 +57,7 @@ var calculate = function () {
         nr.oldPosition = v.position;
         nr.oldRanking = v.ranking;
         nr.newRanking = v.ranking;
-        newRankings[v.name] = nr;
+        newRankings[k] = nr;
     });
     $.each($('#fixtures').find('tr.fixture'), function (k, v) {
         var row = $(v);
@@ -127,33 +134,35 @@ loadFixture = function(  ) {
     var from = formatDate( now );
     var to   =  formatDate( now.addDays( 7 ) );
 
-    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
+    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&sports=mru";
 
     $.get( url ).done( function( data ) {
 
         $.each(data.content, function (i, e) {
 
-            // MRU ( maybe ) is only for MENS
-            if( e.events[0].sport == 'mru' ) {
+            // both Country into RANKINGS array ?
+            if(rankings[e.teams[0].id] && rankings[e.teams[1].id]) {
 
-                // test if both Country into TEAMS array
-                if( $.inArray( e.teams[0].name, teams ) != -1 && $.inArray( e.teams[1].name, teams ) != -1 ) {
+                addFixture();
 
-                    addFixture();
+                // home INPUT
+                $('#fixtures TR:last TD:nth(0) INPUT').val( e.teams[0].name );
 
-                    // home INPUT
-                    $('#fixtures TR:last TD:nth(0) INPUT').val( e.teams[0].name );
+                // home SELECT
+                $('#fixtures TR:last TD:nth(0) SELECT').val( e.teams[0].id );
 
-                    // home SELECT
-                    $('#fixtures TR:last TD:nth(0) SELECT').val( e.teams[0].name );
+                // away INPUT
+                $('#fixtures TR:last TD:nth(3) INPUT').val( e.teams[1].name );
 
-                    // away INPUT
-                    $('#fixtures TR:last TD:nth(3) INPUT').val( e.teams[1].name );
+                // away SELECT
+                $('#fixtures TR:last TD:nth(3) SELECT').val( e.teams[1].id );
 
-                    // away SELECT
-                    $('#fixtures TR:last TD:nth(3) SELECT').val( e.teams[1].name );
+                // rankingsWeight == 2 (maybe) is for World Cup only
+                if( e.events[0].rankingsWeight == 2 ) {
+                	$('#fixtures TR:last .isRwc').attr('checked', true);
                 }
             }
+
         });
 
         addFixture();
@@ -184,4 +193,3 @@ Date.prototype.addDays = function (d) {
     }
     return this;
 };
-
