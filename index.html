@@ -70,7 +70,7 @@
                 <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
             </thead>
             <tbody data-bind="foreach: fixtures">
-                <tr>
+                <tr data-bind="style: { 'background-color' : ($data.isValid() ? '#dfd' : '#fdd') }">
                     <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
                     <td><input type="number" min="0" data-bind="value: homeScore" /></td>
                     <td><input type="number" min="0" data-bind="value: awayScore" /></td>

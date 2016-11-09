@@ -96,7 +96,7 @@ function ViewModel() {
     return this;
 };
 
-function FixtureViewModel() {
+function FixtureViewModel(parent) {
     this.homeId = ko.observable();
     this.awayId = ko.observable();
     this.homeScore = ko.observable();
@@ -104,6 +104,21 @@ function FixtureViewModel() {
 
     this.noHome = ko.observable();
     this.isRwc = ko.observable();
+
+    this.isValid = ko.computed(function() {
+        var rankings = parent.originalRankings();
+
+        var home = rankings[this.homeId()];
+        var away = rankings[this.awayId()];
+        var homeScore = parseInt(this.homeScore());
+        var awayScore = parseInt(this.awayScore());
+
+        return home &&
+            away &&
+            home != away &&
+            !isNaN(homeScore) &&
+            !isNaN(awayScore);
+    }, this);
 
     return this;
 };
@@ -137,7 +152,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
 });
 
 var addFixture = function (top) {
-    var fixture = new FixtureViewModel();
+    var fixture = new FixtureViewModel(viewModel);
     if (top) {
         viewModel.fixtures.unshift(fixture);
     } else {
