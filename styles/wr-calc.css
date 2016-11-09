@@ -1,3 +1,12 @@
+body {
+    display: flex;
+    flex-direction: row;
+}
+
+#fixtures {
+    margin-left: 8px;
+}
+
 input[type=number] {
     width: 3em;
 }

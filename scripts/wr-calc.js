@@ -90,10 +90,6 @@ function ViewModel() {
                 r.rankingDiffDisplay = null;
             }
         });
-
-        setTimeout(function () {
-            $('#right').css('margin-left', $('#left').width());
-        }, 10);
         return sorted;
     }, this);
 
@@ -176,7 +172,6 @@ loadFixture = function(  ) {
         addFixture();
 
         viewModel.shownRankings('calculated');
-        $('#right').css('margin-left', $('#left').width());
     });
 
 }
