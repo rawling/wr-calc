@@ -13,10 +13,16 @@
 </head>
 <body>
     <div id='left' style='position: fixed; left: 0; top: 0; bottom: 0; overflow-y: auto; padding-left: 5px;'>
-        <div>
+        <div data-bind="if: shownRankings">
             <input type="radio" name="rankings" value="original" data-bind="checked: shownRankings">Original
             <input type="radio" name="rankings" value="calculated" data-bind="checked: shownRankings">Calculated
         </div>
+
+        <!-- ko ifnot: shownRankings -->
+        <h4>
+            Loading rankings from <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>
+        </h4>
+        <!-- /ko -->
 
         <div data-bind="if: ($data.shownRankings() === 'original' && $data.sortedRankings())">
             <h4><a href="http://www.worldrugby.org/rankings/mru">World Rugby</a> rankings as of <span data-bind="text: originalDate"></span></h4>
@@ -55,7 +61,6 @@
         </div>
     </div>
     <div id='right' style='margin-left: 300px'>
-        <!--<p id='loadingRight'>Loading next week's fixtures from World Rugby...</p>-->
         <div id="loadedRight">
             <h4>Results</h4>
             <div>
