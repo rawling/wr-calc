@@ -73,6 +73,7 @@
                         <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
                         <td><input type="checkbox" data-bind="checked: noHome" /></td>
                         <td><input type="checkbox" data-bind="checked: isRwc" /></td>
+                        <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>
                     </tr>
                 </tbody>
             </table>
