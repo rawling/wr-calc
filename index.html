@@ -28,15 +28,16 @@
             <h4><a href="http://www.worldrugby.org/rankings/mru">World Rugby</a> rankings as of <span data-bind="text: originalDate"></span></h4>
             <table>
                 <thead>
-                    <tr style="text-align: left;"><th>#</th><th>Team</th><th>Points</th></tr>
+                    <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
                 </thead>
                 <tbody data-bind="foreach: sortedRankings">
                     <tr class="ranking">
-                        <td data-bind="text: position"></td>
-                        <td data-bind="text: name"></td>
-                        <td data-bind="text: ($data.ranking.toFixed(2))"></td>
+                        <td data-bind="text: pos"></td>
+                        <td data-bind="html: previousPosDisplay"></td>
+                        <td data-bind="text: team.name"></td>
+                        <td data-bind="text: ptsDisplay"></td>
+                        <td data-bind="html: ptsDiffDisplay"></td>
                     </tr>
-                </tbody>
                 </tbody>
             </table>
         </div>
@@ -49,13 +50,12 @@
                 </thead>
                 <tbody data-bind="foreach: calculatedRankings">
                     <tr class="ranking">
-                        <td data-bind="text: ($index() + 1)"></td>
-                        <td data-bind="html: oldPositionDisplay"></td>
-                        <td data-bind="text: name"></td>
-                        <td data-bind="text: ($data.newRanking.toFixed(2))"></td>
-                        <td data-bind="html: rankingDiffDisplay"></td>
+                        <td data-bind="text: pos"></td>
+                        <td data-bind="html: previousPosDisplay"></td>
+                        <td data-bind="text: team.name"></td>
+                        <td data-bind="text: ptsDisplay"></td>
+                        <td data-bind="html: ptsDiffDisplay"></td>
                     </tr>
-                </tbody>
                 </tbody>
             </table>
         </div>
