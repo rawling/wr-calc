@@ -163,9 +163,9 @@ var addFixture = function (top) {
 }
 
 loadFixture = function(  ) {
-    var now  = new Date();
-    var from = formatDate( now );
-    var to   =  formatDate( now.addDays( 7 ) );
+    var rankingDate  = new Date(viewModel.originalDate());
+    var from = formatDate( rankingDate );
+    var to   =  formatDate( rankingDate.addDays( 7 ) );
 
     var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&sports=mru";
 
@@ -181,6 +181,11 @@ loadFixture = function(  ) {
                 fixture.awayId(e.teams[1].id);
                 fixture.noHome(false);
                 fixture.isRwc(e.events[0].rankingsWeight == 2);
+
+                if (e.status === 'C') {
+                    fixture.homeScore(e.scores[0]);
+                    fixture.awayScore(e.scores[1]);
+                }
             }
         });
 
