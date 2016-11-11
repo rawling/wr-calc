@@ -17,13 +17,10 @@ function ViewModel() {
 
         var calculatedRankings = {};
         $.each(originalRankings, function (k, v) {
-            var nr = {};
-            nr.name = v.name;
-            nr.oldPosition = v.position;
-            nr.oldRanking = v.ranking;
-            nr.newRanking = v.ranking;
-            nr.id = v.id;
-            calculatedRankings[v.id] = nr;
+            var cr = new RankingViewModel(v);
+            cr.previousPos(cr.pos());
+            cr.previousPts(cr.pts());
+            calculatedRankings[v.team.id] = cr;
         });
 
         $.each(fixtures, function (index, fixture) {
@@ -38,11 +35,11 @@ function ViewModel() {
                 home != away &&
                 !isNaN(homeScore) &&
                 !isNaN(awayScore)) {
-                var homeRanking = home.newRanking;
+                var homeRanking = home.pts();
                 if (!noHome) {
                     homeRanking = homeRanking + 3;
                 }
-                var rankingDiff = homeRanking - away.newRanking;
+                var rankingDiff = homeRanking - away.pts();
                 var cappedDiff = Math.min(10, Math.max(-10, rankingDiff));
                 var drawChange = cappedDiff / 10;
                 var homeChange;
@@ -61,8 +58,8 @@ function ViewModel() {
                     homeChange = homeChange * 2;
                 }
                 var awayChange = -homeChange;
-                home.newRanking = home.newRanking + homeChange;
-                away.newRanking = away.newRanking + awayChange;
+                home.pts(home.pts() + homeChange);
+                away.pts(away.pts() + awayChange);
             }
         });
 
@@ -70,27 +67,49 @@ function ViewModel() {
         $.each(calculatedRankings, function (i, r) {
             sorted.push(r);
         });
-        sorted.sort(function (a, b) { return b.newRanking - a.newRanking; });
+        sorted.sort(function (a, b) { return b.pts() - a.pts(); });
 
-        $.each(sorted, function (i, r) {
-            r.newPosition = i + 1;
-            if (r.newPosition > r.oldPosition) {
-                r.oldPositionDisplay = '<span style="color: #090">(&uarr;' + r.oldPosition + ')</span>';
-            } else if (r.newPosition < r.oldPosition) {
-                r.oldPositionDisplay = '<span style="color: #900">(&darr;' + r.oldPosition + ')</span>';
-            } else {
-                r.oldPositionDisplay = null;
-            }
-
-            if (r.newRanking > r.oldRanking) {
-                r.rankingDiffDisplay = '<span style="color: #090">(+' + (r.newRanking - r.oldRanking).toFixed(2) + ')</span>';
-            } else if (r.newRanking < r.oldRanking) {
-                r.rankingDiffDisplay = '<span style="color: #900">(-' + (r.oldRanking - r.newRanking).toFixed(2) + ')</span>';
-            } else {
-                r.rankingDiffDisplay = null;
-            }
-        });
         return sorted;
+    }, this);
+
+    return this;
+};
+
+function RankingViewModel(rawRanking) {
+    rawRanking = rawRanking || { team: {} };
+
+    this.team = rawRanking.team; // id, name, abbreviation
+    this.pts = ko.observable(ko.utils.unwrapObservable(rawRanking.pts));
+    this.pos = ko.observable(ko.utils.unwrapObservable(rawRanking.pos));
+    this.previousPts = ko.observable(ko.utils.unwrapObservable(rawRanking.previousPts));
+    this.previousPos = ko.observable(ko.utils.unwrapObservable(rawRanking.previousPos));
+
+    this.ptsDisplay = ko.computed(function () {
+        var pts = this.pts();
+        return pts.toFixed(2);
+    }, this);
+
+    this.previousPosDisplay = ko.computed(function () {
+        var pos = this.pos();
+        var previousPos = this.previousPos();
+        if (pos < previousPos) {
+            return '<span style="color: #090">(&uarr;' + previousPos + ')</span>';
+        } else if (pos > previousPos) {
+            return '<span style="color: #900">(&darr;' + previousPos + ')</span>';
+        } else {
+            return null;
+        }
+    }, this);
+
+    this.ptsDiffDisplay = ko.computed(function () {
+        var ptsDiff = this.pts() - this.previousPts();
+        if (ptsDiff > 0) {
+            return '<span style="color: #090">(+' + ptsDiff.toFixed(2) + ')</span>';
+        } else if (ptsDiff < 0) {
+            return '<span style="color: #900">(-' + (-ptsDiff).toFixed(2) + ')</span>';
+        } else {
+            return null;
+        }
     }, this);
 
     return this;
@@ -130,11 +149,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         viewModel.teams.push({ id: e.team.id, name: e.team.name });
-        rankings[e.team.id] = {};
-        rankings[e.team.id].id = e.team.id;
-        rankings[e.team.id].name = e.team.name;
-        rankings[e.team.id].position = e.pos;
-        rankings[e.team.id].ranking = e.pts;
+        rankings[e.team.id] = new RankingViewModel(e);
     });
     viewModel.originalRankings(rankings);
 
@@ -142,7 +157,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     $.each(rankings, function (i, r) {
         sorted.push(r);
     });
-    sorted.sort(function (a, b) { return b.ranking - a.ranking; });
+    sorted.sort(function (a, b) { return b.pts() - a.pts(); });
 
     viewModel.sortedRankings(sorted);
     viewModel.originalDate(data.effective.label);
