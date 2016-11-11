@@ -6,6 +6,13 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.6
+- Load matches between the latest rankings and the next (i.e. a week), including scores
+- Use Knockout rather than manual DOM manipulation.
+
+Some behaviour has regressed (panes don't scroll separately; autocompletes are now just selects)
+but Knockout simplifies the code and gives immediate feedback on changes.
+
 ### 0.5
 - Detect RWC matches (thanks to [marcoas](https://github.com/rawling/wr-calc-stage/pull/1))
 - Change team IDs from name to IDs from API
