@@ -6,39 +6,83 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+<script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
 <link href="styles/jqueryui.css" type="text/css" rel="stylesheet">
 <link href="styles/wr-calc.css" type="text/css" rel="stylesheet">
 <script src="scripts/jqueryui.js" type="text/javascript" ></script>
-<script src="scripts/wr-calc.js" type="text/javascript" ></script>
 </head>
 <body>
-    <div id='left' style='position: fixed; left: 0; top: 0; bottom: 0; overflow-y: auto; padding-left: 5px;'>
-        <p id='loadingLeft'>Loading latest rankings from World Rugby...</p>
-        <div id="loadedLeft" style="display: none;">
-            <h4 id="irbSource">Current rankings taken from <a href="http://www.worldrugby.org/rankings/mru">World Rugby</a></h4>
-            <p><strong>Date:</strong> <span id="irbDate"></span></p>
-            <table id="standings">
-                <tr style="text-align: left;"><th>#</th><th></th><th>Team</th><th>Points</th><th></th></tr>
+    <div id="rankings">
+        <div data-bind="if: shownRankings">
+            <input type="radio" name="rankings" value="original" data-bind="checked: shownRankings">Original
+            <input type="radio" name="rankings" value="calculated" data-bind="checked: shownRankings">Calculated
+        </div>
+
+        <!-- ko ifnot: shownRankings -->
+        <h4>
+            Loading rankings from <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>
+        </h4>
+        <!-- /ko -->
+
+        <div data-bind="if: ($data.shownRankings() === 'original' && $data.sortedRankings())">
+            <h4><a href="http://www.worldrugby.org/rankings/mru">World Rugby</a> rankings as of <span data-bind="text: originalDate"></span></h4>
+            <table>
+                <thead>
+                    <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
+                </thead>
+                <tbody data-bind="foreach: sortedRankings">
+                    <tr class="ranking">
+                        <td data-bind="text: pos"></td>
+                        <td data-bind="html: previousPosDisplay"></td>
+                        <td data-bind="text: team.name"></td>
+                        <td data-bind="text: ptsDisplay"></td>
+                        <td data-bind="html: ptsDiffDisplay"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div data-bind="if: ($data.shownRankings() === 'calculated' && $data.calculatedRankings())">
+            <h4>Rankings from <span data-bind="text: originalDate"></span> after applying displayed fixtures.</h4>
+            <table>
+                <thead>
+                    <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
+                </thead>
+                <tbody data-bind="foreach: calculatedRankings">
+                    <tr class="ranking">
+                        <td data-bind="text: pos"></td>
+                        <td data-bind="html: previousPosDisplay"></td>
+                        <td data-bind="text: team.name"></td>
+                        <td data-bind="text: ptsDisplay"></td>
+                        <td data-bind="html: ptsDiffDisplay"></td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
-    <div id='right' style='margin-left: 300px'>
-        <p id='loadingRight'>Loading next week's fixtures from World Rugby...</p>
-        <div id="loadedRight" style="display: none;">
-            <h4>Results</h4>
-            <div>
-                <button onclick='addFixture(true);'>Add row</button>
-            </div>
-            <table>
-                <thead>
-                    <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
-                </thead>
-                <tbody id="fixtures"></tbody>
-            </table>
-            <div>
-                <button onclick='addFixture();'>Add row</button>
-                <button onclick='calculate();'>Calculate projected rankings</button>
-            </div>
+    <div id="fixtures">
+        <h4>Fixtures</h4>
+        <div>
+            <button onclick='addFixture(true);'>Add row</button>
+        </div>
+        <table>
+            <thead>
+                <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
+            </thead>
+            <tbody data-bind="foreach: fixtures">
+                <tr data-bind="style: { 'background-color' : ($data.isValid() ? '#dfd' : '#fdd') }">
+                    <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
+                    <td><input type="number" min="0" data-bind="value: homeScore" /></td>
+                    <td><input type="number" min="0" data-bind="value: awayScore" /></td>
+                    <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
+                    <td><input type="checkbox" data-bind="checked: noHome" /></td>
+                    <td><input type="checkbox" data-bind="checked: isRwc" /></td>
+                    <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            <button onclick='addFixture();'>Add row</button>
         </div>
         <small>
             Rankings and ranking algorithm are the property of World Rugby.
@@ -46,5 +90,6 @@
             See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
         </small>
     </div>
+    <script src="scripts/wr-calc.js" type="text/javascript" ></script>
 </body>
 </html>
