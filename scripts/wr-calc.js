@@ -207,7 +207,7 @@ loadFixture = function(  ) {
                 fixture.noHome(false);
                 fixture.isRwc(e.events[0].rankingsWeight == 2);
 
-                if (e.status === 'C') {
+                if (e.status !== 'U') {
                     fixture.homeScore(e.scores[0]);
                     fixture.awayScore(e.scores[1]);
                 }
