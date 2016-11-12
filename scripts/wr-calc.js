@@ -193,8 +193,8 @@ loadFixture = function(  ) {
 
         var fixtures = data.content;
         fixtures.sort(function (a, b) {
-            var aStart = a.time.millis - a.time.gmtOffset * (1000 * 60 * 60);
-            var bStart = b.time.millis - b.time.gmtOffset * (1000 * 60 * 60);
+            var aStart = new Date(a.time.label).getTime();
+            var bStart = new Date(b.time.label).getTime();
             return aStart - bStart;
         });
 
