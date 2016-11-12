@@ -190,8 +190,15 @@ loadFixture = function(  ) {
     $.get( url ).done( function( data ) {
 
         var rankings = viewModel.originalRankings();
-        $.each(data.content, function (i, e) {
 
+        var fixtures = data.content;
+        fixtures.sort(function (a, b) {
+            var aStart = a.time.millis - a.time.gmtOffset * (1000 * 60 * 60);
+            var bStart = b.time.millis - b.time.gmtOffset * (1000 * 60 * 60);
+            return aStart - bStart;
+        });
+
+        $.each(fixtures, function (i, e) {
             // both Country into RANKINGS array ?
             if(rankings[e.teams[0].id] && rankings[e.teams[1].id]) {
                 var fixture = addFixture();
