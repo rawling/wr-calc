@@ -68,6 +68,9 @@ function ViewModel() {
             sorted.push(r);
         });
         sorted.sort(function (a, b) { return b.pts() - a.pts(); });
+        $.each(sorted, function (i, r) {
+            r.pos(i + 1);
+        });
 
         return sorted;
     }, this);
