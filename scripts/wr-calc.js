@@ -1,5 +1,5 @@
 function ViewModel() {
-    this.originalRankings = ko.observable();
+    this.rankingsById = ko.observable();
     this.sortedRankings = ko.observable();
     this.originalDate = ko.observable();
     this.teams = ko.observableArray();
@@ -8,15 +8,15 @@ function ViewModel() {
     this.fixturesLoaded = ko.observable(false);
 
     this.calculatedRankings = ko.computed(function() {
-        var originalRankings = this.originalRankings();
+        var rankingsById = this.rankingsById();
         var fixtures = this.fixtures();
 
-        if (!originalRankings || !fixtures) {
+        if (!rankingsById || !fixtures) {
             return null;
         }
 
         var calculatedRankings = {};
-        $.each(originalRankings, function (k, v) {
+        $.each(rankingsById, function (k, v) {
             var cr = new RankingViewModel(v);
             cr.previousPos(cr.pos());
             cr.previousPts(cr.pts());
@@ -128,7 +128,7 @@ function FixtureViewModel(parent) {
     this.isRwc = ko.observable();
 
     this.isValid = ko.computed(function() {
-        var rankings = parent.originalRankings();
+        var rankings = parent.rankingsById();
 
         var home = rankings[this.homeId()];
         var away = rankings[this.awayId()];
@@ -154,7 +154,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
         viewModel.teams.push({ id: e.team.id, name: e.team.name });
         rankings[e.team.id] = new RankingViewModel(e);
     });
-    viewModel.originalRankings(rankings);
+    viewModel.rankingsById(rankings);
 
     var sorted = [];
     $.each(rankings, function (i, r) {
@@ -189,7 +189,7 @@ loadFixture = function(  ) {
 
     $.get( url ).done( function( data ) {
 
-        var rankings = viewModel.originalRankings();
+        var rankings = viewModel.rankingsById();
 
         var fixtures = data.content;
         fixtures.sort(function (a, b) {
