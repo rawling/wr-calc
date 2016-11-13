@@ -1,160 +1,15 @@
-function ViewModel() {
-    this.originalRankings = ko.observable();
-    this.sortedRankings = ko.observable();
-    this.originalDate = ko.observable();
-    this.teams = ko.observableArray();
-    this.fixtures = ko.observableArray();
-    this.shownRankings = ko.observable();
-    this.fixturesLoaded = ko.observable(false);
-
-    this.calculatedRankings = ko.computed(function() {
-        var originalRankings = this.originalRankings();
-        var fixtures = this.fixtures();
-
-        if (!originalRankings || !fixtures) {
-            return null;
-        }
-
-        var calculatedRankings = {};
-        $.each(originalRankings, function (k, v) {
-            var cr = new RankingViewModel(v);
-            cr.previousPos(cr.pos());
-            cr.previousPts(cr.pts());
-            calculatedRankings[v.team.id] = cr;
-        });
-
-        $.each(fixtures, function (index, fixture) {
-            var home = calculatedRankings[fixture.homeId()];
-            var away = calculatedRankings[fixture.awayId()];
-            var homeScore = parseInt(fixture.homeScore());
-            var awayScore = parseInt(fixture.awayScore());
-            var noHome = fixture.noHome();
-            var isRwc = fixture.isRwc();
-            if (home &&
-                away &&
-                home != away &&
-                !isNaN(homeScore) &&
-                !isNaN(awayScore)) {
-                var homeRanking = home.pts();
-                if (!noHome) {
-                    homeRanking = homeRanking + 3;
-                }
-                var rankingDiff = homeRanking - away.pts();
-                var cappedDiff = Math.min(10, Math.max(-10, rankingDiff));
-                var drawChange = cappedDiff / 10;
-                var homeChange;
-                if (homeScore > awayScore + 15) {
-                    homeChange = 1.5 * (1 - drawChange);
-                } else if (homeScore > awayScore) {
-                    homeChange = 1 - drawChange;
-                } else if (homeScore == awayScore) {
-                    homeChange = 0 - drawChange;
-                } else if (homeScore < awayScore - 15) {
-                    homeChange = 1.5 * (-1 - drawChange);
-                } else {
-                    homeChange = -1 - drawChange;
-                }
-                if (isRwc) {
-                    homeChange = homeChange * 2;
-                }
-                var awayChange = -homeChange;
-                home.pts(home.pts() + homeChange);
-                away.pts(away.pts() + awayChange);
-            }
-        });
-
-        var sorted = [];
-        $.each(calculatedRankings, function (i, r) {
-            sorted.push(r);
-        });
-        sorted.sort(function (a, b) { return b.pts() - a.pts(); });
-        $.each(sorted, function (i, r) {
-            r.pos(i + 1);
-        });
-
-        return sorted;
-    }, this);
-
-    return this;
-};
-
-function RankingViewModel(rawRanking) {
-    rawRanking = rawRanking || { team: {} };
-
-    this.team = rawRanking.team; // id, name, abbreviation
-    this.pts = ko.observable(ko.utils.unwrapObservable(rawRanking.pts));
-    this.pos = ko.observable(ko.utils.unwrapObservable(rawRanking.pos));
-    this.previousPts = ko.observable(ko.utils.unwrapObservable(rawRanking.previousPts));
-    this.previousPos = ko.observable(ko.utils.unwrapObservable(rawRanking.previousPos));
-
-    this.ptsDisplay = ko.computed(function () {
-        var pts = this.pts();
-        return pts.toFixed(2);
-    }, this);
-
-    this.previousPosDisplay = ko.computed(function () {
-        var pos = this.pos();
-        var previousPos = this.previousPos();
-        if (pos < previousPos) {
-            return '<span style="color: #090">(&uarr;' + previousPos + ')</span>';
-        } else if (pos > previousPos) {
-            return '<span style="color: #900">(&darr;' + previousPos + ')</span>';
-        } else {
-            return null;
-        }
-    }, this);
-
-    this.ptsDiffDisplay = ko.computed(function () {
-        var ptsDiff = this.pts() - this.previousPts();
-        if (ptsDiff > 0) {
-            return '<span style="color: #090">(+' + ptsDiff.toFixed(2) + ')</span>';
-        } else if (ptsDiff < 0) {
-            return '<span style="color: #900">(-' + (-ptsDiff).toFixed(2) + ')</span>';
-        } else {
-            return null;
-        }
-    }, this);
-
-    return this;
-};
-
-function FixtureViewModel(parent) {
-    this.homeId = ko.observable();
-    this.awayId = ko.observable();
-    this.homeScore = ko.observable();
-    this.awayScore = ko.observable();
-
-    this.noHome = ko.observable();
-    this.isRwc = ko.observable();
-
-    this.isValid = ko.computed(function() {
-        var rankings = parent.originalRankings();
-
-        var home = rankings[this.homeId()];
-        var away = rankings[this.awayId()];
-        var homeScore = parseInt(this.homeScore());
-        var awayScore = parseInt(this.awayScore());
-
-        return home &&
-            away &&
-            home != away &&
-            !isNaN(homeScore) &&
-            !isNaN(awayScore);
-    }, this);
-
-    return this;
-};
-
+// Create the view model and bind it to the HTML.
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
+// Load rankings from World Rugby.
 $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         viewModel.teams.push({ id: e.team.id, name: e.team.name });
         rankings[e.team.id] = new RankingViewModel(e);
     });
-    viewModel.originalRankings(rankings);
+    viewModel.rankingsById(rankings);
 
     var sorted = [];
     $.each(rankings, function (i, r) {
@@ -162,13 +17,17 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     });
     sorted.sort(function (a, b) { return b.pts() - a.pts(); });
 
-    viewModel.sortedRankings(sorted);
+    viewModel.baseRankings(sorted);
     viewModel.originalDate(data.effective.label);
     viewModel.shownRankings('original');
 
+    // When we're done, load fixtures in.
+    // This should be parallelisable if we have our observables set up properly. (Fixture validity depends on teams.)
     loadFixture();
 });
 
+// Helper to add a fixture to the top/bottom.
+// If we had up/down buttons we could maybe get rid of this.
 var addFixture = function (top) {
     var fixture = new FixtureViewModel(viewModel);
     if (top) {
@@ -180,7 +39,10 @@ var addFixture = function (top) {
     return fixture;
 }
 
+// Load fixtures from World Rugby.
 loadFixture = function(  ) {
+    // Load a week of fixtures from when the rankings are dated.
+    // (As that is what will make it into the next rankings.)
     var rankingDate  = new Date(viewModel.originalDate());
     var from = formatDate( rankingDate );
     var to   =  formatDate( rankingDate.addDays( 7 ) );
@@ -189,8 +51,12 @@ loadFixture = function(  ) {
 
     $.get( url ).done( function( data ) {
 
-        var rankings = viewModel.originalRankings();
+        var rankings = viewModel.rankingsById();
 
+        // Sort the fixtures in time order. For some reason they are not already.
+        // The data contains a raw time and a hours-from-UTC float but neither the
+        // raw time nor adding the UTC difference seems to get the right value.
+        // Passing the date label into Date seems to parse it correctly, though.
         var fixtures = data.content;
         fixtures.sort(function (a, b) {
             var aStart = new Date(a.time.label).getTime();
@@ -198,6 +64,8 @@ loadFixture = function(  ) {
             return aStart - bStart;
         });
 
+        // Parse each fixture into a view model, which adds it to the array.
+        // (I thought I was being clever but I don't like this now.)
         $.each(fixtures, function (i, e) {
             // both Country into RANKINGS array ?
             if(rankings[e.teams[0].id] && rankings[e.teams[1].id]) {
@@ -207,6 +75,11 @@ loadFixture = function(  ) {
                 fixture.noHome(false);
                 fixture.isRwc(e.events[0].rankingsWeight == 2);
 
+                // If the match isn't unstarted (or doesn't not have live scores), add
+                // the live score.
+                // U is unstarted / no live score.
+                // C is complete.
+                // L1/LH/L2 are I believe the codes for 1st half, half time, 2nd half but I forgot.
                 if (e.status !== 'U') {
                     fixture.homeScore(e.scores[0]);
                     fixture.awayScore(e.scores[1]);
@@ -214,14 +87,16 @@ loadFixture = function(  ) {
             }
         });
 
+        // Once existing fixtures are laoded, add a blank one for the user.
         addFixture();
 
+        // Once fixtures are loaded, show what effect they have on the rankings.
         viewModel.shownRankings('calculated');
     });
 
 }
 
-
+// Format a date for the fixture or rankings API call.
 var formatDate = function(date) {
     var d     = new Date(date),
         month = '' + (d.getMonth() + 1),
@@ -231,7 +106,7 @@ var formatDate = function(date) {
     return [year, month, day].join('-');
 }
 
-
+// Add days to a date.
 Date.prototype.addDays = function (d) {
     if (d) {
         var t = this.getTime();
