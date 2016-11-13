@@ -42,13 +42,13 @@
             </table>
         </div>
 
-        <div data-bind="if: ($data.shownRankings() === 'calculated' && $data.calculatedRankings())">
+        <div data-bind="if: ($data.shownRankings() === 'calculated' && $data.projectedRankings())">
             <h4>Rankings from <span data-bind="text: originalDate"></span> after applying displayed fixtures.</h4>
             <table>
                 <thead>
                     <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
                 </thead>
-                <tbody data-bind="foreach: calculatedRankings">
+                <tbody data-bind="foreach: projectedRankings">
                     <tr class="ranking">
                         <td data-bind="text: pos"></td>
                         <td data-bind="html: previousPosDisplay"></td>

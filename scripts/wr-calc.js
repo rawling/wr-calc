@@ -7,7 +7,7 @@ function ViewModel() {
     this.shownRankings = ko.observable();
     this.fixturesLoaded = ko.observable(false);
 
-    this.calculatedRankings = ko.computed(function() {
+    this.projectedRankings = ko.computed(function() {
         var rankingsById = this.rankingsById();
         var fixtures = this.fixtures();
 
@@ -15,17 +15,17 @@ function ViewModel() {
             return null;
         }
 
-        var calculatedRankings = {};
+        var projectedRankings = {};
         $.each(rankingsById, function (k, v) {
             var cr = new RankingViewModel(v);
             cr.previousPos(cr.pos());
             cr.previousPts(cr.pts());
-            calculatedRankings[v.team.id] = cr;
+            projectedRankings[v.team.id] = cr;
         });
 
         $.each(fixtures, function (index, fixture) {
-            var home = calculatedRankings[fixture.homeId()];
-            var away = calculatedRankings[fixture.awayId()];
+            var home = projectedRankings[fixture.homeId()];
+            var away = projectedRankings[fixture.awayId()];
             var homeScore = parseInt(fixture.homeScore());
             var awayScore = parseInt(fixture.awayScore());
             var noHome = fixture.noHome();
@@ -64,7 +64,7 @@ function ViewModel() {
         });
 
         var sorted = [];
-        $.each(calculatedRankings, function (i, r) {
+        $.each(projectedRankings, function (i, r) {
             sorted.push(r);
         });
         sorted.sort(function (a, b) { return b.pts() - a.pts(); });
