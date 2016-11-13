@@ -24,13 +24,13 @@
         </h4>
         <!-- /ko -->
 
-        <div data-bind="if: ($data.shownRankings() === 'original' && $data.sortedRankings())">
+        <div data-bind="if: ($data.shownRankings() === 'original' && $data.baseRankings())">
             <h4><a href="http://www.worldrugby.org/rankings/mru">World Rugby</a> rankings as of <span data-bind="text: originalDate"></span></h4>
             <table>
                 <thead>
                     <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
                 </thead>
-                <tbody data-bind="foreach: sortedRankings">
+                <tbody data-bind="foreach: baseRankings">
                     <tr class="ranking">
                         <td data-bind="text: pos"></td>
                         <td data-bind="html: previousPosDisplay"></td>

@@ -1,6 +1,6 @@
 function ViewModel() {
     this.rankingsById = ko.observable();
-    this.sortedRankings = ko.observable();
+    this.baseRankings = ko.observable();
     this.originalDate = ko.observable();
     this.teams = ko.observableArray();
     this.fixtures = ko.observableArray();
@@ -162,7 +162,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     });
     sorted.sort(function (a, b) { return b.pts() - a.pts(); });
 
-    viewModel.sortedRankings(sorted);
+    viewModel.baseRankings(sorted);
     viewModel.originalDate(data.effective.label);
     viewModel.shownRankings('original');
 
