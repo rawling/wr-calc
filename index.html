@@ -43,7 +43,7 @@
                             <tr class="ranking">
                                 <td data-bind="text: pos"></td>
                                 <td data-bind="html: previousPosDisplay"></td>
-                                <td data-bind="text: team.name"></td>
+                                <td data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
                                 <td data-bind="text: ptsDisplay"></td>
                                 <td data-bind="html: ptsDiffDisplay"></td>
                             </tr>
@@ -60,7 +60,7 @@
                             <tr class="ranking">
                                 <td data-bind="text: pos"></td>
                                 <td data-bind="html: previousPosDisplay"></td>
-                                <td data-bind="text: team.name"></td>
+                                <td data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
                                 <td data-bind="text: ptsDisplay"></td>
                                 <td data-bind="html: ptsDiffDisplay"></td>
                             </tr>
@@ -78,10 +78,10 @@
                     </thead>
                     <tbody data-bind="foreach: fixtures">
                         <tr data-bind="style: { 'background-color' : ($data.isValid() ? '#dfd' : '#fdd') }">
-                            <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
+                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
                             <td><input type="number" min="0" data-bind="value: homeScore" /></td>
                             <td><input type="number" min="0" data-bind="value: awayScore" /></td>
-                            <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
+                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
                             <td><input type="checkbox" data-bind="checked: noHome" /></td>
                             <td><input type="checkbox" data-bind="checked: isRwc" /></td>
                             <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>

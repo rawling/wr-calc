@@ -6,7 +6,11 @@ ko.applyBindings(viewModel);
 $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
-        viewModel.teams.push({ id: e.team.id, name: e.team.name });
+        var maxLength = 15;
+        e.team.displayName = e.team.name.length > maxLength ? e.team.abbreviation : e.team.name;
+        e.team.displayTitle = e.team.name.length > maxLength ? e.team.name : null;
+
+        viewModel.teams.push(e.team);
         rankings[e.team.id] = new RankingViewModel(e);
     });
     viewModel.rankingsById(rankings);
