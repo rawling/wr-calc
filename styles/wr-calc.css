@@ -28,12 +28,12 @@ body {
 }
 
 #left h3 {
-    flex: 0;
+    flex-shrink: 0;
 }
 
 #left #which {
     display: flex;
-    flex: 0;
+    flex-shrink: 0;
     padding: 0 5px;
 }
 
