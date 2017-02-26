@@ -6,9 +6,16 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.7
+- Visual redesign
+- Abbreviate longer team names to save space
+- Version CSS/JS links to avoid caching older files
+
+Includes re-instating scrolling panes, disclaimer footer, prettier tables, slightly better loading behaviour.
+
 ### 0.6
 - Load matches between the latest rankings and the next (i.e. a week), including scores
-- Use Knockout rather than manual DOM manipulation.
+- Use Knockout rather than manual DOM manipulation
 
 Some behaviour has regressed (panes don't scroll separately; autocompletes are now just selects)
 but Knockout simplifies the code and gives immediate feedback on changes.
