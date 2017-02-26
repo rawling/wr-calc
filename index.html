@@ -37,13 +37,13 @@
                 <div data-bind="if: ($data.shownRankings() === 'original' && $data.baseRankings())">
                     <table>
                         <thead>
-                            <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
+                            <tr><th class="pos">#</th><th /><th class="name">Team</th><th colspan=2>Points</th></tr>
                         </thead>
                         <tbody data-bind="foreach: baseRankings">
                             <tr class="ranking">
-                                <td data-bind="text: pos"></td>
+                                <td class="pos" data-bind="text: pos"></td>
                                 <td data-bind="html: previousPosDisplay"></td>
-                                <td data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
+                                <td class="name" data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
                                 <td data-bind="text: ptsDisplay"></td>
                                 <td data-bind="html: ptsDiffDisplay"></td>
                             </tr>
@@ -54,13 +54,13 @@
                 <div data-bind="if: ($data.shownRankings() === 'calculated' && $data.projectedRankings())">
                     <table>
                         <thead>
-                            <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
+                            <tr><th class="pos">#</th><th /><th class="name">Team</th><th colspan=2>Points</th></tr>
                         </thead>
                         <tbody data-bind="foreach: projectedRankings">
                             <tr class="ranking">
-                                <td data-bind="text: pos"></td>
+                                <td class="pos" data-bind="text: pos"></td>
                                 <td data-bind="html: previousPosDisplay"></td>
-                                <td data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
+                                <td class="name" data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
                                 <td data-bind="text: ptsDisplay"></td>
                                 <td data-bind="html: ptsDiffDisplay"></td>
                             </tr>
@@ -77,6 +77,7 @@
                         <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
                     </thead>
                     <tbody data-bind="foreach: fixtures">
+                        <tr data-bind="if: $index() > 0" class="spacer" aria-hidden=true><!-- only way to get whitespace between rows? --></tr>
                         <tr data-bind="style: { 'background-color' : ($data.isValid() ? '#dfd' : '#fdd') }">
                             <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
                             <td><input type="number" min="0" data-bind="value: homeScore" /></td>

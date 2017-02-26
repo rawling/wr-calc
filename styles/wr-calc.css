@@ -65,6 +65,27 @@ body {
 
 #left #rankings table {
     margin: 0 auto;
+    border-collapse: collapse;
+}
+
+#left #rankings table th, #left #rankings table td {
+    padding: 2px 4px;
+}
+
+#left #rankings table th {
+    text-align: left;
+}
+
+#left #rankings table tr:nth-child(even) {
+    background-color: lightgray;
+}
+
+#left #rankings table th.pos, #left #rankings table td.pos {
+    text-align: right;
+}
+
+#left #rankings table th.name, #left #rankings table td.name {
+    padding: 0 10px;
 }
 
 #right {
@@ -86,6 +107,16 @@ body {
 
 #right #fixtures table {
     margin: 0 auto;
+    border-collapse: collapse;
+}
+
+#right #fixtures table tr.spacer {
+    height: 3px;
+}
+
+#right #fixtures table th, #right #fixtures table td {
+    padding: 2px 4px;
+    margin-bottom: 5px;
 }
 
 #right #fixtures table input[type=number] {
@@ -95,6 +126,7 @@ body {
 #right #addrow {
     text-align: center;
     flex: 0;
+    padding: 2px;
 }
 
 #left h3, #right h3 {
