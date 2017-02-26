@@ -6,6 +6,9 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.7.2
+- Correct sorting of real-life fixtures
+
 ### 0.7
 - Visual redesign
 - Abbreviate longer team names to save space

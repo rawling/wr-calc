@@ -66,7 +66,9 @@ var loadFixtures = function(  ) {
         fixtures.sort(function (a, b) {
             var aStart = new Date(a.time.label).getTime();
             var bStart = new Date(b.time.label).getTime();
-            return aStart - bStart;
+
+            // N.B. since we add to the top, these get reversed, so reverse the order here!
+            return -(aStart - bStart);
         });
 
         // Parse each fixture into a view model, which adds it to the array.
