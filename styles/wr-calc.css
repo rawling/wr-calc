@@ -63,18 +63,27 @@ body {
 }
 
 #right {
-    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#right h3 {
+    flex: 0;
+}
+
+#right #fixtures {
+    flex: 1;
+    overflow-y: scroll;
+    padding: 0 2px;
 }
 
 #right #addrow {
     text-align: center;
+    flex: 0;
 }
 
-#right #fixtures {
-    padding: 0 2px;
-}
-
-#right #fixtures input[type=number] {
+#right #fixtures table input[type=number] {
     width: 3em;
 }
 
