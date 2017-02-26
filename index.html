@@ -13,83 +13,88 @@
 <script src="scripts/models/FixtureViewModel.js" type="text/javascript" ></script>
 </head>
 <body>
-    <div id="rankings">
-        <div data-bind="if: shownRankings">
-            <input type="radio" name="rankings" value="original" data-bind="checked: shownRankings">Original
-            <input type="radio" name="rankings" value="calculated" data-bind="checked: shownRankings">Calculated
+    <div id="leftright">
+        <div id="left">
+            <h3>Rankings</h3>
+            <div id="which" data-bind="if: shownRankings">
+                <label data-bind="css: $data.shownRankings() === 'original' ? 'sel' : ''">
+                    <input type="radio" name="rankings" value="original" data-bind="checked: shownRankings">
+                    <span data-bind="text: originalDate" />
+                </label>
+                <label data-bind="css: $data.shownRankings() === 'calculated' ? 'sel' : ''">
+                    <input type="radio" name="rankings" value="calculated" data-bind="checked: shownRankings">
+                    <span>Calculated</span>
+                </label>
+            </div>
+
+            <div id="rankings">
+                <!-- ko ifnot: shownRankings -->
+                <h4>
+                    Loading rankings from <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>
+                </h4>
+                <!-- /ko -->
+
+                <div data-bind="if: ($data.shownRankings() === 'original' && $data.baseRankings())">
+                    <table>
+                        <thead>
+                            <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
+                        </thead>
+                        <tbody data-bind="foreach: baseRankings">
+                            <tr class="ranking">
+                                <td data-bind="text: pos"></td>
+                                <td data-bind="html: previousPosDisplay"></td>
+                                <td data-bind="text: team.name"></td>
+                                <td data-bind="text: ptsDisplay"></td>
+                                <td data-bind="html: ptsDiffDisplay"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div data-bind="if: ($data.shownRankings() === 'calculated' && $data.projectedRankings())">
+                    <table>
+                        <thead>
+                            <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
+                        </thead>
+                        <tbody data-bind="foreach: projectedRankings">
+                            <tr class="ranking">
+                                <td data-bind="text: pos"></td>
+                                <td data-bind="html: previousPosDisplay"></td>
+                                <td data-bind="text: team.name"></td>
+                                <td data-bind="text: ptsDisplay"></td>
+                                <td data-bind="html: ptsDiffDisplay"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-
-        <!-- ko ifnot: shownRankings -->
-        <h4>
-            Loading rankings from <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>
-        </h4>
-        <!-- /ko -->
-
-        <div data-bind="if: ($data.shownRankings() === 'original' && $data.baseRankings())">
-            <h4><a href="http://www.worldrugby.org/rankings/mru">World Rugby</a> rankings as of <span data-bind="text: originalDate"></span></h4>
-            <table>
+        <div id="right">
+            <h3>Fixtures</h3>
+            <table id="fixtures">
                 <thead>
-                    <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
+                    <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
                 </thead>
-                <tbody data-bind="foreach: baseRankings">
-                    <tr class="ranking">
-                        <td data-bind="text: pos"></td>
-                        <td data-bind="html: previousPosDisplay"></td>
-                        <td data-bind="text: team.name"></td>
-                        <td data-bind="text: ptsDisplay"></td>
-                        <td data-bind="html: ptsDiffDisplay"></td>
+                <tbody data-bind="foreach: fixtures">
+                    <tr data-bind="style: { 'background-color' : ($data.isValid() ? '#dfd' : '#fdd') }">
+                        <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
+                        <td><input type="number" min="0" data-bind="value: homeScore" /></td>
+                        <td><input type="number" min="0" data-bind="value: awayScore" /></td>
+                        <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
+                        <td><input type="checkbox" data-bind="checked: noHome" /></td>
+                        <td><input type="checkbox" data-bind="checked: isRwc" /></td>
+                        <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-
-        <div data-bind="if: ($data.shownRankings() === 'calculated' && $data.projectedRankings())">
-            <h4>Rankings from <span data-bind="text: originalDate"></span> after applying displayed fixtures.</h4>
-            <table>
-                <thead>
-                    <tr style="text-align: left;"><th>#</th><th /><th>Team</th><th>Points</th><th /></tr>
-                </thead>
-                <tbody data-bind="foreach: projectedRankings">
-                    <tr class="ranking">
-                        <td data-bind="text: pos"></td>
-                        <td data-bind="html: previousPosDisplay"></td>
-                        <td data-bind="text: team.name"></td>
-                        <td data-bind="text: ptsDisplay"></td>
-                        <td data-bind="html: ptsDiffDisplay"></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="addrow">
+                <button onclick='addFixture();'>Add row</button>
+            </div>
         </div>
     </div>
-    <div id="fixtures">
-        <h4>Fixtures</h4>
-        <div>
-            <button onclick='addFixture(true);'>Add row</button>
-        </div>
-        <table>
-            <thead>
-                <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
-            </thead>
-            <tbody data-bind="foreach: fixtures">
-                <tr data-bind="style: { 'background-color' : ($data.isValid() ? '#dfd' : '#fdd') }">
-                    <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
-                    <td><input type="number" min="0" data-bind="value: homeScore" /></td>
-                    <td><input type="number" min="0" data-bind="value: awayScore" /></td>
-                    <td><select data-bind="options: $parent.teams, optionsText: 'name', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
-                    <td><input type="checkbox" data-bind="checked: noHome" /></td>
-                    <td><input type="checkbox" data-bind="checked: isRwc" /></td>
-                    <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>
-                </tr>
-            </tbody>
-        </table>
-        <div>
-            <button onclick='addFixture();'>Add row</button>
-        </div>
-        <small>
-            Rankings and ranking algorithm are the property of World Rugby.
-            <br />
-            See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
-        </small>
+    <div id=footer>
+        Rankings and ranking algorithm are the property of <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>.
+        See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
     </div>
     <script src="scripts/wr-calc.js" type="text/javascript" ></script>
 </body>
