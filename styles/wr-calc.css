@@ -24,6 +24,7 @@ body {
     height: 100%;
     display: flex;
     flex-direction: column;
+    flex: 0.5;
 }
 
 #left h3 {
@@ -62,10 +63,15 @@ body {
     padding: 0 2px;
 }
 
+#left #rankings table {
+    margin: 0 auto;
+}
+
 #right {
     height: 100%;
     display: flex;
     flex-direction: column;
+    flex: 1;
 }
 
 #right h3 {
@@ -78,13 +84,17 @@ body {
     padding: 0 2px;
 }
 
-#right #addrow {
-    text-align: center;
-    flex: 0;
+#right #fixtures table {
+    margin: 0 auto;
 }
 
 #right #fixtures table input[type=number] {
     width: 3em;
+}
+
+#right #addrow {
+    text-align: center;
+    flex: 0;
 }
 
 #left h3, #right h3 {
