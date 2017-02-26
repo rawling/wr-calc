@@ -52,7 +52,7 @@ body {
 }
 
 #left #which label.sel {
-    background-color: lightgrey;
+    background-color: Gainsboro;
     font-weight: bold;
 }
 
@@ -77,7 +77,7 @@ body {
 }
 
 #left #rankings table tr:nth-child(even) {
-    background-color: lightgray;
+    background-color: Gainsboro;
 }
 
 #left #rankings table th.pos, #left #rankings table td.pos {

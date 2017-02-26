@@ -27,7 +27,8 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
 
     // When we're done, load fixtures in.
     // This should be parallelisable if we have our observables set up properly. (Fixture validity depends on teams.)
-    loadFixture();
+    addFixture();
+    loadFixtures();
 });
 
 // Helper to add a fixture to the top/bottom.
@@ -44,7 +45,7 @@ var addFixture = function (top) {
 }
 
 // Load fixtures from World Rugby.
-loadFixture = function(  ) {
+var loadFixtures = function(  ) {
     // Load a week of fixtures from when the rankings are dated.
     // (As that is what will make it into the next rankings.)
     var rankingDate  = new Date(viewModel.originalDate());
@@ -73,7 +74,7 @@ loadFixture = function(  ) {
         $.each(fixtures, function (i, e) {
             // both Country into RANKINGS array ?
             if(rankings[e.teams[0].id] && rankings[e.teams[1].id]) {
-                var fixture = addFixture();
+                var fixture = addFixture(true);
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
                 fixture.noHome(false);
@@ -90,9 +91,6 @@ loadFixture = function(  ) {
                 }
             }
         });
-
-        // Once existing fixtures are laoded, add a blank one for the user.
-        addFixture();
 
         // Once fixtures are loaded, show what effect they have on the rankings.
         viewModel.shownRankings('calculated');
