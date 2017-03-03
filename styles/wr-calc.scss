@@ -1,14 +1,78 @@
 ---
 ---
 
-$hairline: 1px solid black;
-%shaded {
-    background-color: Gainsboro;
+$black: #000000;
+$white: #ffffff;
+$primary: #4caf50;
+$primary-1: #a5d6a7;
+$primary-2: #388e3c;
+$accent: #dd2c00;
+
+@mixin height($h) {
+    z-index: $h;
+    box-shadow: 0 ($h * 0.5px) ($h * 1px) 0 rgba(0, 0, 0, ((10 * $h) + 4) / 100);
+    transition: box-shadow 0.1s ease-in-out;
+}
+
+@mixin textonlight($color) {
+    color: rgba($color, 0.87);
+    .secondaryText {
+        color: rgba($color, 0.54);
+    }
+    .disabledText {
+        color: rgba($color, 0.38);
+    }
+}
+@mixin textondark($color) {
+    color: rgba($color, 1);
+    .secondaryText {
+        color: rgba($color, 0.7);
+    }
+    .disabledText {
+        color: rgba($color, 0.5);
+    }
+}
+
+%textonlight {
+    @include textonlight($black);
+}
+%textondark {
+    @include textondark($white);
+}
+
+%primary {
+    background-color: $primary;
+    @include textonlight($black);
+}
+
+%white {
+    background-color: $white;
+    @include textonlight($black);
+}
+
+%primary-1 {
+    background-color: $primary-1;
+    @include textonlight($black);
+}
+
+%primary-2 {
+    background-color: $primary-2;
+    @include textondark($white);
+}
+%primary-2-text {
+    @include textonlight($primary-2);
+}
+
+%accent {
+    background-color: $accent;
+    @include textondark($white);
+}
+%accent-text {
+    @include textonlight($accent);
 }
 
 html {
     height: 100%;
-    font-size: small;
 }
 
 body {
@@ -28,26 +92,36 @@ body {
 }
 
 #footer {
-    font-size: smaller;
+    @extend %primary;
     padding: 2px;
-    border-top: $hairline;
     text-align: center;
     flex: 0;
 }
 
 #left {
-    border-right: $hairline;
+    @include height(2);
+    @extend %white;
     height: 100%;
     display: flex;
     flex-direction: column;
     flex: 0.5;
+
+    .header { 
+        @extend %primary;
+    }
 }
 
 #right {
+    @include height(0);
+    @extend %primary-1;
     height: 100%;
     display: flex;
     flex-direction: column;
     flex: 1;
+
+    .header {
+        @extend %primary-2;
+    }
 }
 
 #left, #right {
@@ -60,21 +134,30 @@ body {
 #which {
     display: flex;
     flex-shrink: 0;
-    padding: 0 5px;
+    @include height(6);
+    margin: 10px 5px;
+    border-radius: 2px;
 
     label {
         flex-grow: 1;
         text-align: center;
-        border: $hairline;
-        border-left-width: 0;
 
         &:first-child {
-            border-left-width: 1px
+            border-top-left-radius: 2px;
+            border-bottom-left-radius: 2px;
+        }
+
+        &:last-child {
+            border-top-right-radius: 2px;
+            border-bottom-right-radius: 2px;
         }
 
         &.sel {
-            @extend %shaded;
-            font-weight: bold;
+            @extend %primary;
+        }
+        &:not(.sel) {
+            @extend %white;
+            @extend .secondaryText;
         }
 
         input {
@@ -86,7 +169,6 @@ body {
 #rankings {
     flex: 1;
     overflow-y: scroll;
-    margin-top: 5px;
     padding: 0 2px;
 
     table {
@@ -109,8 +191,20 @@ body {
             }
         }
 
+        tr.ptsUp td.ptsDiff, tr.posUp td.posDiff {
+            @extend %primary-2-text;
+        }
+
+        tr.ptsDown td.ptsDiff, tr.posDown td.posDiff {
+            @extend %accent-text;
+        }
+
+        tr:nth-child(odd) {
+           @extend %white;
+        }
+
         tr:nth-child(even) {
-            @extend %shaded;
+           @extend %white;
         }
     }
 }
@@ -123,6 +217,7 @@ body {
     table {
         margin: 0 auto;
         border-collapse: collapse;
+        margin-bottom: 24px + 56px + 2px;
 
         tr.spacer {
             height: 3px;
@@ -140,7 +235,28 @@ body {
 }
 
 #addrow {
-    text-align: center;
     flex: 0;
-    padding: 2px;
+    position: relative;
+
+    button {
+        position: absolute;
+        right: 24px;
+        bottom: 24px;
+        height: 56px;
+        width: 56px;
+        font-size: 48px;
+        border-radius: 50%;
+        box-shadow: $black;
+        @extend %accent;
+        @include height(6);
+
+        &:active {
+            @include height(12);
+        }
+
+        border: none;
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAABlBMVEX///////9VfPVsAAAAAXRSTlMAQObYZgAAABZJREFUCNdjYLBhYCAG////HwUTqQ8AH00QpSze/owAAAAASUVORK5CYII=');
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
+    }
 }
