@@ -6,6 +6,11 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.8
+- Use Jekyll (gh pages) to enable SASS
+- Material redesign
+- Responsive - top/bottom on screens that can't fit left/right
+
 ### 0.7.2
 - Correct sorting of real-life fixtures
 
