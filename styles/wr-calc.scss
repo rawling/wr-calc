@@ -237,7 +237,6 @@ body {
 
         &.sel {
             border-bottom-color: $accent;
-            @extend %accent-text;
         }
         &:not(.sel) {
             @extend .secondaryText;
