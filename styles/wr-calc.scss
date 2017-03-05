@@ -1,6 +1,9 @@
 ---
 ---
 
+/**
+ * Standard colours.
+ */
 $black: #000000;
 $white: #ffffff;
 $primary: #4caf50;
@@ -8,12 +11,9 @@ $primary-1: #a5d6a7;
 $primary-2: #388e3c;
 $accent: #dd2c00;
 
-@mixin height($h) {
-    z-index: $h;
-    box-shadow: 0 ($h * 0.5px) ($h * 1px) 0 rgba(0, 0, 0, ((10 * $h) + 4) / 100);
-    transition: box-shadow 0.1s ease-in-out;
-}
-
+/**
+ * Apply background colour and matching text colour.
+ */
 @mixin textonlight($color) {
     color: rgba($color, 0.87);
     .secondaryText {
@@ -69,6 +69,36 @@ $accent: #dd2c00;
 }
 %accent-text {
     @include textonlight($accent);
+}
+
+/**
+ * Font size and weight all applied directly here as we have so few
+ */
+body {
+    font-size: 13px;
+    font-weight: 400;
+}
+h3 {
+    font-size: 20px;
+    font-weight: 500;
+}
+table th {
+    font-size: 12px;
+    font-weight: 500;
+}
+table td {
+    font-size: 13px;
+    font-weight: 400;
+}
+
+
+/**
+ * Attempt to combine z-index and shadow into height.
+ */
+@mixin height($h) {
+    z-index: $h;
+    box-shadow: 0 ($h * 0.5px) ($h * 1px) 0 rgba(0, 0, 0, ((10 * $h) + 4) / 100);
+    transition: box-shadow 0.1s ease-in-out;
 }
 
 html {
