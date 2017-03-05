@@ -117,23 +117,92 @@ table {
     transition: box-shadow 0.1s ease-in-out;
 }
 
-html {
-    height: 100%;
+/**
+ * Layout magic
+ */
+@mixin largescreen () {
+    @media only screen and (min-width: 840px) {
+        @content
+    }
+}
+@mixin smallscreen () {
+    @media only screen and (max-width: 839px) {
+        @content
+    }
 }
 
+@include largescreen() {
+    html {
+        height: 100%;
+    }
+    body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    #leftright {
+        display: flex;
+        flex-direction: row;
+        overflow-x: hidden;
+        flex: 1;
+    }
+    #footer {
+        flex: 0;
+    }
+    #left {
+        @include height(6);
+        height: 100%;
+        flex: 0.5;
+        display: flex;
+        flex-direction: column;
+    }
+    #right {
+        @include height(0);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    #left, #right {
+    .header h3 {
+            flex: 0;
+        }
+    }
+    #which {
+        flex-shrink: 0;
+    }
+    #rankings {
+        flex: 1;
+        overflow-y: scroll;
+    }
+    #fixtures {
+        flex: 1;
+        overflow-y: scroll;
+    }
+    #addrow {
+        flex: 0;
+    }
+}
+@include smallscreen() {
+    #leftright {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+    #left, #right {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/**
+ * Standard styling.
+ */
 body {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
     margin: 0;
     padding: 0;
 }
 
 #leftright {
-    display: flex;
-    flex-direction: row;
-    overflow-x: hidden;
-    flex: 1;
     @extend %white;
 }
 
@@ -141,23 +210,6 @@ body {
     @extend %primary;
     padding: 2px;
     text-align: center;
-    flex: 0;
-}
-
-#left {
-    @include height(6);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    flex: 0.5;
-}
-
-#right {
-    @include height(0);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
 }
 
 #left, #right {
@@ -166,14 +218,12 @@ body {
 
         h3 {
             text-align: center;
-            flex: 0;
         }
     }
 }
 
 #which {
     display: flex;
-    flex-shrink: 0;
     @extend %primary;
 
     height: 48px;
@@ -200,9 +250,7 @@ body {
 }
 
 #rankings {
-    flex: 1;
-    overflow-y: scroll;
-    padding: 0 2px;
+    padding: 5px;
 
     table {
         margin: 0 auto;
@@ -244,14 +292,18 @@ body {
 }
 
 #fixtures {
-    flex: 1;
-    overflow-y: scroll;
-    padding: 10px 2px;
+    padding: 10px 2px 0;
 
     table {
         margin: 0 auto;
         border-collapse: collapse;
-        margin-bottom: 24px + 56px + 2px;
+
+        @include largescreen {
+            margin-bottom: 24px + 56px + 2px;
+        }
+        @include smallscreen {
+            margin-bottom: (56px / 2) + 2px;
+        }
 
         tr.spacer {
             height: 3px;
@@ -272,13 +324,19 @@ body {
 }
 
 #addrow {
-    flex: 0;
     position: relative;
 
     button {
         position: absolute;
         right: 24px;
-        bottom: 24px;
+
+        @include largescreen {
+            bottom: 24px;
+        }
+        @include smallscreen {
+            bottom: -(56px / 2);
+        }
+
         height: 56px;
         width: 56px;
         font-size: 48px;
