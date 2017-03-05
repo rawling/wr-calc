@@ -90,6 +90,14 @@ table td {
     font-size: 13px;
     font-weight: 400;
 }
+#which {
+    font-size: 14px;
+    font-weight: 500;
+}
+#footer { // can't really find a material match for this
+    font-size: 12px;
+    font-weight: 400;
+}
 
 
 /**
@@ -159,29 +167,22 @@ body {
 #which {
     display: flex;
     flex-shrink: 0;
-    @include height(6);
-    margin: 10px 5px;
-    border-radius: 2px;
+    @extend %primary;
+
+    height: 48px;
+    line-height: 48px;
+    width: 100%;
 
     label {
         flex-grow: 1;
         text-align: center;
-
-        &:first-child {
-            border-top-left-radius: 2px;
-            border-bottom-left-radius: 2px;
-        }
-
-        &:last-child {
-            border-top-right-radius: 2px;
-            border-bottom-right-radius: 2px;
-        }
+        border-bottom: 2px solid $primary;
 
         &.sel {
-            @extend %primary;
+            border-bottom-color: $accent;
+            @extend %accent-text;
         }
         &:not(.sel) {
-            @extend %white;
             @extend .secondaryText;
         }
 
@@ -202,6 +203,7 @@ body {
 
         th {
             text-align: left;
+            @extend .secondaryText;
         }
 
         th, td {
@@ -250,7 +252,10 @@ body {
 
         th, td {
             padding: 2px 4px;
-            margin-bottom: 5px;
+        }
+
+        th {
+            @extend .secondaryText;
         }
 
         input[type=number] {
