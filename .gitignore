@@ -1,1 +1,4 @@
 .vscode
+_site
+Gemfile.lock
+.jekyll-metadata

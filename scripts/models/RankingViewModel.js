@@ -18,16 +18,16 @@ var RankingViewModel = function (rawRanking) {
         return pts.toFixed(2);
     }, this);
 
-    // HTML display of the previous position - show in colour and with a little arrow/
+    // HTML display of the previous position - show in colour and with a little arrow.
     this.previousPosDisplay = ko.computed(function () {
         var pos = this.pos();
         var previousPos = this.previousPos();
         if (pos < previousPos) {
-            return '<span style="color: #090">(&uarr;' + previousPos + ')</span>';
+            return '(&uarr;' + previousPos + ')';
         } else if (pos > previousPos) {
-            return '<span style="color: #900">(&darr;' + previousPos + ')</span>';
+            return '(&darr;' + previousPos + ')';
         } else {
-            return null;
+            return '<span style="visibility: hidden;" aria-hidden="true">(&rarr;' + previousPos + ')</span>';
         }
     }, this);
 
@@ -35,12 +35,33 @@ var RankingViewModel = function (rawRanking) {
     this.ptsDiffDisplay = ko.computed(function () {
         var ptsDiff = this.pts() - this.previousPts();
         if (ptsDiff > 0) {
-            return '<span style="color: #090">(+' + ptsDiff.toFixed(2) + ')</span>';
+            return '(+' + ptsDiff.toFixed(2) + ')';
         } else if (ptsDiff < 0) {
-            return '<span style="color: #900">(-' + (-ptsDiff).toFixed(2) + ')</span>';
+            return '(-' + (-ptsDiff).toFixed(2) + ')';
         } else {
-            return null;
+            return '<span style="visibility: hidden;" aria-hidden="true">(~' + ptsDiff.toFixed(2) + ')</span>';
         }
+    }, this);
+    
+    this.changeCls = ko.computed(function () {
+        var cls = 'ranking';
+
+        var pos = this.pos();
+        var previousPos = this.previousPos();
+        if (pos < previousPos) {
+            cls += ' posUp';
+        } else if (pos > previousPos) {
+            cls += ' posDown';
+        }
+
+        var ptsDiff = this.pts() - this.previousPts();
+        if (ptsDiff > 0) {
+            cls += ' ptsUp';
+        } else if (ptsDiff < 0) {
+            cls += ' ptsDown';
+        }
+
+        return cls;
     }, this);
 
     return this;

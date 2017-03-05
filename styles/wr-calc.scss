@@ -1,0 +1,357 @@
+---
+---
+
+/**
+ * Standard colours.
+ */
+$black: #000000;
+$white: #ffffff;
+$primary: #4caf50;
+$primary-1: #a5d6a7;
+$primary-2: #388e3c;
+$accent: #dd2c00;
+
+/**
+ * Apply background colour and matching text colour.
+ */
+@mixin textonlight($color) {
+    color: rgba($color, 0.87);
+    .secondaryText {
+        color: rgba($color, 0.54);
+    }
+    .disabledText {
+        color: rgba($color, 0.38);
+    }
+}
+@mixin textondark($color) {
+    color: rgba($color, 1);
+    .secondaryText {
+        color: rgba($color, 0.7);
+    }
+    .disabledText {
+        color: rgba($color, 0.5);
+    }
+}
+
+%textonlight {
+    @include textonlight($black);
+}
+%textondark {
+    @include textondark($white);
+}
+
+%primary {
+    background-color: $primary;
+    @include textonlight($black);
+}
+
+%white {
+    background-color: $white;
+    @include textonlight($black);
+}
+
+%primary-1 {
+    background-color: $primary-1;
+    @include textonlight($black);
+}
+
+%primary-2 {
+    background-color: $primary-2;
+    @include textondark($white);
+}
+%primary-2-text {
+    @include textonlight($primary-2);
+}
+
+%accent {
+    background-color: $accent;
+    @include textondark($white);
+}
+%accent-text {
+    @include textonlight($accent);
+}
+
+/**
+ * Font size and weight all applied directly here as we have so few
+ */
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+}
+h3 {
+    font-size: 20px;
+    font-weight: 500;
+}
+table {
+    th {
+        font-size: 12px;
+        font-weight: 500;
+    }
+    td {
+        font-size: 13px;
+        font-weight: 400;
+        input, select {
+            font-size: 13px !important;
+            font-weight: 400 !important;
+            font-family: 'Roboto', sans-serif !important;
+        }
+    }
+}
+#which {
+    font-size: 14px;
+    font-weight: 500;
+}
+#footer { // can't really find a material match for this
+    font-size: 12px;
+    font-weight: 400;
+}
+
+
+/**
+ * Attempt to combine z-index and shadow into height.
+ */
+@mixin height($h) {
+    z-index: $h;
+    box-shadow: 0 ($h * 0.5px) ($h * 1px) 0 rgba(0, 0, 0, ((10 * $h) + 4) / 100);
+    transition: box-shadow 0.1s ease-in-out;
+}
+
+/**
+ * Layout magic
+ */
+@mixin largescreen () {
+    @media only screen and (min-width: 840px) {
+        @content
+    }
+}
+@mixin smallscreen () {
+    @media only screen and (max-width: 839px) {
+        @content
+    }
+}
+
+@include largescreen() {
+    html {
+        height: 100%;
+    }
+    body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    #leftright {
+        display: flex;
+        flex-direction: row;
+        overflow-x: hidden;
+        flex: 1;
+    }
+    #footer {
+        flex: 0;
+    }
+    #left {
+        @include height(6);
+        height: 100%;
+        flex: 0.5;
+        display: flex;
+        flex-direction: column;
+    }
+    #right {
+        @include height(0);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    #left, #right {
+    .header h3 {
+            flex: 0;
+        }
+    }
+    #which {
+        flex-shrink: 0;
+    }
+    #rankings {
+        flex: 1;
+        overflow-y: scroll;
+    }
+    #fixtures {
+        flex: 1;
+        overflow-y: scroll;
+    }
+    #addrow {
+        flex: 0;
+    }
+}
+@include smallscreen() {
+    #leftright {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+    #left, #right {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/**
+ * Standard styling.
+ */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#leftright {
+    @extend %white;
+}
+
+#footer {
+    @extend %primary;
+    padding: 2px;
+    text-align: center;
+}
+
+#left, #right {
+    .header { 
+        @extend %primary;
+
+        h3 {
+            text-align: center;
+        }
+    }
+}
+
+#which {
+    display: flex;
+    @extend %primary;
+
+    height: 48px;
+    line-height: 48px;
+    width: 100%;
+
+    label {
+        flex-grow: 1;
+        text-align: center;
+        border-bottom: 2px solid $primary;
+
+        &.sel {
+            border-bottom-color: $accent;
+            @extend %accent-text;
+        }
+        &:not(.sel) {
+            @extend .secondaryText;
+        }
+
+        input {
+            display: none;
+        }
+    }
+}
+
+#rankings {
+    padding: 5px;
+
+    table {
+        margin: 0 auto;
+        border-collapse: collapse;
+
+        th {
+            text-align: left;
+            @extend .secondaryText;
+        }
+
+        th, td {
+            padding: 2px 4px;
+
+            &.pos {
+                text-align: right;
+            }
+
+            &.name {
+                padding: 0 10px;
+            }
+        }
+
+        tr.ptsUp td.ptsDiff, tr.posUp td.posDiff {
+            @extend %primary-2-text;
+        }
+
+        tr.ptsDown td.ptsDiff, tr.posDown td.posDiff {
+            @extend %accent-text;
+        }
+
+        tr:nth-child(odd) {
+           @extend %white;
+        }
+
+        tr:nth-child(even) {
+           @extend %white;
+        }
+    }
+}
+
+#fixtures {
+    padding: 10px 2px 0;
+
+    table {
+        margin: 0 auto;
+        border-collapse: collapse;
+
+        @include largescreen {
+            margin-bottom: 24px + 56px + 2px;
+        }
+        @include smallscreen {
+            margin-bottom: (56px / 2) + 2px;
+        }
+
+        tr.spacer {
+            height: 3px;
+        }
+
+        th, td {
+            padding: 2px 4px;
+        }
+
+        th {
+            @extend .secondaryText;
+        }
+
+        input[type=number] {
+            width: 3em;
+        }
+    }
+}
+
+#addrow {
+    position: relative;
+
+    button {
+        position: absolute;
+        right: 24px;
+
+        @include largescreen {
+            bottom: 24px;
+        }
+        @include smallscreen {
+            bottom: -(56px / 2);
+        }
+
+        height: 56px;
+        width: 56px;
+        font-size: 48px;
+        border-radius: 50%;
+        box-shadow: $black;
+        @extend %accent;
+        @include height(6);
+
+        &:active {
+            @include height(12);
+        }
+
+        border: none;
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAABlBMVEX///////9VfPVsAAAAAXRSTlMAQObYZgAAABZJREFUCNdjYLBhYCAG////HwUTqQ8AH00QpSze/owAAAAASUVORK5CYII=');
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
+    }
+}
