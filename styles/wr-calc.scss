@@ -75,6 +75,7 @@ $accent: #dd2c00;
  * Font size and weight all applied directly here as we have so few
  */
 body {
+    font-family: 'Roboto', sans-serif;
     font-size: 13px;
     font-weight: 400;
 }
@@ -82,13 +83,20 @@ h3 {
     font-size: 20px;
     font-weight: 500;
 }
-table th {
-    font-size: 12px;
-    font-weight: 500;
-}
-table td {
-    font-size: 13px;
-    font-weight: 400;
+table {
+    th {
+        font-size: 12px;
+        font-weight: 500;
+    }
+    td {
+        font-size: 13px;
+        font-weight: 400;
+        input, select {
+            font-size: 13px !important;
+            font-weight: 400 !important;
+            font-family: 'Roboto', sans-serif !important;
+        }
+    }
 }
 #which {
     font-size: 14px;
@@ -114,7 +122,6 @@ html {
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
     display: flex;
     flex-direction: column;
     height: 100%;
