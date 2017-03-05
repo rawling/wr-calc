@@ -6,16 +6,18 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
-<link href="//fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
-<link href="styles/wr-calc.css?v=0.7" type="text/css" rel="stylesheet">
-<script src="scripts/models/ViewModel.js?v=0.7" type="text/javascript" ></script>
-<script src="scripts/models/RankingViewModel.js?v=0.7" type="text/javascript" ></script>
-<script src="scripts/models/FixtureViewModel.js?v=0.7" type="text/javascript" ></script>
+<link href="//fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet"> 
+<link href="styles/wr-calc.css?v=0.8" type="text/css" rel="stylesheet">
+<script src="scripts/models/ViewModel.js?v=0.8" type="text/javascript" ></script>
+<script src="scripts/models/RankingViewModel.js?v=0.8" type="text/javascript" ></script>
+<script src="scripts/models/FixtureViewModel.js?v=0.8" type="text/javascript" ></script>
 </head>
 <body>
     <div id="leftright">
         <div id="left">
-            <h3>Rankings</h3>
+            <div class="header">
+                <h3>Rankings</h3>
+            </div>
             <div id="which" data-bind="if: shownRankings">
                 <label data-bind="css: $data.shownRankings() === 'original' ? 'sel' : ''">
                     <input type="radio" name="rankings" value="original" data-bind="checked: shownRankings">
@@ -23,7 +25,7 @@
                 </label>
                 <label data-bind="css: $data.shownRankings() === 'calculated' ? 'sel' : ''">
                     <input type="radio" name="rankings" value="calculated" data-bind="checked: shownRankings">
-                    <span>Calculated</span>
+                    CALCULATED
                 </label>
             </div>
 
@@ -40,12 +42,12 @@
                             <tr><th class="pos">#</th><th /><th class="name">Team</th><th colspan=2>Points</th></tr>
                         </thead>
                         <tbody data-bind="foreach: baseRankings">
-                            <tr class="ranking">
+                            <tr data-bind="css: changeCls">
                                 <td class="pos" data-bind="text: pos"></td>
-                                <td data-bind="html: previousPosDisplay"></td>
+                                <td class="posDiff" data-bind="html: previousPosDisplay"></td>
                                 <td class="name" data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
                                 <td data-bind="text: ptsDisplay"></td>
-                                <td data-bind="html: ptsDiffDisplay"></td>
+                                <td class="ptsDiff" data-bind="html: ptsDiffDisplay"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -57,12 +59,12 @@
                             <tr><th class="pos">#</th><th /><th class="name">Team</th><th colspan=2>Points</th></tr>
                         </thead>
                         <tbody data-bind="foreach: projectedRankings">
-                            <tr class="ranking">
+                            <tr data-bind="css: changeCls">
                                 <td class="pos" data-bind="text: pos"></td>
-                                <td data-bind="html: previousPosDisplay"></td>
+                                <td class="posDiff" data-bind="html: previousPosDisplay"></td>
                                 <td class="name" data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
                                 <td data-bind="text: ptsDisplay"></td>
-                                <td data-bind="html: ptsDiffDisplay"></td>
+                                <td class="ptsDiff" data-bind="html: ptsDiffDisplay"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -70,7 +72,9 @@
             </div>
         </div>
         <div id="right">
-            <h3>Fixtures</h3>
+            <div class="header">
+                <h3>Fixtures</h3>
+            </div>
             <div id="fixtures">
                 <table>
                     <thead>
@@ -78,7 +82,7 @@
                     </thead>
                     <tbody data-bind="foreach: fixtures">
                         <tr data-bind="if: $index() > 0" class="spacer" aria-hidden=true><!-- only way to get whitespace between rows? --></tr>
-                        <tr data-bind="style: { 'background-color' : ($data.isValid() ? '#dfd' : '#fdd') }">
+                        <tr>
                             <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
                             <td><input type="number" min="0" data-bind="value: homeScore" /></td>
                             <td><input type="number" min="0" data-bind="value: awayScore" /></td>
@@ -91,13 +95,15 @@
                 </table>
             </div>
             <div id="addrow">
-                <button onclick='addFixture();'>Add row</button>
+                <button onclick='addFixture();'></button>
             </div>
         </div>
     </div>
-    <div id=footer>
-        Rankings and ranking algorithm are the property of <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>.
-        See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
+    <div id="footer">
+        <span class="secondaryText">
+            Rankings and ranking algorithm are the property of <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>.
+            See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
+        </span>
     </div>
     <script src="scripts/wr-calc.js?v=0.7.2" type="text/javascript" ></script>
 </body>
