@@ -82,7 +82,7 @@
                     </thead>
                     <tbody data-bind="foreach: fixtures">
                         <tr data-bind="if: $index() > 0" class="spacer" aria-hidden=true><!-- only way to get whitespace between rows? --></tr>
-                        <tr data-bind="style: { 'background-color' : ($data.isValid() ? '#dfd' : '#fdd') }">
+                        <tr>
                             <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
                             <td><input type="number" min="0" data-bind="value: homeScore" /></td>
                             <td><input type="number" min="0" data-bind="value: awayScore" /></td>
