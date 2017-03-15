@@ -120,5 +120,57 @@ var ViewModel = function () {
         return sorted;
     }, this);
 
+    this.fixturesString = ko.pureComputed({
+        read: function () {
+            var s = '';
+            var first = true;
+            $.each(this.fixtures(), function (i, e) {
+                if (!e.homeId() || !e.awayId()) {
+                    return;
+                }
+                if (first) {
+                    first = false;
+                } else {
+                    s = s + ';';
+                }
+                s = s + e.homeId() + ',' + (e.homeScore() || '') + ',' + (e.awayScore() || '') + ',' + e.awayId() + ',' + (e.noHome() ? '1' : '0') + ',' + (e.isRwc() ? '1' : '0');
+            });
+
+            return s;
+        },
+        write: function (value) {
+            var fs = [];
+            var r = this.rankingsById();
+            var me = this;
+            $.each(value.split(';'), function (i, e) {
+                var rs = /^(\d*),(\d*),(\d*),(\d*),(\d),(\d)$/.exec(e);
+                if (!rs) {
+                    return;
+                }
+
+                // both Country into RANKINGS array ?
+                if(r[rs[1]] && r[rs[4]]) {
+                    var fixture = new FixtureViewModel(me);
+                    fixture.homeId(rs[1]);
+                    fixture.awayId(rs[4]);
+                    fixture.noHome(rs[5] == '1');
+                    fixture.isRwc(rs[6] == '1');
+                    fixture.homeScore(rs[2]);
+                    fixture.awayScore(rs[3]);
+                    fs.push(fixture);
+                }
+            });
+
+            this.fixtures(fs);
+        },
+        owner: this
+    });
+
+    this.queryString = ko.computed(function () {
+        var qs = '?d=' + this.originalDate() + '&f=' + this.fixturesString();
+        history.replaceState(null, '', qs);
+        return qs;
+    }, this);
+
     return this;
 };

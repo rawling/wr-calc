@@ -1,9 +1,19 @@
+var url = '//cmsapi.pulselive.com/rugby/rankings/mru.json';
+var s = location.search;
+var de = /d=([^&]*)/.exec(s);
+var d = de ? de[1] : null;
+if (d) {
+    url += '?date=' + d;
+}
+var fe = /f=([^&]*)/.exec(s);
+var f = fe ? fe[1] : null;
+
 // Create the view model and bind it to the HTML.
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
+$.get(url).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;
@@ -25,10 +35,16 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     viewModel.originalDate(data.effective.label);
     viewModel.shownRankings('original');
 
+
     // When we're done, load fixtures in.
     // This should be parallelisable if we have our observables set up properly. (Fixture validity depends on teams.)
-    addFixture();
-    loadFixtures();
+    if (f) {
+        viewModel.fixturesString(f);
+        viewModel.shownRankings('calculated');
+    } else {
+        addFixture();
+        loadFixtures();
+    }
 });
 
 // Helper to add a fixture to the top/bottom.
