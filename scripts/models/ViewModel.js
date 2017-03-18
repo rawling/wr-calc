@@ -167,9 +167,7 @@ var ViewModel = function () {
     });
 
     this.queryString = ko.computed(function () {
-        var qs = '?d=' + this.originalDate() + '&f=' + this.fixturesString();
-        history.replaceState(null, '', qs);
-        return qs;
+        return 'd=' + this.originalDate() + '&f=' + this.fixturesString();
     }, this);
 
     return this;

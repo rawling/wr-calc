@@ -41,6 +41,9 @@ $.get(url).done(function (data) {
     if (f) {
         viewModel.fixturesString(f);
         viewModel.shownRankings('calculated');
+        viewModel.queryString.subscribe(function (qs) {
+            history.replaceState(null, '', '?' + qs);
+        });
     } else {
         addFixture();
         loadFixtures();
@@ -112,6 +115,10 @@ var loadFixtures = function(  ) {
 
         // Once fixtures are loaded, show what effect they have on the rankings.
         viewModel.shownRankings('calculated');
+
+        viewModel.queryString.subscribe(function (qs) {
+            history.replaceState(null, '', '?' + qs);
+        });
     });
 
 }
