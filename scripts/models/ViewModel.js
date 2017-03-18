@@ -56,63 +56,42 @@ var ViewModel = function () {
 
         // Apply each fixture in turn.
         $.each(fixtures, function (index, fixture) {
+            // Only do anything if the fixture is valid.
+            if (!fixture.isValid()) {
+                return;
+            }
+
             var home = projectedRankings[fixture.homeId()];
             var away = projectedRankings[fixture.awayId()];
-            var homeScore = parseInt(fixture.homeScore());
-            var awayScore = parseInt(fixture.awayScore());
             var noHome = fixture.noHome();
             var isRwc = fixture.isRwc();
 
-            // Only do anything if the fixture is valid.
-            // We should invert the if statement and maybe use the isValid
-            // property, although maybe there's a reason we didn't before.
-            if (home &&
-                away &&
-                home != away &&
-                !isNaN(homeScore) &&
-                !isNaN(awayScore)) {
-
-                // Calculate the effective ranking of the "home" team depending on whether
-                // it is really at home.
-                var homeRanking = home.pts();
-                if (!noHome) {
-                    homeRanking = homeRanking + 3;
-                }
-
-                // Calculate the ranking diff and cap it at 10 points.
-                var rankingDiff = homeRanking - away.pts();
-                var cappedDiff = Math.min(10, Math.max(-10, rankingDiff));
-
-                // A draw gives the home team one tenth of the diff.
-                var drawChange = cappedDiff / 10;
-
-                // A win gives a team one more point, a loss one less.
-                // A win or loss by over 15 multiplies by 1.5.
-                var homeChange;
-                if (homeScore > awayScore + 15) {
-                    homeChange = 1.5 * (1 - drawChange);
-                } else if (homeScore > awayScore) {
-                    homeChange = 1 - drawChange;
-                } else if (homeScore == awayScore) {
-                    homeChange = 0 - drawChange;
-                } else if (homeScore < awayScore - 15) {
-                    homeChange = 1.5 * (-1 - drawChange);
-                } else {
-                    homeChange = -1 - drawChange;
-                }
-
-                // A RWC match doubles the change.
-                if (isRwc) {
-                    homeChange = homeChange * 2;
-                }
-
-                // The rankings are zero-sum, so the away team loses what the home team gains.
-                var awayChange = -homeChange;
-
-                // Update the "current" values.
-                home.pts(home.pts() + homeChange);
-                away.pts(away.pts() + awayChange);
+            // Calculate the effective ranking of the "home" team depending on whether
+            // it is really at home.
+            var homeRanking = home.pts();
+            if (!noHome) {
+                homeRanking = homeRanking + 3;
             }
+
+            // Calculate the ranking diff and cap it at 10 points.
+            var rankingDiff = homeRanking - away.pts();
+            var cappedDiff = Math.min(10, Math.max(-10, rankingDiff));
+
+            // A draw gives the home team one tenth of the diff.
+            var drawChange = cappedDiff / 10;
+
+            // If the home side wins, they gain 1 extra point; if they lose, they gain 1 less point.
+            var homeChange = fixture.winner() - drawChange;
+
+            // Big/small wins/losses and RWC matches multiply rankings changes.
+            homeChange *= fixture.multiplier();
+
+            // The rankings are zero-sum, so the away team loses what the home team gains.
+            var awayChange = -homeChange;
+
+            // Update the "current" values.
+            home.pts(home.pts() + homeChange);
+            away.pts(away.pts() + awayChange);
         });
 
         // Sort the rankings for display and update the "current" positions.
