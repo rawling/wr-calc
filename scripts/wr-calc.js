@@ -30,13 +30,13 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json' + (dateString ? ('?date='
 
     viewModel.baseRankings(sorted);
     viewModel.originalDate(data.effective.label);
-    viewModel.shownRankings('original');
+    viewModel.rankingsChoice('original');
 
 
     // When we're done, load fixtures in.
     if (fixturesString) {
         viewModel.fixturesString(fixturesString);
-        viewModel.shownRankings('calculated');
+        viewModel.rankingsChoice('calculated');
         viewModel.queryString.subscribe(function (qs) {
             history.replaceState(null, '', '?' + qs);
         });
@@ -111,7 +111,7 @@ var loadFixtures = function(  ) {
         });
 
         // Once fixtures are loaded, show what effect they have on the rankings.
-        viewModel.shownRankings('calculated');
+        viewModel.rankingsChoice('calculated');
 
         viewModel.queryString.subscribe(function (qs) {
             history.replaceState(null, '', '?' + qs);

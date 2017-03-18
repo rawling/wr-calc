@@ -26,7 +26,7 @@ var ViewModel = function () {
 
     // An indication of which set of rankings is displayed.
     // Options are null, 'original' or 'calculated'.
-    this.shownRankings = ko.observable();
+    this.rankingsChoice = ko.observable();
 
     // An indication of whether we have loaded fixtures from WR.
     // Not actually used yet, but could help show a loading screen.
@@ -105,6 +105,18 @@ var ViewModel = function () {
         });
 
         return sorted;
+    }, this);
+
+    // Whichever set of rankings is chosen.
+    this.shownRankings = ko.computed(function () {
+        switch (this.rankingsChoice()) {
+            case 'original':
+                return this.baseRankings();
+            case 'calculated':
+                return this.projectedRankings();
+            default:
+                return [];
+        }
     }, this);
 
     // A string representing the selected fixtures and results.
