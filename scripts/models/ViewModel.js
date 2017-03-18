@@ -16,6 +16,14 @@ var ViewModel = function () {
     // The fixtures used to calculate projected rankings.
     this.fixtures = ko.observableArray();
 
+    // A rate-limited set of fixtures. This allows us to add fixtures performantly, by having the fixture list
+    // bound to fixtures above but calculations based on this version.
+    // As long as no-one ands and completes a fixture within the time below, this should not be noticeable.
+    // (It also happens when we load in fixtures at startup, but that's a reasonable trade-off.)
+    this.deferredFixtures = ko.computed(function () {
+        return this.fixtures();
+    }, this).extend({ rateLimit: 100 });
+
     // An indication of which set of rankings is displayed.
     // Options are null, 'original' or 'calculated'.
     this.shownRankings = ko.observable();
@@ -28,7 +36,7 @@ var ViewModel = function () {
     // the fixtures.
     this.projectedRankings = ko.computed(function() {
         var rankingsById = this.rankingsById();
-        var fixtures = this.fixtures();
+        var fixtures = this.deferredFixtures();
 
         // Nothing to calculate if the data has not yet loaded.
         if (!rankingsById || !fixtures) {
