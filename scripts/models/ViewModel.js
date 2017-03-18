@@ -122,46 +122,42 @@ var ViewModel = function () {
 
     this.fixturesString = ko.pureComputed({
         read: function () {
-            var s = '';
-            var first = true;
-            $.each(this.fixtures(), function (i, e) {
-                if (!e.homeId() || !e.awayId()) {
-                    return;
-                }
-                if (first) {
-                    first = false;
-                } else {
-                    s = s + ';';
-                }
-                s = s + e.homeId() + ',' + (e.homeScore() || '') + ',' + (e.awayScore() || '') + ',' + e.awayId() + ',' + (e.noHome() ? '1' : '0') + ',' + (e.isRwc() ? '1' : '0');
-            });
+            return '1:' + $.map(this.fixtures(), function (e) {
+                var vars = [];
+                if (e.homeId()) vars[0] = e.homeId();
+                if (e.awayId()) vars[1] = e.awayId();
+                if (!isNaN(e.homeScore())) vars[2] = e.homeScore();
+                if (!isNaN(e.awayScore())) vars[3] = e.awayScore();
+                if (e.noHome()) vars[4] = '1';
+                if (e.isRwc()) vars[5] = '1';
 
-            return s;
+                return vars.join(',');
+            }).join(';');
         },
         write: function (value) {
-            var fs = [];
-            var r = this.rankingsById();
-            var me = this;
-            $.each(value.split(';'), function (i, e) {
-                var rs = /^(\d*),(\d*),(\d*),(\d*),(\d),(\d)$/.exec(e);
-                if (!rs) {
-                    return;
-                }
-
-                // both Country into RANKINGS array ?
-                if(r[rs[1]] && r[rs[4]]) {
-                    var fixture = new FixtureViewModel(me);
-                    fixture.homeId(rs[1]);
-                    fixture.awayId(rs[4]);
-                    fixture.noHome(rs[5] == '1');
-                    fixture.isRwc(rs[6] == '1');
-                    fixture.homeScore(rs[2]);
-                    fixture.awayScore(rs[3]);
-                    fs.push(fixture);
-                }
-            });
-
-            this.fixtures(fs);
+            var versionAndString = value.split(':');
+            switch (versionAndString[0]) {
+                case '1':
+                    var fs = [];
+                    var r = this.rankingsById();
+                    var me = this;
+                    $.each(versionAndString[1].split(';'), function (i, e) {
+                        var rs = e.split(',');
+                        var fixture = new FixtureViewModel(me);
+                        fixture.homeId(rs[0]);
+                        fixture.awayId(rs[1]);
+                        fixture.homeScore(rs[2]);
+                        fixture.awayScore(rs[3]);
+                        fixture.noHome(rs[4]);
+                        fixture.isRwc(rs[5]);
+                        fs.push(fixture);
+                    });
+                    this.fixtures(fs);
+                    break;
+                default:
+                    this.fixtures([]);
+                    break;
+            }
         },
         owner: this
     });
