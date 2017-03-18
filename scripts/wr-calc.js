@@ -1,9 +1,16 @@
+// Read query string before we do any binding as it may remove it.
+var s = location.search;
+var dateQuery = /d=([^&]*)/.exec(s);
+var dateString = dateQuery ? dateQuery[1] : null;
+var fixturesQuery = /f=([^&]*)/.exec(s);
+var fixturesString = fixturesQuery ? fixturesQuery[1] : null;
+
 // Create the view model and bind it to the HTML.
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
+$.get('//cmsapi.pulselive.com/rugby/rankings/mru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;
@@ -25,10 +32,19 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/mru.json').done(function (data) {
     viewModel.originalDate(data.effective.label);
     viewModel.shownRankings('original');
 
+
     // When we're done, load fixtures in.
-    // This should be parallelisable if we have our observables set up properly. (Fixture validity depends on teams.)
-    addFixture();
-    loadFixtures();
+    if (fixturesString) {
+        viewModel.fixturesString(fixturesString);
+        viewModel.shownRankings('calculated');
+        viewModel.queryString.subscribe(function (qs) {
+            history.replaceState(null, '', '?' + qs);
+        });
+    } else {
+        // This should be parallelisable if we have our observables set up properly. (Fixture validity depends on teams.)
+        addFixture();
+        loadFixtures();
+    }
 });
 
 // Helper to add a fixture to the top/bottom.
@@ -96,6 +112,10 @@ var loadFixtures = function(  ) {
 
         // Once fixtures are loaded, show what effect they have on the rankings.
         viewModel.shownRankings('calculated');
+
+        viewModel.queryString.subscribe(function (qs) {
+            history.replaceState(null, '', '?' + qs);
+        });
     });
 
 }
