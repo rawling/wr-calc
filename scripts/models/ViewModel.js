@@ -120,5 +120,53 @@ var ViewModel = function () {
         return sorted;
     }, this);
 
+    // A string representing the selected fixtures and results.
+    this.fixturesString = ko.pureComputed({
+        read: function () {
+            return '1:' + $.map(this.fixtures(), function (e) {
+                var vars = [];
+                if (e.homeId()) vars[0] = e.homeId();
+                if (e.awayId()) vars[1] = e.awayId();
+                if (!isNaN(e.homeScore())) vars[2] = e.homeScore();
+                if (!isNaN(e.awayScore())) vars[3] = e.awayScore();
+                if (e.noHome()) vars[4] = '1';
+                if (e.isRwc()) vars[5] = '1';
+
+                return vars.join(',');
+            }).join(';');
+        },
+        write: function (value) {
+            var versionAndString = value.split(':');
+            switch (versionAndString[0]) {
+                case '1':
+                    var fs = [];
+                    var r = this.rankingsById();
+                    var me = this;
+                    $.each(versionAndString[1].split(';'), function (i, e) {
+                        var rs = e.split(',');
+                        var fixture = new FixtureViewModel(me);
+                        fixture.homeId(rs[0]);
+                        fixture.awayId(rs[1]);
+                        fixture.homeScore(rs[2]);
+                        fixture.awayScore(rs[3]);
+                        fixture.noHome(rs[4]);
+                        fixture.isRwc(rs[5]);
+                        fs.push(fixture);
+                    });
+                    this.fixtures(fs);
+                    break;
+                default:
+                    this.fixtures([]);
+                    break;
+            }
+        },
+        owner: this
+    });
+
+    // A string representing the base date and selected fixtures, suitable for putting into the address bar.
+    this.queryString = ko.computed(function () {
+        return 'd=' + this.originalDate() + '&f=' + this.fixturesString();
+    }, this);
+
     return this;
 };
