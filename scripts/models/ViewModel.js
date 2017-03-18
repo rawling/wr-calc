@@ -120,6 +120,7 @@ var ViewModel = function () {
         return sorted;
     }, this);
 
+    // A string representing the selected fixtures and results.
     this.fixturesString = ko.pureComputed({
         read: function () {
             return '1:' + $.map(this.fixtures(), function (e) {
@@ -162,6 +163,7 @@ var ViewModel = function () {
         owner: this
     });
 
+    // A string representing the base date and selected fixtures, suitable for putting into the address bar.
     this.queryString = ko.computed(function () {
         return 'd=' + this.originalDate() + '&f=' + this.fixturesString();
     }, this);
