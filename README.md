@@ -6,6 +6,9 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.9
+- Share calculations by putting base date and fixture list into query string
+
 ### 0.8
 - Use Jekyll (gh pages) to enable SASS
 - Material redesign
