@@ -95,7 +95,7 @@ var loadFixtures = function(  ) {
                 var fixture = addFixture(true);
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
-                fixture.noHome(false);
+                fixture.noHome(e.events[0].rankingsWeight == 2 && e.teams[0].id != 2518); // Ireland!
                 fixture.isRwc(e.events[0].rankingsWeight == 2);
 
                 // If the match isn't unstarted (or doesn't not have live scores), add
