@@ -68,7 +68,7 @@ var loadFixtures = function(  ) {
     var from = formatDate( rankingDate );
     var to   =  formatDate( rankingDate.addDays( 21 ) );
 
-    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&sports=wru";
+    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
 
     $.get( url ).done( function( data ) {
 
