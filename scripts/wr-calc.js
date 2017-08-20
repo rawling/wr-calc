@@ -66,7 +66,7 @@ var loadFixtures = function(  ) {
     // (As that is what will make it into the next rankings.)
     var rankingDate  = new Date(viewModel.originalDate());
     var from = formatDate( rankingDate );
-    var to   =  formatDate( rankingDate.addDays( 7 ) );
+    var to   =  formatDate( new Date().addDays( 7 ) ); // hacked - sometimes ranking date is very old
 
     var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&sports=mru";
 
