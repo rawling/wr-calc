@@ -10,7 +10,7 @@ var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('//cmsapi.pulselive.com/rugby/rankings/wru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
+$.get('//cmsapi.pulselive.com/rugby/rankings/mru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;
