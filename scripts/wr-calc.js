@@ -96,7 +96,14 @@ var loadFixtures = function(  ) {
                 var fixture = addFixture(true);
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
-                fixture.noHome(e.venue && e.teams[0].name !== e.venue.country);
+                fixture.noHome(false);
+                if (e.venue) {
+                    $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
+                        if (e.venue.country !== teamData.teams[0].country) {
+                            fixture.noHome(true);
+                        }
+                    });
+                }
                 fixture.isRwc(e.events[0].rankingsWeight == 2);
 
                 // If the match isn't unstarted (or doesn't not have live scores), add
