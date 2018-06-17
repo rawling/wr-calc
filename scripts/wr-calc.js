@@ -4,13 +4,14 @@ var dateQuery = /d=([^&]*)/.exec(s);
 var dateString = dateQuery ? dateQuery[1] : null;
 var fixturesQuery = /f=([^&]*)/.exec(s);
 var fixturesString = fixturesQuery ? fixturesQuery[1] : null;
+var wQuery = /[?&]w\b/.exec(s);
 
 // Create the view model and bind it to the HTML.
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('//cmsapi.pulselive.com/rugby/rankings/mru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
+$.get('//cmsapi.pulselive.com/rugby/rankings/' + (wQuery ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;
@@ -95,7 +96,7 @@ var loadFixtures = function(  ) {
                 var fixture = addFixture(true);
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
-                fixture.noHome(e.events[0].rankingsWeight == 2 && e.teams[0].id != 2518); // Ireland!
+                fixture.noHome(e.venue && e.teams[0].name !== e.venue.country);
                 fixture.isRwc(e.events[0].rankingsWeight == 2);
 
                 // If the match isn't unstarted (or doesn't not have live scores), add
