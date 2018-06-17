@@ -4,13 +4,14 @@ var dateQuery = /d=([^&]*)/.exec(s);
 var dateString = dateQuery ? dateQuery[1] : null;
 var fixturesQuery = /f=([^&]*)/.exec(s);
 var fixturesString = fixturesQuery ? fixturesQuery[1] : null;
+var wQuery = /[?&]w\b/.exec(s);
 
 // Create the view model and bind it to the HTML.
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('//cmsapi.pulselive.com/rugby/rankings/mru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
+$.get('//cmsapi.pulselive.com/rugby/rankings/' + (wQuery ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;

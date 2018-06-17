@@ -6,6 +6,10 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.9.2
+- Pull live hotfixes from GitHub
+- Support WRU with `w` query parameter
+
 ### 0.9.1
 - Upgrade to latest version of Knockout.js
 - Performance upgrades
