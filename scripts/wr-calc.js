@@ -4,13 +4,14 @@ var dateQuery = /d=([^&]*)/.exec(s);
 var dateString = dateQuery ? dateQuery[1] : null;
 var fixturesQuery = /f=([^&]*)/.exec(s);
 var fixturesString = fixturesQuery ? fixturesQuery[1] : null;
+var wQuery = /[?&]w\b/.exec(s);
 
 // Create the view model and bind it to the HTML.
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('//cmsapi.pulselive.com/rugby/rankings/mru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
+$.get('//cmsapi.pulselive.com/rugby/rankings/' + (wQuery ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;
@@ -66,9 +67,9 @@ var loadFixtures = function(  ) {
     // (As that is what will make it into the next rankings.)
     var rankingDate  = new Date(viewModel.originalDate());
     var from = formatDate( rankingDate );
-    var to   =  formatDate( new Date().addDays( 7 ) ); // hacked - sometimes ranking date is very old
+    var to   =  formatDate( rankingDate.addDays( 21 ) );
 
-    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&sports=mru";
+    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
 
     $.get( url ).done( function( data ) {
 
@@ -96,6 +97,13 @@ var loadFixtures = function(  ) {
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
                 fixture.noHome(false);
+                if (e.venue) {
+                    $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
+                        if (e.venue.country !== teamData.teams[0].country) {
+                            fixture.noHome(true);
+                        }
+                    });
+                }
                 fixture.isRwc(e.events[0].rankingsWeight == 2);
 
                 // If the match isn't unstarted (or doesn't not have live scores), add
