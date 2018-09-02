@@ -7,6 +7,9 @@ var FixtureViewModel = function (parent) {
     this.homeScore = ko.observable();
     this.awayScore = ko.observable();
 
+    this.venueName = ko.observable();
+    this.kickoff = ko.observable();
+
     this.noHome = ko.observable();
     this.isRwc = ko.observable();
 
