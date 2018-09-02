@@ -6,6 +6,10 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.9.3
+- Fix issue with NHA detection prematurely populating querystring
+- Add kickoff and venue for loaded fixtures
+
 ### 0.9.2
 - Pull live hotfixes from GitHub
 - Support WRU with `w` query parameter
