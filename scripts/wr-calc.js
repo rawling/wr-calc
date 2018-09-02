@@ -104,7 +104,9 @@ var loadFixtures = function(  ) {
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
                 fixture.noHome(false);
+                fixture.kickoff(e.time.label);
                 if (e.venue) {
+                    fixture.venueName([e.venue.name, e.venue.city, e.venue.country].join(', '));
                     anyQueries = true;
                     venueQueries++;
                     $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
