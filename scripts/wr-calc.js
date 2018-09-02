@@ -88,6 +88,13 @@ var loadFixtures = function(  ) {
             return -(aStart - bStart);
         });
 
+        // We make extra AJAX requests for any fixture with a venue in the hope of working out
+        // if the home team has advantage.
+        // Keep track of those here, so we can check when all queries are finished and subscribe
+        // to the query string then.
+        var anyQueries = false;
+        var venueQueries = 0;
+
         // Parse each fixture into a view model, which adds it to the array.
         // (I thought I was being clever but I don't like this now.)
         $.each(fixtures, function (i, e) {
@@ -98,9 +105,18 @@ var loadFixtures = function(  ) {
                 fixture.awayId(e.teams[1].id);
                 fixture.noHome(false);
                 if (e.venue) {
+                    anyQueries = true;
+                    venueQueries++;
                     $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
                         if (e.venue.country !== teamData.teams[0].country) {
                             fixture.noHome(true);
+                        }
+                    }).always(function () {
+                        venueQueries--;
+                        if (venueQueries === 0) {
+                            viewModel.queryString.subscribe(function (qs) {
+                                history.replaceState(null, '', '?' + qs);
+                            });
                         }
                     });
                 }
@@ -121,9 +137,11 @@ var loadFixtures = function(  ) {
         // Once fixtures are loaded, show what effect they have on the rankings.
         viewModel.rankingsChoice('calculated');
 
-        viewModel.queryString.subscribe(function (qs) {
-            history.replaceState(null, '', '?' + qs);
-        });
+        if (!anyQueries) {
+            viewModel.queryString.subscribe(function (qs) {
+                history.replaceState(null, '', '?' + qs);
+            });
+        }
     });
 
 }
