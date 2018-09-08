@@ -6,6 +6,10 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.10
+- Add indicator of live score status
+- Show kickoffs in browser-local time rather than venue-local time
+
 ### 0.9.3
 - Fix issue with NHA detection prematurely populating querystring
 - Add kickoff and venue for loaded fixtures
