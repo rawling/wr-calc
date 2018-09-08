@@ -108,9 +108,9 @@ var loadFixtures = function(  ) {
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
                 fixture.noHome(false);
-                fixture.kickoff($.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis)));
+                fixture.kickoff = $.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis));
                 if (e.venue) {
-                    fixture.venueName([e.venue.name, e.venue.city, e.venue.country].join(', '));
+                    fixture.venueName = [e.venue.name, e.venue.city, e.venue.country].join(', ');
                     anyQueries = true;
                     venueQueries++;
                     $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
@@ -134,8 +134,6 @@ var loadFixtures = function(  ) {
                 // C is complete.
                 // L1/LH/L2 are I believe the codes for 1st half, half time, 2nd half but I forgot.
                 if (e.status !== 'U') {
-                    fixture.liveHomeScore = e.scores[0];
-                    fixture.liveAwayScore = e.scores[1];
                     fixture.homeScore(e.scores[0]);
                     fixture.awayScore(e.scores[1]);
                 }
