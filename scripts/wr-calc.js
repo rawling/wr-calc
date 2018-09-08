@@ -50,15 +50,17 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/' + (wQuery ? 'w' : 'm') + 'ru.json
 
 // Helper to add a fixture to the top/bottom.
 // If we had up/down buttons we could maybe get rid of this.
-var addFixture = function (top) {
+var addFixture = function (top, process) {
     var fixture = new FixtureViewModel(viewModel);
+    if (process) {
+        process(fixture);
+    }
+
     if (top) {
         viewModel.fixtures.unshift(fixture);
     } else {
         viewModel.fixtures.push(fixture);
     }
-
-    return fixture;
 }
 
 // Load fixtures from World Rugby.
@@ -96,17 +98,19 @@ var loadFixtures = function(  ) {
         var venueQueries = 0;
 
         // Parse each fixture into a view model, which adds it to the array.
-        // (I thought I was being clever but I don't like this now.)
         $.each(fixtures, function (i, e) {
-            // both Country into RANKINGS array ?
-            if(rankings[e.teams[0].id] && rankings[e.teams[1].id]) {
-                var fixture = addFixture(true);
+            // I don't think we can reliably only request fixtures relevant to loaded teams, so filter here.
+            if (!rankings[e.teams[0].id] || !rankings[e.teams[1].id]) {
+                return;
+            };
+
+            addFixture(true, function (fixture) {
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
                 fixture.noHome(false);
-                fixture.kickoff(e.time.label);
+                fixture.kickoff = $.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis));
                 if (e.venue) {
-                    fixture.venueName([e.venue.name, e.venue.city, e.venue.country].join(', '));
+                    fixture.venueName = [e.venue.name, e.venue.city, e.venue.country].join(', ');
                     anyQueries = true;
                     venueQueries++;
                     $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
@@ -133,7 +137,14 @@ var loadFixtures = function(  ) {
                     fixture.homeScore(e.scores[0]);
                     fixture.awayScore(e.scores[1]);
                 }
-            }
+                switch (e.status) {
+                    case 'U': fixture.liveScoreMode = 'Upcoming'; break;
+                    case 'C': fixture.liveScoreMode = 'Complete'; break;
+                    case 'L1': fixture.liveScoreMode = 'First half'; break;
+                    case 'L2': fixture.liveScoreMode = 'Second half'; break;
+                    case 'LH': fixture.liveScoreMode = 'Half time'; break;
+                }
+            });
         });
 
         // Once fixtures are loaded, show what effect they have on the rankings.

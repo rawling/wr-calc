@@ -8,6 +8,7 @@
 <meta name="viewport" content="width=480"/>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="//cdn.rawgit.com/agschwender/jquery.formatDateTime/master/dist/jquery.formatDateTime.min.js"></script>
 <script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.4.2.js"></script>
 <link href="//fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet"> 
 <link href="styles/wr-calc.css?v={{site.time|date:'%s'}}" type="text/css" rel="stylesheet">
@@ -77,9 +78,10 @@
                             <td><input type="checkbox" data-bind="checked: isRwc" /></td>
                             <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>
                         </tr>
-                        <tr class="details" data-bind="if: $data.venueName() || $data.kickoff()">
-                            <td colspan="2" data-bind="text: kickoff"></td>
-                            <td colspan="5" data-bind="text: venueName"></td>
+                        <tr class="details" data-bind="if: $data.venueName || $data.kickoff || $data.liveScoreMode">
+                            <td class="details-left" colspan="1" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
+                            <td class="details-center" colspan="2" data-bind="text: liveScoreMode"></td>
+                            <td class="details-right" colspan="5" data-bind="text: venueName"></td>
                         </tr>
                     </tbody>
                 </table>

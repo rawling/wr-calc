@@ -310,6 +310,15 @@ body {
 
         tr.details td {
             font-size: 9px;
+            &.details-left {
+                text-align: left;
+            }
+            &.details-center {
+                text-align: center;
+            }
+            &.details-right {
+                text-align: right;
+            }
         }
 
         th, td {
