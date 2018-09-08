@@ -104,7 +104,7 @@ var loadFixtures = function(  ) {
                 fixture.homeId(e.teams[0].id);
                 fixture.awayId(e.teams[1].id);
                 fixture.noHome(false);
-                fixture.kickoff(e.time.label);
+                fixture.kickoff($.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis)));
                 if (e.venue) {
                     fixture.venueName([e.venue.name, e.venue.city, e.venue.country].join(', '));
                     anyQueries = true;
