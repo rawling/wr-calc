@@ -6,6 +6,9 @@ var FixtureViewModel = function (parent) {
     this.awayId = ko.observable();
     this.homeScore = ko.observable();
     this.awayScore = ko.observable();
+    this.liveHomeScore = null;
+    this.liveAwayScore = null;
+    this.liveScoreMode = null;
 
     this.venueName = ko.observable();
     this.kickoff = ko.observable();

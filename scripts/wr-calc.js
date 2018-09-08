@@ -50,15 +50,17 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/' + (wQuery ? 'w' : 'm') + 'ru.json
 
 // Helper to add a fixture to the top/bottom.
 // If we had up/down buttons we could maybe get rid of this.
-var addFixture = function (top) {
+var addFixture = function (top, process) {
     var fixture = new FixtureViewModel(viewModel);
+    if (process) {
+        process(fixture);
+    }
+
     if (top) {
         viewModel.fixtures.unshift(fixture);
     } else {
         viewModel.fixtures.push(fixture);
     }
-
-    return fixture;
 }
 
 // Load fixtures from World Rugby.
@@ -96,43 +98,52 @@ var loadFixtures = function(  ) {
         var venueQueries = 0;
 
         // Parse each fixture into a view model, which adds it to the array.
-        // (I thought I was being clever but I don't like this now.)
         $.each(fixtures, function (i, e) {
             // both Country into RANKINGS array ?
-            if(rankings[e.teams[0].id] && rankings[e.teams[1].id]) {
-                var fixture = addFixture(true);
-                fixture.homeId(e.teams[0].id);
-                fixture.awayId(e.teams[1].id);
-                fixture.noHome(false);
-                fixture.kickoff($.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis)));
-                if (e.venue) {
-                    fixture.venueName([e.venue.name, e.venue.city, e.venue.country].join(', '));
-                    anyQueries = true;
-                    venueQueries++;
-                    $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
-                        if (e.venue.country !== teamData.teams[0].country) {
-                            fixture.noHome(true);
-                        }
-                    }).always(function () {
-                        venueQueries--;
-                        if (venueQueries === 0) {
-                            viewModel.queryString.subscribe(function (qs) {
-                                history.replaceState(null, '', '?' + qs);
-                            });
-                        }
-                    });
-                }
-                fixture.isRwc(e.events[0].rankingsWeight == 2);
+            if (rankings[e.teams[0].id] && rankings[e.teams[1].id]) {
+                addFixture(true, function (fixture) {
+                    fixture.homeId(e.teams[0].id);
+                    fixture.awayId(e.teams[1].id);
+                    fixture.noHome(false);
+                    fixture.kickoff($.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis)));
+                    if (e.venue) {
+                        fixture.venueName([e.venue.name, e.venue.city, e.venue.country].join(', '));
+                        anyQueries = true;
+                        venueQueries++;
+                        $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
+                            if (e.venue.country !== teamData.teams[0].country) {
+                                fixture.noHome(true);
+                            }
+                        }).always(function () {
+                            venueQueries--;
+                            if (venueQueries === 0) {
+                                viewModel.queryString.subscribe(function (qs) {
+                                    history.replaceState(null, '', '?' + qs);
+                                });
+                            }
+                        });
+                    }
+                    fixture.isRwc(e.events[0].rankingsWeight == 2);
 
-                // If the match isn't unstarted (or doesn't not have live scores), add
-                // the live score.
-                // U is unstarted / no live score.
-                // C is complete.
-                // L1/LH/L2 are I believe the codes for 1st half, half time, 2nd half but I forgot.
-                if (e.status !== 'U') {
-                    fixture.homeScore(e.scores[0]);
-                    fixture.awayScore(e.scores[1]);
-                }
+                    // If the match isn't unstarted (or doesn't not have live scores), add
+                    // the live score.
+                    // U is unstarted / no live score.
+                    // C is complete.
+                    // L1/LH/L2 are I believe the codes for 1st half, half time, 2nd half but I forgot.
+                    if (e.status !== 'U') {
+                        fixture.liveHomeScore = e.scores[0];
+                        fixture.liveAwayScore = e.scores[1];
+                        fixture.homeScore(e.scores[0]);
+                        fixture.awayScore(e.scores[1]);
+                    }
+                    switch (e.status) {
+                        case 'U': fixture.liveScoreMode = 'Upcoming'; break;
+                        case 'C': fixture.liveScoreMode = 'Complete'; break;
+                        case 'L1': fixture.liveScoreMode = 'First half'; break;
+                        case 'L2': fixture.liveScoreMode = 'Second half'; break;
+                        case 'LH': fixture.liveScoreMode = 'Half time'; break;
+                    }
+                });
             }
         });
 
