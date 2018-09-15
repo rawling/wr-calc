@@ -142,7 +142,7 @@ var loadFixtures = function(  ) {
                     case 'C': fixture.liveScoreMode = 'Complete'; break;
                     case 'L1': fixture.liveScoreMode = 'First half'; break;
                     case 'L2': fixture.liveScoreMode = 'Second half'; break;
-                    case 'LH': fixture.liveScoreMode = 'Half time'; break;
+                    case 'LHT': fixture.liveScoreMode = 'Half time'; break;
                 }
             });
         });
