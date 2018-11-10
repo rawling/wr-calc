@@ -126,7 +126,7 @@ var loadFixtures = function(  ) {
                         }
                     });
                 }
-                fixture.isRwc(e.events[0].rankingsWeight == 2);
+                fixture.isRwc(e.events.length > 0 && e.events[0].rankingsWeight == 2);
 
                 // If the match isn't unstarted (or doesn't not have live scores), add
                 // the live score.
@@ -142,7 +142,7 @@ var loadFixtures = function(  ) {
                     case 'C': fixture.liveScoreMode = 'Complete'; break;
                     case 'L1': fixture.liveScoreMode = 'First half'; break;
                     case 'L2': fixture.liveScoreMode = 'Second half'; break;
-                    case 'LH': fixture.liveScoreMode = 'Half time'; break;
+                    case 'LHT': fixture.liveScoreMode = 'Half time'; break;
                 }
             });
         });
