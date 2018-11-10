@@ -6,6 +6,9 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.11
+- Support WRU fixture-links by preserving `w` query parameter
+
 ### 0.10.0.1
 - handle matches with no events
 
