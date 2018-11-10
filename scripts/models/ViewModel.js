@@ -1,5 +1,7 @@
 // Overall view model for the page
-var ViewModel = function () {
+var ViewModel = function (isFemale) {
+    this.isFemale = isFemale;
+
     // The base rankings in an object, indexed by the ID of the team.
     this.rankingsById = ko.observable();
 
@@ -64,7 +66,6 @@ var ViewModel = function () {
             var home = projectedRankings[fixture.homeId()];
             var away = projectedRankings[fixture.awayId()];
             var noHome = fixture.noHome();
-            var isRwc = fixture.isRwc();
 
             // Calculate the effective ranking of the "home" team depending on whether
             // it is really at home.
@@ -164,7 +165,7 @@ var ViewModel = function () {
 
     // A string representing the base date and selected fixtures, suitable for putting into the address bar.
     this.queryString = ko.computed(function () {
-        return 'd=' + this.originalDate() + '&f=' + this.fixturesString();
+        return (this.isFemale ? 'w&' : '') + 'd=' + this.originalDate() + '&f=' + this.fixturesString();
     }, this);
 
     return this;
