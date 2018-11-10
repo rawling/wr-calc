@@ -4,14 +4,14 @@ var dateQuery = /d=([^&]*)/.exec(s);
 var dateString = dateQuery ? dateQuery[1] : null;
 var fixturesQuery = /f=([^&]*)/.exec(s);
 var fixturesString = fixturesQuery ? fixturesQuery[1] : null;
-var wQuery = /[?&]w\b/.exec(s);
+var wQuery = /[?&]w\b/.test(s);
 
 // Create the view model and bind it to the HTML.
-var viewModel = new ViewModel();
+var viewModel = new ViewModel(wQuery);
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('//cmsapi.pulselive.com/rugby/rankings/' + (wQuery ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
+$.get('//cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;
@@ -71,6 +71,7 @@ var loadFixtures = function(  ) {
     var from = formatDate( rankingDate );
     var to   =  formatDate( rankingDate.addDays( 21 ) );
 
+    // We load all fixtures and eventually filter by matching teams.
     var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
 
     $.get( url ).done( function( data ) {
