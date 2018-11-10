@@ -6,6 +6,9 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.10.0.1
+- handle matches with no events
+
 ### 0.10
 - Add indicator of live score status
 - Show kickoffs in browser-local time rather than venue-local time

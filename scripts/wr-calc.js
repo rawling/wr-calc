@@ -126,7 +126,7 @@ var loadFixtures = function(  ) {
                         }
                     });
                 }
-                fixture.isRwc(e.events[0].rankingsWeight == 2);
+                fixture.isRwc(e.events.length > 0 && e.events[0].rankingsWeight == 2);
 
                 // If the match isn't unstarted (or doesn't not have live scores), add
                 // the live score.
