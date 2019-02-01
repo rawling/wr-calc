@@ -6,6 +6,11 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.12
+- Support loading multiple pages of fixtures
+- Better support when the last ranking date was a long time ago
+- Fix scoping issue?
+
 ### 0.11
 - Support WRU fixture-links by preserving `w` query parameter
 
