@@ -44,7 +44,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm'
     } else {
         // This should be parallelisable if we have our observables set up properly. (Fixture validity depends on teams.)
         addFixture();
-        loadFixtures();
+        loadFixtures(rankings);
     }
 });
 
@@ -64,25 +64,33 @@ var addFixture = function (top, process) {
 }
 
 // Load fixtures from World Rugby.
-var loadFixtures = function(  ) {
+var loadFixtures = function( rankings ) {
     // Load a week of fixtures from when the rankings are dated.
     // (As that is what will make it into the next rankings.)
     var rankingDate  = new Date(viewModel.originalDate());
     var from = formatDate( rankingDate );
-    var to   =  formatDate( rankingDate.addDays( 21 ) );
+    var toDate = rankingDate.addDays( 21 );
+    var fromTodayDate = new Date().addDays(7);
+    if (toDate < fromTodayDate) toDate = fromTodayDate;
+    var to   =  formatDate( toDate );
 
     // We load all fixtures and eventually filter by matching teams.
-    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100";
+    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&page=";
+    var getFixtures = function (fixtures, page, then) {
+        $.get(url + page).done(function(data) {
+            if (data.content.length == 100) {
+                getFixtures(fixtures.concat(data.content), page + 1, then);
+            } else {
+                then(fixtures.concat(data.content));
+            }
+        });
+    };
 
-    $.get( url ).done( function( data ) {
-
-        var rankings = viewModel.rankingsById();
-
+    getFixtures([], 0, function (fixtures) {
         // Sort the fixtures in time order. For some reason they are not already.
         // The data contains a raw time and a hours-from-UTC float but neither the
         // raw time nor adding the UTC difference seems to get the right value.
         // Passing the date label into Date seems to parse it correctly, though.
-        var fixtures = data.content;
         fixtures.sort(function (a, b) {
             var aStart = new Date(a.time.label).getTime();
             var bStart = new Date(b.time.label).getTime();
