@@ -66,12 +66,18 @@ var ViewModel = function (isFemale) {
             var home = projectedRankings[fixture.homeId()];
             var away = projectedRankings[fixture.awayId()];
             var noHome = fixture.noHome();
+            var switched = fixture.switched();
 
             // Calculate the effective ranking of the "home" team depending on whether
-            // it is really at home.
+            // it is really at home, or at a neutral venue, or even if the home team
+            // is nominally away.
             var homeRanking = home.pts();
             if (!noHome) {
-                homeRanking = homeRanking + 3;
+                if (!switched) {
+                    homeRanking = homeRanking + 3;
+                } else {
+                    homeRanking = homeRanking - 3;
+                }
             }
 
             // Calculate the ranking diff and cap it at 10 points.

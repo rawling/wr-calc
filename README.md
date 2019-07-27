@@ -6,6 +6,9 @@ Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stabl
 
 ## Release notes
 
+### 0.13
+- Support nominally Away teams playing at home and gaining home advanage, as seen in Pacific Nations Cup 2019
+
 ### 0.12
 - Support loading multiple pages of fixtures
 - Better support when the last ranking date was a long time ago
