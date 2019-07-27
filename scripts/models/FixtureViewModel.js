@@ -12,6 +12,7 @@ var FixtureViewModel = function (parent) {
     this.kickoff = null;
 
     this.noHome = ko.observable();
+    this.switched = ko.observable();
     this.isRwc = ko.observable();
 
     this.isValid = ko.computed(function() {

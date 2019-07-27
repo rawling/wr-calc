@@ -75,7 +75,10 @@
                             <td><input type="number" min="0" data-bind="value: homeScore" /></td>
                             <td><input type="number" min="0" data-bind="value: awayScore" /></td>
                             <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
-                            <td><input type="checkbox" data-bind="checked: noHome" /></td>
+                            <td>
+                                <input type="checkbox" data-bind="checked: noHome" />
+                                <span data-bind="if: switched" title="Home team is nominally Away">*</span>
+                            </td>
                             <td><input type="checkbox" data-bind="checked: isRwc" /></td>
                             <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>
                         </tr>
