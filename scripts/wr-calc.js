@@ -135,6 +135,13 @@ var loadFixtures = function( rankings ) {
                                 } else {
                                     fixture.noHome(true);
                                 }
+                            }).always(function () {
+                                venueQueries--;
+                                if (venueQueries === 0) {
+                                    viewModel.queryString.subscribe(function (qs) {
+                                        history.replaceState(null, '', '?' + qs);
+                                    });
+                                }
                             });
                         }
                     }).always(function () {
