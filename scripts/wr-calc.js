@@ -44,7 +44,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm'
     } else {
         // This should be parallelisable if we have our observables set up properly. (Fixture validity depends on teams.)
         addFixture();
-        loadFixtures(rankings);
+        loadFixtures(rankings, !!dateString);
     }
 });
 
@@ -64,14 +64,13 @@ var addFixture = function (top, process) {
 }
 
 // Load fixtures from World Rugby.
-var loadFixtures = function( rankings ) {
+var loadFixtures = function(rankings, specifiedDate) {
     // Load a week of fixtures from when the rankings are dated.
     // (As that is what will make it into the next rankings.)
+    // Or more if this is just "from now" rather than a specific week.
     var rankingDate  = new Date(viewModel.originalDate());
     var from = formatDate( rankingDate );
-    var toDate = rankingDate.addDays( 21 );
-    var fromTodayDate = new Date().addDays(7);
-    if (toDate < fromTodayDate) toDate = fromTodayDate;
+    var toDate = rankingDate.addDays(specifiedDate ? 7 : 28);
     var to   =  formatDate( toDate );
 
     // We load all fixtures and eventually filter by matching teams.
