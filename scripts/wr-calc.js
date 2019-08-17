@@ -127,7 +127,7 @@ var loadFixtures = function(rankings, specifiedDate) {
                             venueQueries++;
                             $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function(teamData) {
                                 if (e.venue.country === teamData.teams[0].country) {
-                                    debugger;
+                                    //debugger;
                                     // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
                                     // but in a home stadium. The seemed to get home nation advantage.
                                     fixture.switched(true);
