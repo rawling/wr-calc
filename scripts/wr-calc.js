@@ -31,6 +31,7 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm'
 
     viewModel.baseRankings(sorted);
     viewModel.originalDate(data.effective.label);
+    viewModel.originalMillis = data.effective.millis;
     viewModel.rankingsChoice('original');
 
 
@@ -111,6 +112,11 @@ var loadFixtures = function(rankings, specifiedDate) {
             if (!rankings[e.teams[0].id] || !rankings[e.teams[1].id]) {
                 return;
             };
+
+            // WR started publishing rankings on match days during the world cup so discard matches that kicked off (ick) before then.
+            if (e.time.millis < viewModel.originalMillis) {
+                return;
+            }
 
             addFixture(true, function (fixture) {
                 fixture.homeId(e.teams[0].id);

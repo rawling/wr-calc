@@ -10,6 +10,7 @@ var ViewModel = function (isFemale) {
 
     // The date of the base rankings.
     this.originalDate = ko.observable();
+    this.originalMillis = -1;
 
     // The teams from the base rankings, used to populate the lookup.
     // We only need this separate from baseRankings if we want to sort differently.
