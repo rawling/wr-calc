@@ -8,11 +8,12 @@
 <meta name="description" content="Check World Rugby's test rankings and see what effect upcoming tests might have." />
 <meta name="viewport" content="width=480"/>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script src="//cdn.rawgit.com/agschwender/jquery.formatDateTime/master/dist/jquery.formatDateTime.min.js"></script>
 <script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.4.2.js"></script>
-<link href="//fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet"> 
-<link href="styles/wr-calc.css?v={{site.time|date:'%s'}}" type="text/css" rel="stylesheet">
+<link href="//fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet">
+<link href="styles/wr-calc.css?v={{site.time|date:'%s'}}" type="text/css" rel="stylesheet"> -->
+<link rel="stylesheet" href="styles/new-style.css">
 <script src="scripts/models/ViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
 <script src="scripts/models/RankingViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
 <script src="scripts/models/FixtureViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
@@ -22,6 +23,7 @@
         <div id="left">
             <div class="header">
                 <h3>WR <span data-bind="text: ($data.isFemale ? 'Women\'s' : 'Men\'s')"></span> Rankings</h3>
+                <div id="fixMenu"></div>
             </div>
             <div id="which" data-bind="if: rankingsChoice">
                 <label data-bind="css: $data.rankingsChoice() === 'original' ? 'sel' : ''">
@@ -30,7 +32,7 @@
                 </label>
                 <label data-bind="css: $data.rankingsChoice() === 'calculated' ? 'sel' : ''">
                     <input type="radio" name="rankings" value="calculated" data-bind="checked: rankingsChoice">
-                    CALCULATED
+                    <span>CALCULATED</span>
                 </label>
             </div>
 
@@ -102,5 +104,6 @@
         </span>
     </div>
     <script src="scripts/wr-calc.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
+    <script src="scripts/new-style.js"></script>
 </body>
 </html>

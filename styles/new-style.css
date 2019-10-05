@@ -1,0 +1,380 @@
+/* stylesheet for small devices */
+
+:root {
+    --blue: rgb(42, 61, 131);
+    --green: rgb(44, 134, 38);
+    --red: rgb(228, 24, 24);
+    --white: rgb(255, 255, 255);
+    --whitesmoke: rgb(228, 228, 228);
+    --silver: rgb(192, 192, 192);
+    --grey: rgb(136, 136, 136);
+    --dark: rgb(51, 51, 51);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: all .2s ease-in;
+}
+
+html {
+    font-size: 16px;
+    font-family: fsblake, helvetica, arial, sans-serif;
+}
+
+html,
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#leftright {
+    width: 100vw;
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+#left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--white);
+    width: 100%;
+    overflow-y: auto;
+}
+
+#left .header {
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--blue);
+    color: var(--white);
+    position: relative;
+}
+
+#left .header #fixMenu {
+    position: absolute;
+    display: flex;
+    right: .5rem;
+    width: 1.2rem;
+    height: 1.5rem;
+    background: linear-gradient(transparent 25%, var(--white) 25%,
+            var(--white) calc(25% + 1px), transparent calc(25% + 1px),
+            transparent 50%, var(--white) 50%,
+            var(--white) calc(50% + 1px), transparent calc(50% + 1px),
+            transparent calc(75% - 1px), var(--white) calc(75% - 1px),
+            var(--white) 75%, transparent 75%,
+            transparent 100%);
+}
+
+#left .header #fixMenu.show {
+    background: none;
+}
+
+#left .header #fixMenu::after,
+#left .header #fixMenu::before {
+    transition: all .1s linear;
+    content: "";
+    position: absolute;
+    display: block;
+    height: 1.2rem;
+    width: 1px;
+    background: none;
+    top: 0;
+    left: 50%;
+}
+
+#left .header #fixMenu.show::after,
+#left .header #fixMenu.show::before {
+    transition: all .1s linear;
+    content: "";
+    position: absolute;
+    display: block;
+    height: 1.2rem;
+    width: 1px;
+    background: var(--white);
+    top: 50%;
+    left: 50%;
+}
+
+#left .header #fixMenu.show:after {
+    transform: translate(50%, -50%) rotate(45deg)
+}
+
+#left .header #fixMenu.show:before {
+    transform: translate(50%, -50%) rotate(-45deg)
+}
+
+#left #which {
+    background: var(--green);
+    display: flex;
+}
+
+#which label {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    text-align: center;
+    display: flex;
+}
+
+#which label input {
+    display: none;
+}
+
+#which label span {
+    padding: 1rem;
+    flex: 1;
+    color: var(--white);
+}
+
+
+#which label input:checked+span {
+    box-shadow: 0 -4px 0 var(--white) inset;
+}
+
+#rankings {
+    text-transform: uppercase;
+    font-size: .75rem;
+    overflow-y: auto;
+}
+
+#rankings div {
+    height: calc(100vh - 11rem);
+    overflow-y: auto;
+    padding-bottom: 2rem;
+}
+
+#rankings table thead th {
+    padding: 1rem;
+    font-size: .75rem;
+    color: var(--silver);
+}
+
+
+#rankings table {
+    margin: 1rem auto;
+    border-collapse: collapse;
+}
+
+#rankings table td {
+    padding: .75rem .5rem;
+    text-align: center;
+    color: var(--grey);
+}
+
+#rankings table .ranking:nth-child(odd) {
+    background: var(--whitesmoke);
+}
+
+#rankings table td.name {
+    text-align: left;
+    font-weight: bold;
+    color: var(--dark);
+}
+
+#rankings table tr.ptsUp td.ptsDiff,
+#rankings table tr.ptsUp td.posDiff {
+    color: var(--green);
+}
+
+#rankings table tr.ptsDown td.ptsDiff,
+#rankings table tr.ptsDown td.posDiff {
+    color: var(--red);
+}
+
+#footer {
+    height: 5rem;
+    font-size: .9rem;
+    background: var(--whitesmoke);
+    padding: 1rem 7rem 1rem 1rem;
+    color: var(--grey);
+}
+
+
+#footer a {
+    color: var(--grey);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#footer a:hover {
+    color: var(--green);
+}
+
+#right {
+    left: 100%;
+    top: 3rem;
+    position: absolute;
+    height: calc(100vh - 8rem);
+    background: var(--white);
+    width: 100%;
+    overflow: auto;
+    padding: 1rem;
+}
+
+#right.show {
+    left: 0;
+}
+
+#right #fixtures table tr {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: .5rem;
+}
+
+
+#right #fixtures table tr td:nth-child(1) {
+    order: 1;
+}
+
+#right #fixtures table tr td:nth-child(2) {
+    order: 2;
+}
+
+#right #fixtures table tr td:nth-child(3) {
+    order: 4;
+}
+
+#right #fixtures table tr td:nth-child(4) {
+    order: 3;
+}
+
+#right #fixtures table tr td:nth-child(5) {
+    order: 5;
+    margin: 0 0 0 auto;
+}
+
+#right #fixtures table tr td:nth-child(6) {
+    order: 6;
+}
+
+#right #fixtures table tr td:nth-child(7) {
+    order: 7;
+    margin-left: .5rem;
+}
+
+#right #fixtures table tr td:nth-child(1),
+#right #fixtures table tr td:nth-child(4) {
+    width: calc(100% - 4rem);
+}
+
+#right #fixtures table td select,
+#right #fixtures table td input {
+    width: calc(100% - .5rem);
+    height: 2.5rem;
+    border: 1px solid var(--whitesmoke);
+    margin-bottom: .5rem;
+    padding: 0 .5rem;
+    border-radius: 3px;
+}
+
+#right #fixtures table td input {
+    width: 4rem;
+}
+
+#right #fixtures table td input[type="checkbox"] {
+    -webkit-appearance: button;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-left: .5rem;
+    box-shadow: inset 0 0 0 2px silver, inset 0 0 0 10px white;
+    outline: none;
+}
+
+#right #fixtures table td input[type="checkbox"]:checked {
+    background: var(--silver);
+}
+
+
+#right #fixtures table td select {
+    color: var(--blue);
+    letter-spacing: .5px;
+    font-size: .8em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#right #fixtures table td button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    border-radius: 3px;
+    background: var(--red);
+    color: var(--white);
+    font-family: monospace;
+    font-size: 2rem;
+    position: relative;
+    font-size: 0;
+}
+
+#right #fixtures table td button:after,
+#right #fixtures table td button:before {
+    transition: all .1s linear;
+    content: "";
+    position: absolute;
+    display: block;
+    height: 1.2rem;
+    width: 2px;
+    background: var(--white);
+    top: 50%;
+    left: 50%;
+}
+
+#right #fixtures table td button:after {
+    transform: translate(-50%, -50%) rotate(45deg)
+}
+
+#right #fixtures table td button:before {
+    transform: translate(-50%, -50%) rotate(-45deg)
+}
+
+#addrow button {
+    width: 0rem;
+    height: 0rem;
+    background: var(--green);
+    border-radius: 50%;
+    border: none;
+    position: fixed;
+    bottom: 5rem;
+    right: 3.5rem;
+    outline: none;
+    overflow: hidden;
+}
+
+#addrow.show button {
+    width: 4rem;
+    height: 4rem;
+    bottom: 3rem;
+    right: 1.5rem;
+    transform: rotate(-90deg)
+}
+
+#addrow.show button:after,
+#addrow.show button:before {
+    height:24px;
+}
+
+#addrow button:after,
+#addrow button:before {
+    transition: all .1s linear;
+    content: "";
+    position: absolute;
+    display: block;
+    height: 0;
+    border-left: 2px solid var(--white);
+    top: calc(50% - 1px);
+    left: calc(50% - 1px);
+}
+
+#addrow button:after {
+    transform: translate(-50%, -50%)
+}
+
+#addrow button:before {
+    transform: translate(-50%, -50%) rotate(-90deg)
+}
