@@ -1,7 +1,9 @@
 // View model for a ranking entry.
 // You can pass the raw data from the API call or an existing view model.
 var RankingViewModel = function (rawRanking) {
-    rawRanking = rawRanking || { team: {} };
+    rawRanking = rawRanking || {
+        team: {}
+    };
 
     // Basic data. Unwrap in case we were passed another view model.
     // I think "previous" values are only observable because we bind the VM before we set
@@ -23,9 +25,9 @@ var RankingViewModel = function (rawRanking) {
         var pos = this.pos();
         var previousPos = this.previousPos();
         if (pos < previousPos) {
-            return '(&uarr;' + previousPos + ')';
+            return previousPos;
         } else if (pos > previousPos) {
-            return '(&darr;' + previousPos + ')';
+            return previousPos;
         } else {
             return '<span style="visibility: hidden;" aria-hidden="true">(&rarr;' + previousPos + ')</span>';
         }
@@ -35,16 +37,16 @@ var RankingViewModel = function (rawRanking) {
     this.ptsDiffDisplay = ko.computed(function () {
         var ptsDiff = this.pts() - this.previousPts();
         if (ptsDiff > 0) {
-            return '(+' + ptsDiff.toFixed(2) + ')';
+            return ptsDiff.toFixed(2);
         } else if (ptsDiff < 0) {
-            return '(-' + (-ptsDiff).toFixed(2) + ')';
+            return (-ptsDiff).toFixed(2);
         } else {
             return '<span style="visibility: hidden;" aria-hidden="true">(~' + ptsDiff.toFixed(2) + ')</span>';
         }
     }, this);
-    
+
     this.changeCls = ko.computed(function () {
-        var cls = 'ranking';
+        var cls = 'team';
 
         var pos = this.pos();
         var previousPos = this.previousPos();

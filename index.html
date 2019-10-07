@@ -1,108 +1,139 @@
----
----
 <!DOCTYPE html>
-
 <html>
 <head>
 <title>World Rugby Rankings calculator</title>
 <meta name="description" content="Check World Rugby's test rankings and see what effect upcoming tests might have." />
-<meta name="viewport" content="width=480"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script src="//cdn.rawgit.com/agschwender/jquery.formatDateTime/master/dist/jquery.formatDateTime.min.js"></script>
 <script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.4.2.js"></script>
-<link href="//fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet">
+<script src="./scripts/models/ViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
+<script src="./scripts/models/RankingViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
+<script src="./scripts/models/FixtureViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
+
 <link rel="stylesheet" href="styles/new-style.css">
-<script src="scripts/models/ViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
-<script src="scripts/models/RankingViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
-<script src="scripts/models/FixtureViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
 </head>
-<body>
-<div id="leftright">
-        <div id="left">
-            <div class="header">
-                <h3>WR <span data-bind="text: ($data.isFemale ? 'Women\'s' : 'Men\'s')"></span> Rankings</h3>
-                <div id="fixMenu"></div>
-            </div>
-            <div id="which" data-bind="if: rankingsChoice">
-                <label data-bind="css: $data.rankingsChoice() === 'original' ? 'sel' : ''">
-                    <input type="radio" name="rankings" value="original" data-bind="checked: rankingsChoice">
-                    <span data-bind="text: originalDate" />
+<body id="app">
+    <!-- Header -->
+    <header class="header">
+        <!-- Header title -->
+        <h3>WR <span data-bind="text: ($data.isFemale ? 'Women\'s' : 'Men\'s')"></span> Rankings</h3>
+        <!-- Header button -->
+        <div id="fixMenu" class="header__menu"></div>
+    </header>
+    <!-- Main -->
+    <main class="main">
+        <!-- Main rankings -->
+        <section class="ranking">
+            <!-- Main rankings controls -->
+            <div class="ranking__controls" id="which" data-bind="if: rankingsChoice">
+                <label class="ranking__controls_date"
+                    data-bind="css: $data.rankingsChoice() === 'original' ? 'sel' : ''">
+                    <input class="ranking__controls_date--input" type="radio" name="rankings" value="original"
+                        data-bind="checked: rankingsChoice">
+                    <span class="ranking__controls_date--label" data-bind="text: originalDate" />
                 </label>
-                <label data-bind="css: $data.rankingsChoice() === 'calculated' ? 'sel' : ''">
-                    <input type="radio" name="rankings" value="calculated" data-bind="checked: rankingsChoice">
-                    <span>CALCULATED</span>
+                <label class="ranking__controls_calculate"
+                    data-bind="css: $data.rankingsChoice() === 'calculated' ? 'sel' : ''">
+                    <input class="ranking__controls_calculate--input" type="radio" name="rankings" value="calculated"
+                        data-bind="checked: rankingsChoice">
+                    <span class="ranking__controls_calculate--label">CALCULATED</span>
                 </label>
             </div>
-
-            <div id="rankings">
+            <!-- Main rankings list -->
+            <div class="ranking__list" id="rankings">
                 <!-- ko ifnot: rankingsChoice -->
-                <h4>
-                    Loading <a href="http://www.worldrugby.org/rankings/mru?lang=en">rankings</a>
-                </h4>
+                <div class="ranking__list_loader">
+                    <span>Loading</span>
+                    <a class="ranking__list_loader--link"
+                        href="//www.worldrugby.org/rankings/mru?lang=es">rankings</a>
+                    <span class="ranking__list_loader--spinner"></span>
+                </div>
                 <!-- /ko -->
-
-                <div data-bind="if: rankingsChoice">
-                    <table>
-                        <thead>
-                            <tr><th class="pos">#</th><th /><th class="name">Team</th><th colspan=2>Points</th></tr>
-                        </thead>
-                        <tbody data-bind="foreach: shownRankings">
-                            <tr data-bind="css: changeCls">
-                                <td class="pos" data-bind="text: pos"></td>
-                                <td class="posDiff" data-bind="html: previousPosDisplay"></td>
-                                <td class="name" data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
-                                <td data-bind="text: ptsDisplay"></td>
-                                <td class="ptsDiff" data-bind="html: ptsDiffDisplay"></td>
+                <div class="ranking__list_container" data-bind="if: rankingsChoice">
+                    <table class="ranking__list_container--table">
+                        <thead class="ranking__list_container--table-head">
+                            <tr>
+                                <th class="pos">#</th>
+                                <th class="posDiff" />
+                                <th class="name">Team</th>
+                                <th class="points" colspan=2>Points</th>
                             </tr>
-                        </tbody>
+                        </thead>
+                        <div>
+                            <tbody class="ranking__list_container--table-body" data-bind="foreach: shownRankings">
+                                <tr data-bind="css: changeCls" class="ranking__list_container--table-body team">
+                                    <td class="pos" data-bind="text: pos"></td>
+                                    <td class="posDiff" data-bind="html: previousPosDisplay"></td>
+                                    <td class="name"
+                                        data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
+                                    <td class="pts" data-bind="text: ptsDisplay"></td>
+                                    <td class="ptsDiff" data-bind="html: ptsDiffDisplay"></td>
+                                </tr>
+
+                            </tbody>
+                        </div>
                     </table>
                 </div>
             </div>
-        </div>
-        <div id="right">
-            <div class="header">
+        </section>
+        <section class="fixtures" id="right">
+            <div class="fixtures__header">
                 <h3>Fixtures</h3>
             </div>
-            <div id="fixtures">
-                <table>
-                    <thead>
-                        <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
-                    </thead>
-                    <tbody data-bind="foreach: fixtures">
-                        <tr data-bind="if: $index() > 0" class="spacer" aria-hidden=true><!-- only way to get whitespace between rows? --></tr>
-                        <tr>
-                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
-                            <td><input type="number" min="0" data-bind="value: homeScore" /></td>
-                            <td><input type="number" min="0" data-bind="value: awayScore" /></td>
-                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
-                            <td>
-                                <input type="checkbox" data-bind="checked: noHome" />
-                                <span data-bind="if: switched" title="Home team is nominally Away">*</span>
-                            </td>
-                            <td><input type="checkbox" data-bind="checked: isRwc" /></td>
-                            <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>
-                        </tr>
-                        <tr class="details" data-bind="if: $data.venueName || $data.kickoff || $data.liveScoreMode">
-                            <td class="details-left" colspan="1" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
-                            <td class="details-center" colspan="2" data-bind="text: liveScoreMode"></td>
-                            <td class="details-right" colspan="5" data-bind="text: venueName"></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="fixtures__container" data-bind="foreach: fixtures">
+                <div class="fixtures__game">
+                    <div class="fixtures__game_teams">
+                        <div class="fixtures__game_teams--team">
+                            <select class="fixtures__game_teams--team-selector"
+                                data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select>
+                            <input class="fixtures__game_teams--team-score" type="number" min="0"
+                                data-bind="value: homeScore" />
+                        </div>
+                        <div class="fixtures__game_teams--team">
+                            <select class="fixtures__game_teams--team-selector"
+                                data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select>
+                            <input class="fixtures__game_teams--team-score"="number" min="0"
+                                data-bind="value: awayScore" />
+                        </div>
+                    </div>
+                    <div class="fixtures__game_options">
+                        <label class="fixtures__game_options--option">
+                            <input type="checkbox" data-bind="checked: noHome">
+                            <span title="Home team is nominally Away">No home advantage</span>
+                        </label>
+                        <label class="fixtures__game_options--option">
+                            <input type="checkbox" data-bind="checked: isRwc">
+                            <span title="RWC disputed game">Rugby World Cup</span>
+                        </label>
+                        <div class="fixtures__game_options--option delete"
+                            data-bind="click: function () {$parent.fixtures.remove($data); }"></div>
+                    </div>
+                    <div class="fixtures__game_details"
+                        data-bind="if: $data.venueName || $data.kickoff || $data.liveScoreMode">
+                        <div class="fixtures__game_details--detail kickoff" data-bind="text: kickoff"
+                            title="Kickoff in your browser time"></div>
+                        <div class="fixtures__game_details--detail livescoremode" data-bind="text: liveScoreMode"></div>
+                        <div class="fixtures__game_details--detail venuename" data-bind="text: venueName"></div>
+                    </div>
+                </div>
             </div>
-            <div id="addrow">
+            <div id="addrow" class="fixtures__addrow">
                 <button onclick='addFixture();'></button>
             </div>
-        </div>
+        </section>
+    </main>
+    <footer class="footer">
+        Rankings and ranking algorithm are the property of <a
+            href="//www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>.
+        See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
+    </footer>
+    <div id="leftright">
+
     </div>
-    <div id="footer">
-        <span class="secondaryText">
-            Rankings and ranking algorithm are the property of <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>.
-            See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
-        </span>
     </div>
-    <script src="scripts/wr-calc.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
-    <script src="scripts/new-style.js"></script>
+    <script src="./scripts/wr-calc.js"></script>
+    <script src="./scripts/new-style.js"></script>
 </body>
 </html>

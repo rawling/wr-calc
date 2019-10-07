@@ -15,7 +15,7 @@ var FixtureViewModel = function (parent) {
     this.switched = ko.observable();
     this.isRwc = ko.observable();
 
-    this.isValid = ko.computed(function() {
+    this.isValid = ko.computed(function () {
         var rankings = parent.rankingsById();
 
         var home = rankings[this.homeId()];
@@ -43,7 +43,7 @@ var FixtureViewModel = function (parent) {
         return 0;
     }, this);
 
-    this.multiplier = ko.computed(function() {
+    this.multiplier = ko.computed(function () {
         if (!this.isValid()) {
             return null;
         }
