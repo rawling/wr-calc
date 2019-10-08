@@ -8,7 +8,7 @@ var wQuery = /[?&]w\b/.test(s);
 
 // Create the view model and bind it to the HTML.
 var viewModel = new ViewModel(wQuery);
-ko.applyBindings(viewModel);
+ko.applyBindings(viewModel, document.querySelector("#app"));
 
 // Load rankings from World Rugby.
 $.get('//cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
@@ -27,7 +27,9 @@ $.get('//cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm'
     $.each(rankings, function (i, r) {
         sorted.push(r);
     });
-    sorted.sort(function (a, b) { return b.pts() - a.pts(); });
+    sorted.sort(function (a, b) {
+        return b.pts() - a.pts();
+    });
 
     viewModel.baseRankings(sorted);
     viewModel.originalDate(data.effective.label);
@@ -65,19 +67,19 @@ var addFixture = function (top, process) {
 }
 
 // Load fixtures from World Rugby.
-var loadFixtures = function(rankings, specifiedDate) {
+var loadFixtures = function (rankings, specifiedDate) {
     // Load a week of fixtures from when the rankings are dated.
     // (As that is what will make it into the next rankings.)
     // Or more if this is just "from now" rather than a specific week.
-    var rankingDate  = new Date(viewModel.originalDate());
-    var from = formatDate( rankingDate );
+    var rankingDate = new Date(viewModel.originalDate());
+    var from = formatDate(rankingDate);
     var toDate = rankingDate.addDays(specifiedDate ? 7 : 28);
-    var to   =  formatDate( toDate );
+    var to = formatDate(toDate);
 
     // We load all fixtures and eventually filter by matching teams.
-    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&page=";
+    var url = "//cmsapi.pulselive.com/rugby/match?startDate=" + from + "&endDate=" + to + "&sort=asc&pageSize=100&page=";
     var getFixtures = function (fixtures, page, then) {
-        $.get(url + page).done(function(data) {
+        $.get(url + page).done(function (data) {
             if (data.content.length == 100) {
                 getFixtures(fixtures.concat(data.content), page + 1, then);
             } else {
@@ -128,10 +130,10 @@ var loadFixtures = function(rankings, specifiedDate) {
                     fixture.venueName = [e.venue.name, e.venue.city, e.venue.country].join(', ');
                     anyQueries = true;
                     venueQueries++;
-                    $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
+                    $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function (teamData) {
                         if (e.venue.country !== teamData.teams[0].country) {
                             venueQueries++;
-                            $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function(teamData) {
+                            $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function (teamData) {
                                 if (e.venue.country === teamData.teams[0].country) {
                                     //debugger;
                                     // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
@@ -170,11 +172,21 @@ var loadFixtures = function(rankings, specifiedDate) {
                     fixture.awayScore(e.scores[1]);
                 }
                 switch (e.status) {
-                    case 'U': fixture.liveScoreMode = 'Upcoming'; break;
-                    case 'C': fixture.liveScoreMode = 'Complete'; break;
-                    case 'L1': fixture.liveScoreMode = 'First half'; break;
-                    case 'L2': fixture.liveScoreMode = 'Second half'; break;
-                    case 'LHT': fixture.liveScoreMode = 'Half time'; break;
+                    case 'U':
+                        fixture.liveScoreMode = 'Upcoming';
+                        break;
+                    case 'C':
+                        fixture.liveScoreMode = 'Complete';
+                        break;
+                    case 'L1':
+                        fixture.liveScoreMode = 'First half';
+                        break;
+                    case 'L2':
+                        fixture.liveScoreMode = 'Second half';
+                        break;
+                    case 'LHT':
+                        fixture.liveScoreMode = 'Half time';
+                        break;
                 }
             });
         });
@@ -192,11 +204,11 @@ var loadFixtures = function(rankings, specifiedDate) {
 }
 
 // Format a date for the fixture or rankings API call.
-var formatDate = function(date) {
-    var d     = new Date(date),
+var formatDate = function (date) {
+    var d = new Date(date),
         month = '' + (d.getMonth() + 1),
-        day   = '' + d.getDate(),
-        year  = d.getFullYear();
+        day = '' + d.getDate(),
+        year = d.getFullYear();
 
     return [year, month, day].join('-');
 }

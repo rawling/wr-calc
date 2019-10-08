@@ -1,6 +1,6 @@
 // Overall view model for the page
 var ViewModel = function (isFemale) {
-    this.isFemale = isFemale;
+    this.isFemale = false;
 
     // The base rankings in an object, indexed by the ID of the team.
     this.rankingsById = ko.observable();
@@ -25,7 +25,9 @@ var ViewModel = function (isFemale) {
     // (It also happens when we load in fixtures at startup, but that's a reasonable trade-off.)
     this.deferredFixtures = ko.computed(function () {
         return this.fixtures();
-    }, this).extend({ rateLimit: 100 });
+    }, this).extend({
+        rateLimit: 100
+    });
 
     // An indication of which set of rankings is displayed.
     // Options are null, 'original' or 'calculated'.
@@ -37,7 +39,7 @@ var ViewModel = function (isFemale) {
 
     // The rankings calcualted by taking the original rankings and applying
     // the fixtures.
-    this.projectedRankings = ko.computed(function() {
+    this.projectedRankings = ko.computed(function () {
         var rankingsById = this.rankingsById();
         var fixtures = this.deferredFixtures();
 
@@ -47,7 +49,7 @@ var ViewModel = function (isFemale) {
         }
 
         // We work on the rankings as we go. Duplicate the base rankings
-        // and set the "old" values to the "current" values so we can 
+        // and set the "old" values to the "current" values so we can
         // show changes at the end.
         var projectedRankings = {};
         $.each(rankingsById, function (k, v) {
@@ -107,7 +109,9 @@ var ViewModel = function (isFemale) {
         $.each(projectedRankings, function (i, r) {
             sorted.push(r);
         });
-        sorted.sort(function (a, b) { return b.pts() - a.pts(); });
+        sorted.sort(function (a, b) {
+            return b.pts() - a.pts();
+        });
         $.each(sorted, function (i, r) {
             r.pos(i + 1);
         });
