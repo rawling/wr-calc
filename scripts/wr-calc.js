@@ -109,7 +109,8 @@ var loadFixtures = function(rankings, specifiedDate) {
         // Parse each fixture into a view model, which adds it to the array.
         $.each(fixtures, function (i, e) {
             // I don't think we can reliably only request fixtures relevant to loaded teams, so filter here.
-            if (!rankings[e.teams[0].id] || !rankings[e.teams[1].id]) {
+            // Saw no team[1] in Autumn Nations Cup (ANC) 2020 where finals had the host decided but visitor TBC.
+            if (!rankings[e.teams[0].id] || (e.teams[1] && !rankings[e.teams[1].id])) {
                 return;
             };
 
@@ -120,7 +121,7 @@ var loadFixtures = function(rankings, specifiedDate) {
 
             addFixture(true, function (fixture) {
                 fixture.homeId(e.teams[0].id);
-                fixture.awayId(e.teams[1].id);
+                if (e.teams[1]) fixture.awayId(e.teams[1].id); // See ANC above
                 fixture.noHome(false);
                 fixture.switched(false);
                 fixture.kickoff = $.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis));
@@ -129,7 +130,7 @@ var loadFixtures = function(rankings, specifiedDate) {
                     anyQueries = true;
                     venueQueries++;
                     $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
-                        if (e.venue.country !== teamData.teams[0].country) {
+                        if (e.venue.country !== teamData.teams[0].country && e.teams[1]) { // See ANC above
                             venueQueries++;
                             $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function(teamData) {
                                 if (e.venue.country === teamData.teams[0].country) {
