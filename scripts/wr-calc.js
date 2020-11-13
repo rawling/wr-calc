@@ -164,14 +164,17 @@ var loadFixtures = function(rankings, specifiedDate) {
                 // If the match isn't unstarted (or doesn't not have live scores), add
                 // the live score.
                 // U is unstarted / no live score.
+                // UP/CC are postponed/cancelled and also have no live score.
                 // C is complete.
                 // L1/LH/L2 are I believe the codes for 1st half, half time, 2nd half but I forgot.
-                if (e.status !== 'U') {
+                if (e.status !== 'U' && e.status !== 'UP' && e.status !== 'CC') {
                     fixture.homeScore(e.scores[0]);
                     fixture.awayScore(e.scores[1]);
                 }
                 switch (e.status) {
                     case 'U': fixture.liveScoreMode = 'Upcoming'; break;
+                    case 'UP': fixture.liveScoreMode = 'Postponed'; break;
+                    case 'CC': fixture.liveScoreMode = 'Cancelled'; break;
                     case 'C': fixture.liveScoreMode = 'Complete'; break;
                     case 'L1': fixture.liveScoreMode = 'First half'; break;
                     case 'L2': fixture.liveScoreMode = 'Second half'; break;
