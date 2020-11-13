@@ -130,25 +130,29 @@ var loadFixtures = function(rankings, specifiedDate) {
                     anyQueries = true;
                     venueQueries++;
                     $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
-                        if (e.venue.country !== teamData.teams[0].country && e.teams[1]) { // See ANC above
-                            venueQueries++;
-                            $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function(teamData) {
-                                if (e.venue.country === teamData.teams[0].country) {
-                                    //debugger;
-                                    // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
-                                    // but in a home stadium. The seemed to get home nation advantage.
-                                    fixture.switched(true);
-                                } else {
-                                    fixture.noHome(true);
-                                }
-                            }).always(function () {
-                                venueQueries--;
-                                if (venueQueries === 0) {
-                                    viewModel.queryString.subscribe(function (qs) {
-                                        history.replaceState(null, '', '?' + qs);
-                                    });
-                                }
-                            });
+                        if (e.venue.country !== teamData.teams[0].country) {
+                            if (e.teams[1]) {
+                                venueQueries++;
+                                $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function(teamData) {
+                                    if (e.venue.country === teamData.teams[0].country) {
+                                        // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
+                                        // but in a home stadium. The seemed to get home nation advantage.
+                                        fixture.switched(true);
+                                    } else {
+                                        fixture.noHome(true);
+                                    }
+                                }).always(function () {
+                                    venueQueries--;
+                                    if (venueQueries === 0) {
+                                        viewModel.queryString.subscribe(function (qs) {
+                                            history.replaceState(null, '', '?' + qs);
+                                        });
+                                    }
+                                });
+                            } else { // See ANC above
+                                // Don't know who the second team is, but we do know the first team isn't at home.
+                                fixture.noHome(true);
+                            }
                         }
                     }).always(function () {
                         venueQueries--;
