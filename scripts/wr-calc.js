@@ -68,10 +68,15 @@ var addFixture = function (top, process) {
 var loadFixtures = function(rankings, specifiedDate) {
     // Load a week of fixtures from when the rankings are dated.
     // (As that is what will make it into the next rankings.)
-    // Or more if this is just "from now" rather than a specific week.
+    // Or until next monday.
+    function nextMonday() {
+      var d = new Date();
+      d.setDate(d.getDate() + ((7-d.getDay())%7) + 1);
+      return d;
+    }
     var rankingDate  = new Date(viewModel.originalDate());
     var from = formatDate( rankingDate );
-    var toDate = rankingDate.addDays(specifiedDate ? 7 : 28);
+    var toDate = specifiedDate ? rankingDate.addDays(7) : nextMonday();
     var to   =  formatDate( toDate );
 
     // We load all fixtures and eventually filter by matching teams.
