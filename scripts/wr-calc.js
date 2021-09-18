@@ -130,6 +130,13 @@ var loadFixtures = function(rankings, specifiedDate) {
                 fixture.noHome(false);
                 fixture.switched(false);
                 fixture.kickoff = $.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis));
+
+                // Covid-TRC (noticed in 2021 but apparently also in 2020) ignores the stadium location
+                // and treats the nominal home team as always at home
+                var tournamentRespectsStadiumLocation = !e.events.some(function (event) {
+                    return event.label.indexOf('Rugby Championship') > -1;
+                });
+
                 if (e.venue) {
                     fixture.venueName = [e.venue.name, e.venue.city, e.venue.country].join(', ');
                     anyQueries = true;
@@ -142,9 +149,13 @@ var loadFixtures = function(rankings, specifiedDate) {
                                     if (e.venue.country === teamData.teams[0].country) {
                                         // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
                                         // but in a home stadium. The seemed to get home nation advantage.
-                                        // temporary removal - TRC 2021 is ignoring being in Australia //fixture.switched(true);
+                                        if (tournamentRespectsStadiumLocation) {
+                                            fixture.switched(true);
+                                        }
                                     } else {
-                                        // temporary removal - TRC 2021 is ignoring being in Australia //fixture.noHome(true);
+                                        if (tournamentRespectsStadiumLocation) {
+                                            fixture.noHome(true);
+                                        }
                                     }
                                 }).always(function () {
                                     venueQueries--;
@@ -156,7 +167,9 @@ var loadFixtures = function(rankings, specifiedDate) {
                                 });
                             } else { // See ANC above
                                 // Don't know who the second team is, but we do know the first team isn't at home.
-                                fixture.noHome(true);
+                                if (tournamentRespectsStadiumLocation) {
+                                    fixture.noHome(true);
+                                }
                             }
                         }
                     }).always(function () {
