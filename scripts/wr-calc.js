@@ -142,9 +142,9 @@ var loadFixtures = function(rankings, specifiedDate) {
                                     if (e.venue.country === teamData.teams[0].country) {
                                         // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
                                         // but in a home stadium. The seemed to get home nation advantage.
-                                        fixture.switched(true);
+                                        // temporary removal - TRC 2021 is ignoring being in Australia //fixture.switched(true);
                                     } else {
-                                        fixture.noHome(true);
+                                        // temporary removal - TRC 2021 is ignoring being in Australia //fixture.noHome(true);
                                     }
                                 }).always(function () {
                                     venueQueries--;
