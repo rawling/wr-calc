@@ -134,7 +134,7 @@ var loadFixtures = function(rankings, specifiedDate) {
                 // Covid-TRC (noticed in 2021 but apparently also in 2020) ignores the stadium location
                 // and treats the nominal home team as always at home
                 var tournamentRespectsStadiumLocation = !e.events.some(function (event) {
-                    return event.label.indexOf('Rugby Championship') > -1;
+                    return event.label.match(/^202[01] Rugby Championship$/);
                 });
 
                 if (e.venue) {
