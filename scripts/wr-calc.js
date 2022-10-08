@@ -11,7 +11,7 @@ var viewModel = new ViewModel(wQuery);
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('//cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
+$.get('https://cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;
@@ -80,7 +80,7 @@ var loadFixtures = function(rankings, specifiedDate) {
     var to   =  formatDate( toDate );
 
     // We load all fixtures and eventually filter by matching teams.
-    var url = "//cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&page=";
+    var url = "https://cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&page=";
     var getFixtures = function (fixtures, page, then) {
         $.get(url + page).done(function(data) {
             if (data.content.length == 100) {
