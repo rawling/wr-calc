@@ -73,7 +73,7 @@
                         <!-- ko if: $data.venueName || $data.kickoff || $data.liveScoreMode -->
                         <tr class="details">
                             <td class="details-left" colspan="1" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
-                            <td class="details-center" colspan="5" data-bind="text: liveScoreMode, title: liveScoreExplanation"></td>
+                            <td class="details-center" colspan="5" data-bind="text: liveScoreMode"></td>
                             <td class="details-right" colspan="5" data-bind="text: venueName"></td>
                         </tr>
                         <!-- /ko -->
@@ -99,6 +99,13 @@
                             <td class="details-right" data-bind="text: $data.getDisplayChange(3), style: { 'font-weight': $data.activeChange() == 3 ?  'bold' : 'inherit'}"></td class="details-center">
                             <td class="details-right" data-bind="text: $data.getDisplayChange(4), style: { 'font-weight': $data.activeChange() == 4 ?  'bold' : 'inherit'}"></td class="details-center">
                             <td class="details-right" data-bind="text: $data.awayRankingBefore() ? $data.awayRankingBefore().toFixed(2) : ''"></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <!-- /ko -->
+                        <!-- ko if: alreadyInRankings -->
+                        <tr class="possible-changes">
+                            <td colspan="7" class="details-center" title="The match is complete and kicked off 90 minutes or more before the latest rankings, so assume it is already included">Already ranked*</td>
+                            <td colspan="3"></td>
                         </tr>
                         <!-- /ko -->
                     </tbody>

@@ -193,6 +193,7 @@ var loadFixtures = function(rankings, specifiedDate) {
                     case 'UP': fixture.liveScoreMode = 'Postponed'; break;
                     case 'CC': fixture.liveScoreMode = 'Cancelled'; break;
                     case 'C': {
+                        fixture.liveScoreMode = 'Complete';
                         // WR started publishing rankings on match days during the world cup.
                         // Try to work out if the match is already included in the rankings.
                         // We know it is "complete" because we're in that case.
@@ -208,10 +209,6 @@ var loadFixtures = function(rankings, specifiedDate) {
                         var endMillis = kickoffMillis + 90 * 60 * 1000;
                         if (endMillis < viewModel.originalMillis) {
                             fixture.alreadyInRankings = true;
-                            fixture.liveScoreMode = 'Complete & ranked*';
-                            fixture.liveScoreExplanation = 'The match is complete and kicked off 90 minutes or more before the latest rankings, so assume it is already included';
-                        } else {
-                            fixture.liveScoreMode = 'Complete';
                         }
                         break;
                     }
