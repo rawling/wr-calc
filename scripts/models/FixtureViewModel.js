@@ -72,7 +72,7 @@ var FixtureViewModel = function (parent) {
         var changes = this.changes();
         if (!changes) return null;
         var change = changes[index];
-        if (!change) return null;
+        if (isNaN(change)) return null;
 
         var formattedChange = Math.abs(change).toFixed(2);
         var prefix = change > 0 ? '<' : '';
