@@ -116,7 +116,10 @@ var ViewModel = function (isFemale) {
     this.fixturesString = ko.pureComputed({
         read: function () {
             return '2:' + $.map(this.fixtures(), function (e) {
-                if (e.alreadyInRankings) return null;
+                // In theory we should exclude matches that are already in the rankings, because otherwise we will include thema second time.
+                // But in practice, when we ask for "today's" rankings, we will get the previous rankings, as "today's" rankings were posted after midnight.
+                // These matches, played on top of the previous rankings, should reconstruct the same end result..
+                //if (e.alreadyInRankings) return null;
 
                 var t = (e.homeId() || e.awayId()) ? ('t' + (e.homeId() ?? '') + 'v' + (e.awayId() ?? '')) : '';
                 var s = (!isNaN(e.homeScore()) || !isNaN(e.awayScore())) ? ('s' + (!isNaN(e.homeScore()) ? e.homeScore() : '') + '-' + (!isNaN(e.awayScore()) ? e.awayScore() : '')) : '';
