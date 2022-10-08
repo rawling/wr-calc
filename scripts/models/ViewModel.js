@@ -115,7 +115,7 @@ var ViewModel = function (isFemale) {
     // A string representing the selected fixtures and results.
     this.fixturesString = ko.pureComputed({
         read: function () {
-            return '1:' + $.map(this.fixtures(), function (e) {
+            return '2:' + $.map(this.fixtures(), function (e) {
                 if (e.alreadyInRankings) return null;
                 var vars = [];
                 if (e.homeId()) vars[0] = e.homeId();
@@ -124,6 +124,7 @@ var ViewModel = function (isFemale) {
                 if (!isNaN(e.awayScore())) vars[3] = e.awayScore();
                 if (e.noHome()) vars[4] = '1';
                 if (e.isRwc()) vars[5] = '1';
+                if (e.switched()) vars[6] = '1';
 
                 return vars.join(',');
             }).join(';');
@@ -144,6 +145,25 @@ var ViewModel = function (isFemale) {
                         fixture.awayScore(rs[3]);
                         fixture.noHome(rs[4]);
                         fixture.isRwc(rs[5]);
+                        fixture.switched(false);
+                        fs.push(fixture);
+                    });
+                    this.fixtures(fs);
+                    break;
+                case '2':
+                    var fs = [];
+                    var r = this.rankingsById();
+                    var me = this;
+                    $.each(versionAndString[1].split(';'), function (i, e) {
+                        var rs = e.split(',');
+                        var fixture = new FixtureViewModel(me);
+                        fixture.homeId(rs[0]);
+                        fixture.awayId(rs[1]);
+                        fixture.homeScore(rs[2]);
+                        fixture.awayScore(rs[3]);
+                        fixture.noHome(rs[4]);
+                        fixture.isRwc(rs[5]);
+                        fixture.switched(rs[6]);
                         fs.push(fixture);
                     });
                     this.fixtures(fs);
