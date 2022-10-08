@@ -16,6 +16,9 @@ $accent: #dd2c00;
  */
 @mixin textonlight($color) {
     color: rgba($color, 0.87);
+    .primaryText { // for more specific targeting
+        color: rgba($color, 0.87);
+    }
     .secondaryText {
         color: rgba($color, 0.54);
     }
@@ -25,6 +28,9 @@ $accent: #dd2c00;
 }
 @mixin textondark($color) {
     color: rgba($color, 1);
+    .primaryText { // for more specific targeting
+        color: rgba($color, 1);
+    }
     .secondaryText {
         color: rgba($color, 0.7);
     }
@@ -98,7 +104,7 @@ table {
         }
     }
 }
-#which {
+#which, #union {
     font-size: 14px;
     font-weight: 500;
 }
@@ -168,7 +174,7 @@ table {
             flex: 0;
         }
     }
-    #which {
+    #which,#union {
         flex-shrink: 0;
     }
     #rankings {
@@ -244,6 +250,31 @@ body {
 
         input {
             display: none;
+        }
+    }
+}
+
+#union {
+    display: flex;
+    @extend %white;
+
+    height: 24px;
+    line-height: 24px;
+    width: 100%;
+
+    a {
+        flex-grow: 1;
+        text-align: center;
+        border-bottom: 2px solid $white;
+        display: block;
+        text-decoration: none;
+
+        &.sel {
+            @extend .primaryText;
+            border-bottom-color: $accent;
+        }
+        &:not(.sel) {
+            @extend .secondaryText;
         }
     }
 }

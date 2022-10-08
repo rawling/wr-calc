@@ -18,10 +18,18 @@
 <script src="scripts/models/FixtureViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
 </head>
 <body>
+    <div id="union">
+        <a href="?m" data-bind="css: isFemale ? '' : 'sel'">
+            MRU
+        </a>
+        <a href="?w" data-bind="css: isFemale ? 'sel' : ''">
+            WRU
+        </a>
+    </div>
     <div id="leftright">
         <div id="left">
             <div class="header">
-                <h3>WR <span data-bind="text: ($data.isFemale ? 'Women\'s' : 'Men\'s')"></span> Rankings</h3>
+                <h3>Rankings</h3>
             </div>
             <div id="which" data-bind="if: rankingsChoice">
                 <label data-bind="css: $data.rankingsChoice() === 'original' ? 'sel' : ''">
@@ -148,7 +156,7 @@
     </div>
     <div id="footer">
         <span class="secondaryText">
-            Rankings and ranking algorithm are the property of <a href="http://www.worldrugby.org/rankings/mru?lang=en">World Rugby</a>.
+            Rankings and ranking algorithm are the property of <a data-bind="attr: { href: 'https://www.world.rugby/tournaments/rankings/' + ($data.isFemale ? 'wru' : 'mru') }">World Rugby</a>.
             See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
         </span>
     </div>
