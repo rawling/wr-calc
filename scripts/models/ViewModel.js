@@ -59,45 +59,25 @@ var ViewModel = function (isFemale) {
 
         // Apply each fixture in turn.
         $.each(fixtures, function (index, fixture) {
-            // Only do anything if the fixture is valid.
+            // If the fixture doesn't have teams selected, or is already applied, do nothing.
+            if (!fixture.hasValidTeams() || fixture.alreadyInRankings) {
+                return;
+            }
+
+            // Supply the current rankings to the fixture so it can calculate potential change.
+            var home = projectedRankings[fixture.homeId()];
+            var away = projectedRankings[fixture.awayId()];
+
+            fixture.homeRankingBefore(home.pts());
+            fixture.awayRankingBefore(away.pts());
+
+            // If the fixture doesn't have scores as well as teams, don't apply it to the rankings.
             if (!fixture.isValid()) {
                 return;
             }
 
-            // If it's already in the rankings, don't reapply it.
-            if (fixture.alreadyInRankings) {
-                return;
-            }
-
-            var home = projectedRankings[fixture.homeId()];
-            var away = projectedRankings[fixture.awayId()];
-            var noHome = fixture.noHome();
-            var switched = fixture.switched();
-
-            // Calculate the effective ranking of the "home" team depending on whether
-            // it is really at home, or at a neutral venue, or even if the home team
-            // is nominally away.
-            var homeRanking = home.pts();
-            if (!noHome) {
-                if (!switched) {
-                    homeRanking = homeRanking + 3;
-                } else {
-                    homeRanking = homeRanking - 3;
-                }
-            }
-
-            // Calculate the ranking diff and cap it at 10 points.
-            var rankingDiff = homeRanking - away.pts();
-            var cappedDiff = Math.min(10, Math.max(-10, rankingDiff));
-
-            // A draw gives the home team one tenth of the diff.
-            var drawChange = cappedDiff / 10;
-
-            // If the home side wins, they gain 1 extra point; if they lose, they gain 1 less point.
-            var homeChange = fixture.winner() - drawChange;
-
-            // Big/small wins/losses and RWC matches multiply rankings changes.
-            homeChange *= fixture.multiplier();
+            var possibleHomeChanges = fixture.changes();
+            var homeChange = possibleHomeChanges[fixture.activeChange()];
 
             // The rankings are zero-sum, so the away team loses what the home team gains.
             var awayChange = -homeChange;

@@ -304,11 +304,7 @@ body {
             margin-bottom: (56px / 2) + 2px;
         }
 
-        tr.spacer {
-            height: 3px;
-        }
-
-        tr.details td {
+        tr.details td, tr.possible-changes td {
             font-size: 9px;
             &.details-left {
                 text-align: left;
@@ -322,7 +318,11 @@ body {
         }
 
         th, td {
-            padding: 2px 4px;
+            padding: 0 4px;
+        }
+
+        tbody.fixture tr:first-child td {
+            padding-top: 10px;
         }
 
         th {

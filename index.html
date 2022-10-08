@@ -66,15 +66,29 @@
             <div id="fixtures">
                 <table>
                     <thead>
-                        <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
-                    </thead>
-                    <tbody data-bind="foreach: fixtures">
-                        <tr data-bind="if: $index() > 0" class="spacer" aria-hidden=true><!-- only way to get whitespace between rows? --></tr>
                         <tr>
-                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...', disabled: alreadyInRankings"></select></td>
-                            <td><input type="number" min="0" data-bind="value: homeScore, disabled: alreadyInRankings" /></td>
-                            <td><input type="number" min="0" data-bind="value: awayScore, disabled: alreadyInRankings" /></td>
-                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...', disabled: alreadyInRankings"></select></td>
+                            <th colspan="2">Home team</th>
+                            <th colspan="4">Score</th>
+                            <th colspan="2">Away team</th>
+                            <th title='No Home Advantage'>NHA</th>
+                            <th title='Is Rugby World Cup match'>RWC</th>
+                            <th></th>
+                    </tr>
+                    </thead>
+                    <!-- ko foreach: fixtures -->
+                    <tbody class="fixture">
+                        <!-- ko if: $data.venueName || $data.kickoff || $data.liveScoreMode -->
+                        <tr class="details">
+                            <td class="details-left" colspan="2" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
+                            <td class="details-center" colspan="4" data-bind="text: liveScoreMode"></td>
+                            <td class="details-right" colspan="5" data-bind="text: venueName"></td>
+                        </tr>
+                        <!-- /ko -->
+                        <tr class="teams">
+                            <td colspan="2" style="text-align: left"><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...', disabled: alreadyInRankings"></select></td colspan="2">
+                            <td colspan="2" style="text-align: right"><input type="number" min="0" data-bind="value: homeScore, disabled: alreadyInRankings" /></td colspan="2">
+                            <td colspan="2" style="text-align: left"><input type="number" min="0" data-bind="value: awayScore, disabled: alreadyInRankings" /></td colspan="5">
+                            <td colspan="2" style="text-align: right"><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...', disabled: alreadyInRankings"></select></td colspan="2">
                             <td>
                                 <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
                                 <span data-bind="if: switched" title="Home team is nominally Away">*</span>
@@ -82,12 +96,49 @@
                             <td><input type="checkbox" data-bind="checked: isRwc, disabled: alreadyInRankings" /></td>
                             <td><button data-bind="click: function () { $parent.fixtures.remove($data); }, disabled: alreadyInRankings">x</button></td>
                         </tr>
-                        <tr class="details" data-bind="if: $data.venueName || $data.kickoff || $data.liveScoreMode">
-                            <td class="details-left" colspan="1" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
-                            <td class="details-center" colspan="2" data-bind="text: liveScoreMode, title: liveScoreExplanation"></td>
-                            <td class="details-right" colspan="5" data-bind="text: venueName"></td>
+                        <!-- ko if: $data.hasValidTeams() && !$data.alreadyInRankings -->
+                        <tr class="possible-changes">
+                            <td class="details-left" data-bind="text: $data.homeRankingBefore() ? $data.homeRankingBefore().toFixed(2) : ''"></td>
+                            <td class="details-right" data-bind="text: $data.getDisplayChange(0), style: { 'text-decoration': $data.activeChange() == 0 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td class="details-center" data-bind="text: $data.getDisplayChange(1), style: { 'text-decoration': $data.activeChange() == 1 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td colspan="2" class="details-center" data-bind="text: $data.getDisplayChange(2), style: { 'text-decoration': $data.activeChange() == 2 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td class="details-center" data-bind="text: $data.getDisplayChange(3), style: { 'text-decoration': $data.activeChange() == 3 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td class="details-left" data-bind="text: $data.getDisplayChange(4), style: { 'text-decoration': $data.activeChange() == 4 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td class="details-right" data-bind="text: $data.awayRankingBefore() ? $data.awayRankingBefore().toFixed(2) : ''"></td>
+                            <td colspan="3"></td>
                         </tr>
+                        <!-- /ko -->
+                        <!-- ko if: alreadyInRankings -->
+                        <tr class="possible-changes">
+                            <td colspan="8" class="details-center" title="The match is complete and kicked off 90 minutes or more before the latest rankings, so assume it is already included">Already ranked*</td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <!-- /ko -->
                     </tbody>
+                    <!-- /ko -->
+                    <!--
+                        trying to be clever and align the score cells like
+                        | HOME | AWAY |
+                        | <1 | 0 | 1> |
+                        by making this 2+2 and 1+2+1
+                        but Chrome seems to not want to align like this if no row has 4 cells there
+                        so we have to make an empty row with this many cells
+                    -->
+                    <tfoot aria-hidden="true">
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
             <div id="addrow">
