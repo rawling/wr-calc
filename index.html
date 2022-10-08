@@ -66,14 +66,22 @@
             <div id="fixtures">
                 <table>
                     <thead>
-                        <tr><th>Home team</th><th colspan='2'>Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
+                        <tr><th>Home team</th><th colspan="5">Score</th><th>Away team</th><th title='No Home Advantage'>NHA</th><th title='Is Rugby World Cup match'>RWC</th></tr>
                     </thead>
-                    <tbody data-bind="foreach: fixtures">
-                        <tr data-bind="if: $index() > 0" class="spacer" aria-hidden=true><!-- only way to get whitespace between rows? --></tr>
-                        <tr>
+                    <!-- ko foreach: fixtures -->
+                    <tbody class="fixture">
+                        <!-- ko if: $data.venueName || $data.kickoff || $data.liveScoreMode -->
+                        <tr class="details">
+                            <td class="details-left" colspan="1" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
+                            <td class="details-center" colspan="5" data-bind="text: liveScoreMode, title: liveScoreExplanation"></td>
+                            <td class="details-right" colspan="5" data-bind="text: venueName"></td>
+                        </tr>
+                        <!-- /ko -->
+                        <tr class="teams">
                             <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...', disabled: alreadyInRankings"></select></td>
-                            <td><input type="number" min="0" data-bind="value: homeScore, disabled: alreadyInRankings" /></td>
-                            <td><input type="number" min="0" data-bind="value: awayScore, disabled: alreadyInRankings" /></td>
+                            <td colspan="2" style="text-align: left"><input type="number" min="0" data-bind="value: homeScore, disabled: alreadyInRankings" /></td>
+                            <td style="text-align: center">v</td>
+                            <td colspan="2" style="text-align: right"><input type="number" min="0" data-bind="value: awayScore, disabled: alreadyInRankings" /></td colspan="5">
                             <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...', disabled: alreadyInRankings"></select></td>
                             <td>
                                 <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
@@ -82,12 +90,19 @@
                             <td><input type="checkbox" data-bind="checked: isRwc, disabled: alreadyInRankings" /></td>
                             <td><button data-bind="click: function () { $parent.fixtures.remove($data); }, disabled: alreadyInRankings">x</button></td>
                         </tr>
-                        <tr class="details" data-bind="if: $data.venueName || $data.kickoff || $data.liveScoreMode">
-                            <td class="details-left" colspan="1" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
-                            <td class="details-center" colspan="2" data-bind="text: liveScoreMode, title: liveScoreExplanation"></td>
-                            <td class="details-right" colspan="5" data-bind="text: venueName"></td>
+                        <!-- ko if: $data.hasValidTeams() && !$data.alreadyInRankings -->
+                        <tr class="possible-changes">
+                            <td class="details-left" data-bind="text: $data.homeRankingBefore() ? $data.homeRankingBefore().toFixed(2) : ''"></td>
+                            <td class="details-left" data-bind="text: $data.getDisplayChange(0), style: { 'font-weight': $data.activeChange() == 0 ?  'bold' : 'inherit'}"></td class="details-center">
+                            <td class="details-left" data-bind="text: $data.getDisplayChange(1), style: { 'font-weight': $data.activeChange() == 1 ?  'bold' : 'inherit'}"></td class="details-center">
+                            <td class="details-center" data-bind="text: $data.getDisplayChange(2), style: { 'font-weight': $data.activeChange() == 2 ?  'bold' : 'inherit'}"></td class="details-center">
+                            <td class="details-right" data-bind="text: $data.getDisplayChange(3), style: { 'font-weight': $data.activeChange() == 3 ?  'bold' : 'inherit'}"></td class="details-center">
+                            <td class="details-right" data-bind="text: $data.getDisplayChange(4), style: { 'font-weight': $data.activeChange() == 4 ?  'bold' : 'inherit'}"></td class="details-center">
+                            <td class="details-right" data-bind="text: $data.awayRankingBefore() ? $data.awayRankingBefore().toFixed(2) : ''"></td>
                         </tr>
+                        <!-- /ko -->
                     </tbody>
+                    <!-- /ko -->
                 </table>
             </div>
             <div id="addrow">
