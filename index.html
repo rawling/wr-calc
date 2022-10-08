@@ -99,11 +99,11 @@
                         <!-- ko if: $data.hasValidTeams() && !$data.alreadyInRankings -->
                         <tr class="possible-changes">
                             <td class="details-left" data-bind="text: $data.homeRankingBefore() ? $data.homeRankingBefore().toFixed(2) : ''"></td>
-                            <td class="details-right" data-bind="text: $data.getDisplayChange(0), style: { 'font-weight': $data.activeChange() == 0 ?  'bold' : 'inherit'}"></td class="details-center">
-                            <td class="details-center" data-bind="text: $data.getDisplayChange(1), style: { 'font-weight': $data.activeChange() == 1 ?  'bold' : 'inherit'}"></td class="details-center">
-                            <td colspan="2" class="details-center" data-bind="text: $data.getDisplayChange(2), style: { 'font-weight': $data.activeChange() == 2 ?  'bold' : 'inherit'}"></td class="details-center">
-                            <td class="details-center" data-bind="text: $data.getDisplayChange(3), style: { 'font-weight': $data.activeChange() == 3 ?  'bold' : 'inherit'}"></td class="details-center">
-                            <td class="details-left" data-bind="text: $data.getDisplayChange(4), style: { 'font-weight': $data.activeChange() == 4 ?  'bold' : 'inherit'}"></td class="details-center">
+                            <td class="details-right" data-bind="text: $data.getDisplayChange(0), style: { 'text-decoration': $data.activeChange() == 0 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td class="details-center" data-bind="text: $data.getDisplayChange(1), style: { 'text-decoration': $data.activeChange() == 1 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td colspan="2" class="details-center" data-bind="text: $data.getDisplayChange(2), style: { 'text-decoration': $data.activeChange() == 2 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td class="details-center" data-bind="text: $data.getDisplayChange(3), style: { 'text-decoration': $data.activeChange() == 3 ?  'underline' : 'inherit'}"></td class="details-center">
+                            <td class="details-left" data-bind="text: $data.getDisplayChange(4), style: { 'text-decoration': $data.activeChange() == 4 ?  'underline' : 'inherit'}"></td class="details-center">
                             <td class="details-right" data-bind="text: $data.awayRankingBefore() ? $data.awayRankingBefore().toFixed(2) : ''"></td>
                             <td colspan="3"></td>
                         </tr>
