@@ -117,16 +117,12 @@ var ViewModel = function (isFemale) {
         read: function () {
             return '2:' + $.map(this.fixtures(), function (e) {
                 if (e.alreadyInRankings) return null;
-                var vars = [];
-                if (e.homeId()) vars[0] = e.homeId();
-                if (e.awayId()) vars[1] = e.awayId();
-                if (!isNaN(e.homeScore())) vars[2] = e.homeScore();
-                if (!isNaN(e.awayScore())) vars[3] = e.awayScore();
-                if (e.noHome()) vars[4] = '1';
-                if (e.isRwc()) vars[5] = '1';
-                if (e.switched()) vars[6] = '1';
 
-                return vars.join(',');
+                var t = (e.homeId() || e.awayId()) ? ('t' + (e.homeId() ?? '') + 'v' + (e.awayId() ?? '')) : '';
+                var s = (!isNaN(e.homeScore()) || !isNaN(e.awayScore())) ? ('s' + (!isNaN(e.homeScore()) ? e.homeScore() : '') + '-' + (!isNaN(e.awayScore()) ? e.awayScore() : '')) : '';
+                var f = (e.noHome() || e.isRwc() || e.switched()) ? ('f' + ((e.noHome() ? 1 : 0) + (e.isRwc() ? 2 : 0) + (e.switched() ? 4 : 0))) : '';
+
+                return (t || s || f) ? (t + s + f) : null;
             }).join(';');
         },
         write: function (value) {
@@ -134,7 +130,6 @@ var ViewModel = function (isFemale) {
             switch (versionAndString[0]) {
                 case '1':
                     var fs = [];
-                    var r = this.rankingsById();
                     var me = this;
                     $.each(versionAndString[1].split(';'), function (i, e) {
                         var rs = e.split(',');
@@ -152,18 +147,25 @@ var ViewModel = function (isFemale) {
                     break;
                 case '2':
                     var fs = [];
-                    var r = this.rankingsById();
                     var me = this;
                     $.each(versionAndString[1].split(';'), function (i, e) {
-                        var rs = e.split(',');
+                        var m = e.match(/^(t(\d*)v(\d*))?(s(\d*)-(\d*))?(f(\d+))?$/);
+                        if (!m) return;
                         var fixture = new FixtureViewModel(me);
-                        fixture.homeId(rs[0]);
-                        fixture.awayId(rs[1]);
-                        fixture.homeScore(rs[2]);
-                        fixture.awayScore(rs[3]);
-                        fixture.noHome(rs[4]);
-                        fixture.isRwc(rs[5]);
-                        fixture.switched(rs[6]);
+                        if (m[1]) {
+                            fixture.homeId(m[2]);
+                            fixture.awayId(m[3]);
+                        }
+                        if (m[4]) {
+                            fixture.homeScore(m[5]);
+                            fixture.awayScore(m[6]);
+                        }
+                        if (m[7]) {
+                            var flags = parseInt(m[8]);
+                            fixture.noHome((flags & 1) == 1);
+                            fixture.isRwc((flags & 2) == 2);
+                            fixture.switched((flags & 4) == 4);
+                        }
                         fs.push(fixture);
                     });
                     this.fixtures(fs);
