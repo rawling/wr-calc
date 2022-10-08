@@ -37,7 +37,7 @@
             <div id="rankings">
                 <!-- ko ifnot: rankingsChoice -->
                 <h4>
-                    Loading <a href="http://www.worldrugby.org/rankings/mru?lang=en">rankings</a>
+                    Loading rankings from WR</a>
                 </h4>
                 <!-- /ko -->
 
@@ -71,20 +71,20 @@
                     <tbody data-bind="foreach: fixtures">
                         <tr data-bind="if: $index() > 0" class="spacer" aria-hidden=true><!-- only way to get whitespace between rows? --></tr>
                         <tr>
-                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...'"></select></td>
-                            <td><input type="number" min="0" data-bind="value: homeScore" /></td>
-                            <td><input type="number" min="0" data-bind="value: awayScore" /></td>
-                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...'"></select></td>
+                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...', disabled: alreadyInRankings"></select></td>
+                            <td><input type="number" min="0" data-bind="value: homeScore, disabled: alreadyInRankings" /></td>
+                            <td><input type="number" min="0" data-bind="value: awayScore, disabled: alreadyInRankings" /></td>
+                            <td><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...', disabled: alreadyInRankings"></select></td>
                             <td>
-                                <input type="checkbox" data-bind="checked: noHome" />
+                                <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
                                 <span data-bind="if: switched" title="Home team is nominally Away">*</span>
                             </td>
-                            <td><input type="checkbox" data-bind="checked: isRwc" /></td>
-                            <td><button data-bind="click: function () { $parent.fixtures.remove($data); }">x</button></td>
+                            <td><input type="checkbox" data-bind="checked: isRwc, disabled: alreadyInRankings" /></td>
+                            <td><button data-bind="click: function () { $parent.fixtures.remove($data); }, disabled: alreadyInRankings">x</button></td>
                         </tr>
                         <tr class="details" data-bind="if: $data.venueName || $data.kickoff || $data.liveScoreMode">
                             <td class="details-left" colspan="1" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
-                            <td class="details-center" colspan="2" data-bind="text: liveScoreMode"></td>
+                            <td class="details-center" colspan="2" data-bind="text: liveScoreMode, title: liveScoreExplanation"></td>
                             <td class="details-right" colspan="5" data-bind="text: venueName"></td>
                         </tr>
                     </tbody>

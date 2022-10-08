@@ -119,11 +119,6 @@ var loadFixtures = function(rankings, specifiedDate) {
                 return;
             };
 
-            // WR started publishing rankings on match days during the world cup so discard matches that kicked off (ick) before then.
-            if (e.time.millis < viewModel.originalMillis) {
-                return;
-            }
-
             addFixture(true, function (fixture) {
                 fixture.homeId(e.teams[0].id);
                 if (e.teams[1]) fixture.awayId(e.teams[1].id); // See ANC above
@@ -197,7 +192,29 @@ var loadFixtures = function(rankings, specifiedDate) {
                     case 'U': fixture.liveScoreMode = 'Upcoming'; break;
                     case 'UP': fixture.liveScoreMode = 'Postponed'; break;
                     case 'CC': fixture.liveScoreMode = 'Cancelled'; break;
-                    case 'C': fixture.liveScoreMode = 'Complete'; break;
+                    case 'C': {
+                        // WR started publishing rankings on match days during the world cup.
+                        // Try to work out if the match is already included in the rankings.
+                        // We know it is "complete" because we're in that case.
+                        // Try to ensure it ended before the ranking timestamp.
+                        // (If we used the start time here we would block events that were in progress when
+                        // the rankings were published, which obviously can't have been in the rankings.)
+                        // This will incorrectly exclude a match that has completed, if WR published rankings
+                        // 90 minutes after it started that didn't include the result.
+                        // This will incorrectly include a match that is not marked as complete but is included
+                        // in the rankings, or that finished and was included in the rankings less than 90
+                        // minutes after it kicked off.
+                        var kickoffMillis = e.time.millis;
+                        var endMillis = kickoffMillis + 90 * 60 * 1000;
+                        if (endMillis < viewModel.originalMillis) {
+                            fixture.alreadyInRankings = true;
+                            fixture.liveScoreMode = 'Complete & ranked*';
+                            fixture.liveScoreExplanation = 'The match is complete and kicked off 90 minutes or more before the latest rankings, so assume it is already included';
+                        } else {
+                            fixture.liveScoreMode = 'Complete';
+                        }
+                        break;
+                    }
                     case 'L1': fixture.liveScoreMode = 'First half'; break;
                     case 'L2': fixture.liveScoreMode = 'Second half'; break;
                     case 'LHT': fixture.liveScoreMode = 'Half time'; break;
@@ -236,3 +253,26 @@ Date.prototype.addDays = function (d) {
     }
     return this;
 };
+
+// Taken from SO https://stackoverflow.com/questions/30043773/knockout-input-readonly-state/30101073#30101073
+// User Yvan https://stackoverflow.com/users/3738129/yvan
+// Adjusted to add disabled attrbute, not enabled
+ko.bindingHandlers.disabled = {
+    update: function (element, valueAccessor) {
+        if (ko.utils.unwrapObservable(valueAccessor())) {
+            element.setAttribute('disabled', true);
+        } else {
+            element.removeAttribute('disabled');
+        }
+    }
+};
+ko.bindingHandlers.title = {
+    update: function (element, valueAccessor) {
+        var value = ko.utils.unwrapObservable(valueAccessor());
+        if (value) {
+            element.setAttribute('title', value);
+        } else {
+            element.removeAttribute('title');
+        }
+    }
+}

@@ -10,6 +10,8 @@ var FixtureViewModel = function (parent) {
     this.venueName = null;
     this.liveScoreMode = null;
     this.kickoff = null;
+    this.alreadyInRankings = false;
+    this.liveScoreExplanation = null;
 
     this.noHome = ko.observable();
     this.switched = ko.observable();

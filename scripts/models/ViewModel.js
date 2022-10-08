@@ -64,6 +64,11 @@ var ViewModel = function (isFemale) {
                 return;
             }
 
+            // If it's already in the rankings, don't reapply it.
+            if (fixture.alreadyInRankings) {
+                return;
+            }
+
             var home = projectedRankings[fixture.homeId()];
             var away = projectedRankings[fixture.awayId()];
             var noHome = fixture.noHome();
