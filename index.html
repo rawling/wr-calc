@@ -19,10 +19,10 @@
 </head>
 <body>
     <div id="union">
-        <a href="?m" data-bind="css: isFemale ? '' : 'sel'">
+        <a href="?m" data-bind="css: isFemale ? '' : 'sel', attr: { href: $data.isFemale ? '?m' : null }">
             MRU
         </a>
-        <a href="?w" data-bind="css: isFemale ? 'sel' : ''">
+        <a href="?w" data-bind="css: isFemale ? 'sel' : '', attr: { href: $data.isFemale ? null : '?w' }">
             WRU
         </a>
     </div>
