@@ -116,6 +116,7 @@ var ViewModel = function (isFemale) {
     this.fixturesString = ko.pureComputed({
         read: function () {
             return '1:' + $.map(this.fixtures(), function (e) {
+                if (e.alreadyInRankings) return null;
                 var vars = [];
                 if (e.homeId()) vars[0] = e.homeId();
                 if (e.awayId()) vars[1] = e.awayId();
