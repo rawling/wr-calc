@@ -136,11 +136,11 @@ var loadFixtures = function(rankings, specifiedDate) {
                     fixture.venueName = [e.venue.name, e.venue.city, e.venue.country].join(', ');
                     anyQueries = true;
                     venueQueries++;
-                    $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
+                    $.get('https://cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
                         if (e.venue.country !== teamData.teams[0].country) {
                             if (e.teams[1]) {
                                 venueQueries++;
-                                $.get('//cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function(teamData) {
+                                $.get('https://cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function(teamData) {
                                     if (e.venue.country === teamData.teams[0].country) {
                                         // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
                                         // but in a home stadium. The seemed to get home nation advantage.
