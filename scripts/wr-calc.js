@@ -219,9 +219,6 @@ var loadFixtures = function(rankings, specifiedDate) {
             });
         });
 
-        // Once fixtures are loaded, show what effect they have on the rankings.
-        viewModel.rankingsChoice('calculated');
-
         if (!anyQueries) {
             viewModel.queryString.subscribe(function (qs) {
                 history.replaceState(null, '', '?' + qs);

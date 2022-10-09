@@ -58,6 +58,7 @@ var ViewModel = function (isFemale) {
         });
 
         // Apply each fixture in turn.
+        var anyApplied = false;
         $.each(fixtures, function (index, fixture) {
             // If the fixture doesn't have teams selected, or is already applied, do nothing.
             if (!fixture.hasValidTeams() || fixture.alreadyInRankings) {
@@ -85,6 +86,8 @@ var ViewModel = function (isFemale) {
             // Update the "current" values.
             home.pts(home.pts() + homeChange);
             away.pts(away.pts() + awayChange);
+
+            anyApplied = true;
         });
 
         // Sort the rankings for display and update the "current" positions.
@@ -96,6 +99,11 @@ var ViewModel = function (isFemale) {
         $.each(sorted, function (i, r) {
             r.pos(i + 1);
         });
+
+        // If we have calculated rankings, make sure we are showing the calculated ones.
+        if (anyApplied) {
+            viewModel.rankingsChoice('calculated');
+        }
 
         return sorted;
     }, this);
