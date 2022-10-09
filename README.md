@@ -1,10 +1,15 @@
 # wr-calc
 World Rugby rankings calculator
 
-Development and testing takes place at [`wr-calc-stage`](https://github.com/rawling/wr-calc-stage).  
-Changes are pushed to [`wr-calc`](https://github.com/rawling/wr-calc) once stable.
-
 ## Release notes
+
+### 0.14
+
+Many changes, but mostly
+
+- make WRU option more visible for the RWC
+- handle WR publishing rankings updates on matchdays better
+- show rankings and potential changes per-fixture
 
 ### 0.13.1
 - try to handle WR publishing rankings on match days
