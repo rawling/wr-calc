@@ -11,7 +11,7 @@ var viewModel = new ViewModel(wQuery);
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('https://cmsapi.pulselive.com/rugby/rankings/' + (viewModel.isFemale ? 'w' : 'm') + 'ru.json' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
+$.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/rankings/' + (viewModel.isFemale ? 'w' : 'm') + 'ru' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;
@@ -80,7 +80,7 @@ var loadFixtures = function(rankings, specifiedDate) {
     var to   =  formatDate( toDate );
 
     // We load all fixtures and eventually filter by matching teams.
-    var url = "https://cmsapi.pulselive.com/rugby/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&page=";
+    var url = "https://api.wr-rims-prod.pulselive.com/rugby/v3/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&page=";
     var getFixtures = function (fixtures, page, then) {
         $.get(url + page).done(function(data) {
             if (data.content.length == 100) {
@@ -136,12 +136,12 @@ var loadFixtures = function(rankings, specifiedDate) {
                     fixture.venueName = [e.venue.name, e.venue.city, e.venue.country].join(', ');
                     anyQueries = true;
                     venueQueries++;
-                    $.get('https://cmsapi.pulselive.com/rugby/team/' + e.teams[0].id).done(function(teamData) {
-                        if (e.venue.country !== teamData.teams[0].country) {
+                    $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + e.teams[0].id).done(function(teamData) {
+                        if (e.venue.country !== teamData.country) {
                             if (e.teams[1]) {
                                 venueQueries++;
-                                $.get('https://cmsapi.pulselive.com/rugby/team/' + e.teams[1].id).done(function(teamData) {
-                                    if (e.venue.country === teamData.teams[0].country) {
+                                $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + e.teams[1].id).done(function(teamData) {
+                                    if (e.venue.country === teamData.country) {
                                         // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
                                         // but in a home stadium. The seemed to get home nation advantage.
                                         if (tournamentRespectsStadiumLocation) {
@@ -231,8 +231,8 @@ var loadFixtures = function(rankings, specifiedDate) {
 // Format a date for the fixture or rankings API call.
 var formatDate = function(date) {
     var d     = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day   = '' + d.getDate(),
+        month = '' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1),
+        day   = '' + (d.getDate() < 10 ? '0' : '') + d.getDate(),
         year  = d.getFullYear();
 
     return [year, month, day].join('-');
