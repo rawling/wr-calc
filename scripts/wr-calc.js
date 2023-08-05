@@ -92,17 +92,8 @@ var loadFixtures = function(rankings, specifiedDate) {
     };
 
     getFixtures([], 0, function (fixtures) {
-        // Sort the fixtures in time order. For some reason they are not already.
-        // The data contains a raw time and a hours-from-UTC float but neither the
-        // raw time nor adding the UTC difference seems to get the right value.
-        // Passing the date label into Date seems to parse it correctly, though.
-        fixtures.sort(function (a, b) {
-            var aStart = new Date(a.time.label).getTime();
-            var bStart = new Date(b.time.label).getTime();
-
-            // N.B. since we add to the top, these get reversed, so reverse the order here!
-            return -(aStart - bStart);
-        });
+        // N.B. since we add to the top, these get reversed, so reverse the order here!
+        fixtures.reverse();
 
         // We make extra AJAX requests for any fixture with a venue in the hope of working out
         // if the home team has advantage.
