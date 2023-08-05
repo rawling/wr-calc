@@ -180,7 +180,17 @@ var loadFixtures = function(rankings, specifiedDate) {
                     fixture.awayScore(e.scores[1]);
                 }
                 switch (e.status) {
-                    case 'U': fixture.liveScoreMode = 'Upcoming'; break;
+                    case 'U': {
+                        // Try to detect if a match should have started by now, and just hasn't been reported by WR.
+                        // Give it a bit of leeway.
+                        var leeway = 5 * 60 * 1000; // 5 minutes
+                        if (e.time.millis + leeway > new Date()) {
+                            fixture.liveScoreMode = 'Upcoming';
+                        } else {
+                            fixture.liveScoreMode = 'Unreported';
+                        }
+                        break;
+                    }
                     case 'UP': fixture.liveScoreMode = 'Postponed'; break;
                     case 'CC': fixture.liveScoreMode = 'Cancelled'; break;
                     case 'C': {
