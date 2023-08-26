@@ -3,6 +3,14 @@ World Rugby rankings calculator
 
 ## Release notes
 
+### 0.15
+
+Many changes, but mostly
+
+- handle API changes
+- add "unreported" instead of "upcoming" if a match result isn't on the API but should be
+- add RWC pools (original draw with current rankings, or what-if-it-was-seeded-today)
+
 ### 0.14
 
 Many changes, but mostly

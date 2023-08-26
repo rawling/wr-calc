@@ -238,6 +238,7 @@ body {
 
     label {
         flex-grow: 1;
+        flex-basis: 50%;
         text-align: center;
         border-bottom: 2px solid $primary;
 
@@ -264,6 +265,7 @@ body {
 
     a {
         flex-grow: 1;
+        flex-basis: 50%;
         text-align: center;
         border-bottom: 2px solid $white;
         display: block;
@@ -396,5 +398,69 @@ body {
         background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAABlBMVEX///////9VfPVsAAAAAXRSTlMAQObYZgAAABZJREFUCNdjYLBhYCAG////HwUTqQ8AH00QpSze/owAAAAASUVORK5CYII=');
         background-repeat: no-repeat;
         background-position: 50% 50%;
+    }
+}
+
+#poolsarea {
+    #showpools {
+        margin: 5px 5px 0 5px
+    }
+    
+    #whichpools {
+        display: flex;
+        @extend %white;
+    
+        height: 28px;
+        line-height: 28px;
+        width: 100%;
+    
+        label {
+            flex-grow: 1;
+            flex-basis: 50%;
+            text-align: center;
+            white-space: nowrap;
+            border-bottom: 2px solid $white;
+    
+            &.sel {
+                border-bottom-color: $accent;
+            }
+            &:not(.sel) {
+                @extend .secondaryText;
+            }
+    
+            input {
+                display: none;
+            }
+        }
+    }
+
+    #pools {
+        padding: 5px 5px 0 5px;
+        grid-gap: 5px;
+
+        table {
+            border-collapse: collapse;
+            margin: 0 auto;
+    
+            th {
+                text-align: center;
+                padding: 0;
+                @extend .secondaryText;
+            }
+    
+            td {
+                padding: 0;
+                padding-top: 1px;
+    
+                &.abbr {
+                    text-align: left;
+                }
+    
+                &.pos {
+                    text-align: right;
+                    padding-right: 3px;
+                }
+            }
+        }
     }
 }

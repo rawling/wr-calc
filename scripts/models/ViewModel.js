@@ -21,7 +21,7 @@ var ViewModel = function (isFemale) {
 
     // A rate-limited set of fixtures. This allows us to add fixtures performantly, by having the fixture list
     // bound to fixtures above but calculations based on this version.
-    // As long as no-one ands and completes a fixture within the time below, this should not be noticeable.
+    // As long as no-one adds and completes a fixture within the time below, this should not be noticeable.
     // (It also happens when we load in fixtures at startup, but that's a reasonable trade-off.)
     this.deferredFixtures = ko.computed(function () {
         return this.fixtures();
@@ -35,7 +35,7 @@ var ViewModel = function (isFemale) {
     // Not actually used yet, but could help show a loading screen.
     this.fixturesLoaded = ko.observable(false);
 
-    // The rankings calcualted by taking the original rankings and applying
+    // The rankings calculated by taking the original rankings and applying
     // the fixtures.
     this.projectedRankings = ko.computed(function() {
         var rankingsById = this.rankingsById();
@@ -117,6 +117,114 @@ var ViewModel = function (isFemale) {
                 return this.projectedRankings();
             default:
                 return [];
+        }
+    }, this);
+
+    this.rwcPoolsChoice = ko.observable('original');
+    this.rwcPools = ko.computed(function () {
+
+        var sr = this.shownRankings();
+        if (!sr || sr.length == 0) return null; // not ready yet
+
+        // CBA to have made a lookup, just do scans to find by name
+        function getTeam(name, seed, abbr) {
+            var ranking = sr.find(function (r) { return r.team.name == name });
+            if (ranking == null) return { name: name, abbr: abbr, pos: ''}; // in case it's e.g. 'Europe 1'
+            return { name: ranking.team.name, abbr: ranking.team.abbreviation, pos: ranking.pos(), seed: seed };
+        }
+
+        // I doubt there's an API for this. Just hardcode the pools when they're drawn and take down after the RWC.
+        var year;
+        var rawData;
+
+        if (this.isFemale) return null; // no draw yet
+        if (new Date() < new Date('2023 Oct 29')) {
+            year = 2023;
+            rawData = [
+            {
+                pool: 'A',
+                teams: [
+                    getTeam('New Zealand', 2),
+                    getTeam('France', 7),
+                    getTeam('Italy', 12),
+                    getTeam('Uruguay'),
+                    getTeam('Namibia')
+                ]
+            },
+            {
+                pool: 'B',
+                teams: [
+                    getTeam('South Africa', 1),
+                    getTeam('Ireland', 5),
+                    getTeam('Scotland', 9),
+                    getTeam('Tonga'),
+                    getTeam('Romania')
+                ]
+            },
+            {
+                pool: 'C',
+                teams: [
+                    getTeam('Wales', 4),
+                    getTeam('Australia', 6),
+                    getTeam('Fiji', 11),
+                    getTeam('Georgia'),
+                    getTeam('Portugal')
+                ]
+            },
+            {
+                pool: 'D',
+                teams: [
+                    getTeam('England', 3),
+                    getTeam('Japan', 8),
+                    getTeam('Argentina', 10),
+                    getTeam('Samoa'),
+                    getTeam('Chile')
+                ]
+            }];
+        }
+
+        // try to map to "if they were drawn today"
+        var seeded = rawData.map(function (p) { return p.teams.filter(function (t) { return t.seed > 0; }) }).flat();
+        seeded.sort(function (a, b) { return a.seed - b.seed; });
+        for (var i = 0; i < seeded.length; i++) {
+            seeded[i].originalSeedOrder = i;
+        }
+        seeded.sort(function (a, b) { return a.pos - b.pos; });
+        var seedOrderNowToTeam = {};
+        for (var i = 0; i < seeded.length; i++) {
+            seedOrderNowToTeam[i] = seeded[i];
+        }
+
+        var drawnToday = [];
+        for (var i = 0; i < rawData.length; i++) {
+            var redrawnPool = { pool: rawData[i].pool, teams: [] };
+            for (var j = 0; j < rawData[i].teams.length; j++) {
+                var team = rawData[i].teams[j];
+                if (team.originalSeedOrder > -1) {
+                    team = seedOrderNowToTeam[team.originalSeedOrder];
+                }
+
+                redrawnPool.teams.push(team);
+            }
+            drawnToday.push(redrawnPool);
+        }
+
+        return {
+            year: year,
+            withCurrentRankings: rawData,
+            ifDrawnToday: drawnToday
+        };
+    }, this);
+    this.shownRwcPools = ko.computed(function () {
+        var data = this.rwcPools();
+        if (!data) return null;
+        switch (this.rwcPoolsChoice()) {
+            case 'original':
+                return data.withCurrentRankings;
+            case 'redrawn':
+                return data.ifDrawnToday;
+            default:
+                return null;
         }
     }, this);
 

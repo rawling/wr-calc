@@ -42,10 +42,53 @@
                 </label>
             </div>
 
+            <div id='poolsarea' data-bind="if: rankingsChoice">
+                <!-- ko if: rwcPools -->
+                <div style="text-align:center">
+                    <button
+                        id="showpools"
+                        onclick="document.getElementById('poolsandpicker').style.display = 'block'; document.getElementById('showpools').style.display = 'none';">
+                        Show RWC<span data-bind="text: rwcPools().year"></span> draw with these rankings
+                    </button>
+
+                    <div id="poolsandpicker" style="display: none">
+                        <div id="whichpools">
+                            <label data-bind="css: $data.rwcPoolsChoice() === 'original' ? 'sel' : ''">
+                                <input type="radio" name="pools" value="original" data-bind="checked: rwcPoolsChoice">
+                                Original draw
+                            </label>
+                            <label data-bind="css: $data.rwcPoolsChoice() === 'redrawn' ? 'sel' : ''">
+                                <input type="radio" name="pools" value="redrawn" data-bind="checked: rwcPoolsChoice">
+                                If reseeded
+                            </label>
+                        </div>
+                        <div id="pools" style="display:grid;">
+                            <!-- ko foreach: shownRwcPools -->
+                            <table style="grid-row-start: 1;" data-bind="style: { 'grid-column-start': ($index() + 1) }">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Pool <span data-bind="text: pool"></span></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody data-bind="foreach: teams">
+                                    <tr>
+                                        <td class="pos" data-bind="text: pos" />
+                                        <td class="abbr" data-bind="text: abbr, title: name" />
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- /ko -->
+                        </div>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+
             <div id="rankings">
                 <!-- ko ifnot: rankingsChoice -->
                 <h4>
-                    Loading rankings from WR</a>
+                    Loading rankings from WR
                 </h4>
                 <!-- /ko -->
 
