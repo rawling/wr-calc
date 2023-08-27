@@ -120,8 +120,33 @@ var ViewModel = function (isFemale) {
         }
     }, this);
 
+
+    /*
+     * Display/calculation of RWC pools
+     */
+
+    // Early check of "should we even try to display this".
+    // Returns the RWC year if one is relevant, or falsy if not.
+    this.rwcPoolsYear = ko.computed(function () {
+        if (this.isFemale) return false; // no draw yet
+        if (new Date() < new Date('2023 Oct 29')) return 2023; // male and not ended
+        return false;
+    }, this);
+
+    // False until the user presses the button to show pools.
+    // Trying to stop any of this behaviour from running if the user doesn't want it,
+    // as it can slow things down on mobile and looks to break Safari. (GH issue 10.)
+    this.rwcPoolsStart = ko.observable(false);
+
+    // Choice of whether to show the "original" pools, or if they were "reseeded" with the shown rankings.
     this.rwcPoolsChoice = ko.observable('original');
+
+    // Both pools the user can pick from.
+    // Could tidy this up to only calculate the chosen one; alternatively,
+    // this way lets the user flick back and forth without recalculating.
+    // Again, tries to bail out early if the user hasn't clicked the button.
     this.rwcPools = ko.computed(function () {
+        if (!this.rwcPoolsStart()) return null;
 
         var sr = this.shownRankings();
         if (!sr || sr.length == 0) return null; // not ready yet
@@ -136,9 +161,7 @@ var ViewModel = function (isFemale) {
         // I doubt there's an API for this. Just hardcode the pools when they're drawn and take down after the RWC.
         var year;
         var rawData;
-
-        if (this.isFemale) return null; // no draw yet
-        if (new Date() < new Date('2023 Oct 29')) {
+        if (this.rwcPoolsYear() == 2023) {
             year = 2023;
             rawData = [
             {
@@ -181,6 +204,8 @@ var ViewModel = function (isFemale) {
                     getTeam('Chile')
                 ]
             }];
+        } else {
+            return null;
         }
 
         // try to map to "if they were drawn today"
@@ -215,6 +240,8 @@ var ViewModel = function (isFemale) {
             ifDrawnToday: drawnToday
         };
     }, this);
+
+    // Picks the correct set of pools out of the data above based on the user's selection.
     this.shownRwcPools = ko.computed(function () {
         var data = this.rwcPools();
         if (!data) return null;
@@ -227,6 +254,10 @@ var ViewModel = function (isFemale) {
                 return null;
         }
     }, this);
+
+    /*
+     * End RWC pools stuff
+     */
 
     // A string representing the selected fixtures and results.
     this.fixturesString = ko.pureComputed({

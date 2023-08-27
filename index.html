@@ -42,16 +42,19 @@
                 </label>
             </div>
 
+            <!-- ko if: rwcPoolsYear -->
             <div id='poolsarea' data-bind="if: rankingsChoice">
-                <!-- ko if: rwcPools -->
+                <!-- ko ifnot: rwcPoolsStart -->
                 <div style="text-align:center">
                     <button
                         id="showpools"
-                        onclick="document.getElementById('poolsandpicker').style.display = 'block'; document.getElementById('showpools').style.display = 'none';">
-                        Show RWC<span data-bind="text: rwcPools().year"></span> draw with these rankings
+                        onclick="window.viewModel.rwcPoolsStart(true)">
+                        Show RWC<span data-bind="text: rwcPoolsYear"></span> draw with these rankings
                     </button>
-
-                    <div id="poolsandpicker" style="display: none">
+                </div>
+                <!-- /ko -->
+                <!-- ko if: rwcPools -->
+                <div style="text-align:center">
                         <div id="whichpools">
                             <label data-bind="css: $data.rwcPoolsChoice() === 'original' ? 'sel' : ''">
                                 <input type="radio" name="pools" value="original" data-bind="checked: rwcPoolsChoice">
@@ -80,10 +83,10 @@
                             </table>
                             <!-- /ko -->
                         </div>
-                    </div>
                 </div>
                 <!-- /ko -->
             </div>
+            <!-- /ko -->
 
             <div id="rankings">
                 <!-- ko ifnot: rankingsChoice -->
