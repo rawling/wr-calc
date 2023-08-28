@@ -16,6 +16,7 @@ ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
 var loadRankings = function (rankingsSource, startDate, fixtures, event) {
+    viewModel.rankingsSource(rankingsSource);
     $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/rankings/' + rankingsSource + (startDate ? ('?date=' + startDate) : '')).done(function (data) {
         var rankings = {};
         $.each(data.entries, function (i, e) {
