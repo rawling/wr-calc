@@ -28,6 +28,16 @@ var loadRankings = function (rankingsSource, startDate, fixtures, event) {
         });
         viewModel.rankingsById(rankings);
 
+        if (event) {
+            // Restrict selectable teams to those in the event
+            var eventTeamIds = {};
+            $.each(fixtures, function (i, e) {
+                if (e.teams[0] && e.teams[0].id != '0') eventTeamIds[e.teams[0].id] = true;
+                if (e.teams[1] && e.teams[1].id != '0') eventTeamIds[e.teams[1].id] = true;
+            });
+            viewModel.teams.remove(function (t) { return !eventTeamIds[t.id]});
+        }
+
         var sorted = [];
         $.each(rankings, function (i, r) {
             sorted.push(r);
@@ -64,6 +74,7 @@ if (sourceString == 'mru' || sourceString == 'wru') {
 } else {
     // load the event!
     $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + sourceString + '/schedule?language=en').done(function (data) {
+
         loadRankings(
             data.event.sport,
             data.event.start.label,// maybe subtract a day so we don't include rankings on that date?
@@ -198,7 +209,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
 
             if (event) {
                 function shortenPhase(name) {
-                    return name.replace(/[a-z]+-final/, 'F').replace('Runner-up P', '2nd P').replace('Runner-up S', 'Loser S');
+                    return name && name.replace(/[a-z]+-final/, 'F').replace('Runner-up P', '2nd P').replace('Runner-up S', 'Loser S');
                 }
                 fixture.eventPhase = shortenPhase(e.eventPhase);
                 if (e.teams[0].id == '0' && e.teams[0].name) {
