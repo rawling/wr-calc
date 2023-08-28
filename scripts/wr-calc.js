@@ -139,7 +139,16 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     // Keep track of those here, so we can check when all queries are finished and subscribe
     // to the query string then.
     var anyQueries = false;
-    var venueQueries = 0;
+    var venueQueryCount = 0;
+    var venueQueries = {};
+    function queryVenue(id) {
+        var query = venueQueries[id];
+        if (!query) {
+            query = $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + id);
+            venueQueries[id] = query;
+        }
+        return query;
+    }
 
     // Parse each fixture into a view model, which adds it to the array.
     $.each(fixtures, function (i, e) {
@@ -165,12 +174,12 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             if (e.venue) {
                 fixture.venueName = [e.venue.name, e.venue.city, e.venue.country].join(', ');
                 anyQueries = true;
-                venueQueries++;
-                $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + e.teams[0].id).done(function(teamData) {
+                venueQueryCount++;
+                queryVenue(e.teams[0].id).done(function(teamData) {
                     if (e.venue.country !== teamData.country) {
                         if (e.teams[1]) {
-                            venueQueries++;
-                            $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + e.teams[1].id).done(function(teamData) {
+                            venueQueryCount++;
+                            queryVenue(e.teams[1].id).done(function(teamData) {
                                 if (e.venue.country === teamData.country) {
                                     // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
                                     // but in a home stadium. They seemed to get home nation advantage.
@@ -183,8 +192,8 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                                     }
                                 }
                             }).always(function () {
-                                venueQueries--;
-                                if (venueQueries === 0) {
+                                venueQueryCount--;
+                                if (venueQueryCount === 0) {
                                     viewModel.queryString.subscribe(function (qs) {
                                         history.replaceState(null, '', '?' + qs);
                                     });
@@ -198,8 +207,8 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                         }
                     }
                 }).always(function () {
-                    venueQueries--;
-                    if (venueQueries === 0) {
+                    venueQueryCount--;
+                    if (venueQueryCount === 0) {
                         viewModel.queryString.subscribe(function (qs) {
                             history.replaceState(null, '', '?' + qs);
                         });
