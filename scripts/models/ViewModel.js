@@ -1,6 +1,6 @@
 // Overall view model for the page
 var ViewModel = function (source) {
-    this.source = source; //mru or wru
+    this.source = source; // mru or wru or event id - doesn't really matter, just goes back into the query
 
     // The base rankings in an object, indexed by the ID of the team.
     this.rankingsById = ko.observable();
