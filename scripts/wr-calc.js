@@ -196,6 +196,19 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             }
             fixture.isRwc((event && event.rankingsWeight == 2) || (e.events.length > 0 && e.events[0].rankingsWeight == 2));
 
+            if (event) {
+                function shortenPhase(name) {
+                    return name.replace(/[a-z]+-final/, 'F').replace('Runner-up P', '2nd P').replace('Runner-up S', 'Loser S');
+                }
+                fixture.eventPhase = shortenPhase(e.eventPhase);
+                if (e.teams[0].id == '0' && e.teams[0].name) {
+                    fixture.homeCaption = shortenPhase(e.teams[0].name);
+                }
+                if (e.teams[1].id == '0' && e.teams[1].name) {
+                    fixture.awayCaption = shortenPhase(e.teams[1].name);
+                }
+            }
+
             // If the match isn't unstarted (or doesn't not have live scores), add
             // the live score.
             // U is unstarted / no live score.
