@@ -1,17 +1,21 @@
 // Read query string before we do any binding as it may remove it.
 var s = location.search;
-var dateQuery = /d=([^&]*)/.exec(s);
-var dateString = dateQuery ? dateQuery[1] : null;
-var fixturesQuery = /f=([^&]*)/.exec(s);
-var fixturesString = fixturesQuery ? fixturesQuery[1] : null;
-var wQuery = /[?&]w\b/.test(s);
+var usp = new URLSearchParams(s);
+
+var dateString = usp.get('d');
+var fixturesString = usp.get('f');
+
+var sourceString = usp.has('w') ? 'wru' : usp.get('s'); // support ?w for older links
+if (!sourceString) {
+    sourceString = 'mru';
+}
 
 // Create the view model and bind it to the HTML.
-var viewModel = new ViewModel(wQuery);
+var viewModel = new ViewModel(sourceString);
 ko.applyBindings(viewModel);
 
 // Load rankings from World Rugby.
-$.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/rankings/' + (viewModel.isFemale ? 'w' : 'm') + 'ru' + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
+$.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/rankings/' + sourceString + (dateString ? ('?date=' + dateString) : '')).done(function (data) {
     var rankings = {};
     $.each(data.entries, function (i, e) {
         var maxLength = 15;

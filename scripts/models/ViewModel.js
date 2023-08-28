@@ -1,6 +1,6 @@
 // Overall view model for the page
-var ViewModel = function (isFemale) {
-    this.isFemale = isFemale;
+var ViewModel = function (source) {
+    this.source = source; //mru or wru
 
     // The base rankings in an object, indexed by the ID of the team.
     this.rankingsById = ko.observable();
@@ -123,7 +123,7 @@ var ViewModel = function (isFemale) {
     // A string representing the selected fixtures and results.
     this.fixturesString = ko.pureComputed({
         read: function () {
-            return '2:' + $.map(this.fixtures(), function (e) {
+            return '2_' + $.map(this.fixtures(), function (e) {
                 // In theory we should exclude matches that are already in the rankings, because otherwise we will include them a second time.
                 // But in practice, when we ask for "today's" rankings, we will get the previous rankings, as "today's" rankings were posted after midnight.
                 // These matches, played on top of the previous rankings, should reconstruct the same end result..
@@ -137,7 +137,7 @@ var ViewModel = function (isFemale) {
             }).join(';');
         },
         write: function (value) {
-            var versionAndString = value.split(':');
+            var versionAndString = value.split(/[:_]/); // old was : but URLSearchParams %-encodes that so switched to underscore
             switch (versionAndString[0]) {
                 case '1':
                     var fs = [];
@@ -191,7 +191,9 @@ var ViewModel = function (isFemale) {
 
     // A string representing the base date and selected fixtures, suitable for putting into the address bar.
     this.queryString = ko.computed(function () {
-        return (this.isFemale ? 'w&' : '') + 'd=' + this.originalDate() + '&f=' + this.fixturesString();
+        var params = { s: this.source, d: this.originalDate(), f: this.fixturesString() };
+        var usp = new URLSearchParams(params);
+        return usp.toString();
     }, this);
 
     return this;
