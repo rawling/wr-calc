@@ -19,11 +19,14 @@
 </head>
 <body>
     <div id="union">
-        <a href="?m" data-bind="css: isFemale ? '' : 'sel', attr: { href: $data.isFemale ? '?m' : null }">
+        <a data-bind="css: source == 'mru' ? 'sel' : '', attr: { href: $data.source == 'mru' ? null : '?s=mru' }">
             MRU
         </a>
-        <a href="?w" data-bind="css: isFemale ? 'sel' : '', attr: { href: $data.isFemale ? null : '?w' }">
+        <a data-bind="css: source == 'wru' ? 'sel' : '', attr: { href: $data.source == 'wru' ? null : '?s=wru' }">
             WRU
+        </a>
+        <a data-bind="css: source == '1893' ? 'sel' : '', attr: { href: $data.source == '1893' ? null : '?s=1893' }">
+            RWC2023
         </a>
     </div>
     <div id="leftright">
@@ -85,18 +88,18 @@
                     </thead>
                     <!-- ko foreach: fixtures -->
                     <tbody class="fixture">
-                        <!-- ko if: $data.venueName || $data.kickoff || $data.liveScoreMode -->
+                        <!-- ko if: $data.venueName || $data.kickoff || $data.liveScoreMode || $data.eventPhase -->
                         <tr class="details">
                             <td class="details-left" colspan="2" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
-                            <td class="details-center" colspan="4" data-bind="text: liveScoreMode"></td>
+                            <td class="details-center" colspan="4" data-bind="text: ($data.eventPhase && $data.liveScoreMode) ? ($data.eventPhase + ' (' + $data.liveScoreMode + ')') : ($data.eventPhase || $data.liveScoreMode)"></td>
                             <td class="details-right" colspan="5" data-bind="text: venueName"></td>
                         </tr>
                         <!-- /ko -->
                         <tr class="teams">
-                            <td colspan="2" style="text-align: left"><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: 'Home...', disabled: alreadyInRankings"></select></td colspan="2">
+                            <td colspan="2" style="text-align: left"><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: homeCaption, disabled: alreadyInRankings"></select></td colspan="2">
                             <td colspan="2" style="text-align: right"><input type="number" min="0" data-bind="value: homeScore, disabled: alreadyInRankings" /></td colspan="2">
                             <td colspan="2" style="text-align: left"><input type="number" min="0" data-bind="value: awayScore, disabled: alreadyInRankings" /></td colspan="5">
-                            <td colspan="2" style="text-align: right"><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: 'Away...', disabled: alreadyInRankings"></select></td colspan="2">
+                            <td colspan="2" style="text-align: right"><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: awayCaption, disabled: alreadyInRankings"></select></td colspan="2">
                             <td>
                                 <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
                                 <span data-bind="if: switched" title="Home team is nominally Away">*</span>
@@ -156,7 +159,7 @@
     </div>
     <div id="footer">
         <span class="secondaryText">
-            Rankings and ranking algorithm are the property of <a data-bind="attr: { href: 'https://www.world.rugby/tournaments/rankings/' + ($data.isFemale ? 'wru' : 'mru') }">World Rugby</a>.
+            Rankings and ranking algorithm are the property of <a data-bind="attr: { href: 'https://www.world.rugby/tournaments/rankings/' + $data.rankingsSource() }">World Rugby</a>.
             See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
         </span>
     </div>

@@ -15,6 +15,11 @@ var FixtureViewModel = function (parent) {
     this.kickoff = null;
     this.alreadyInRankings = false;
 
+    // Only set elsewhere for "event" mode
+    this.homeCaption = 'Home...';
+    this.awayCaption = 'Away...';
+    this.eventPhase = null;
+
     this.noHome = ko.observable();
     this.switched = ko.observable();
     this.isRwc = ko.observable();
