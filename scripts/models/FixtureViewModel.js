@@ -10,7 +10,8 @@ var FixtureViewModel = function (parent) {
     this.homeRankingBefore = ko.observable();
     this.awayRankingBefore = ko.observable();
 
-    this.venueName = null;
+    this.venueNameAndCountry = null;
+    this.venueCity = null;
     this.liveScoreMode = null;
     this.kickoff = null;
     this.alreadyInRankings = false;

@@ -37,7 +37,7 @@
             <div id="which" data-bind="if: rankingsChoice">
                 <label data-bind="css: $data.rankingsChoice() === 'original' ? 'sel' : ''">
                     <input type="radio" name="rankings" value="original" data-bind="checked: rankingsChoice">
-                    <span data-bind="text: originalDate" />
+                    <span data-bind="text: $data.originalDate() + ($data.originalDateIsEstimated() ? '*' : ''), title: $data.originalDateIsEstimated() ? 'Last published rankings on or before this date' : ''" />
                 </label>
                 <label data-bind="css: $data.rankingsChoice() === 'calculated' ? 'sel' : ''">
                     <input type="radio" name="rankings" value="calculated" data-bind="checked: rankingsChoice">
@@ -61,7 +61,7 @@
                             <tr data-bind="css: changeCls">
                                 <td class="pos" data-bind="text: pos"></td>
                                 <td class="posDiff" data-bind="html: previousPosDisplay"></td>
-                                <td class="name" data-bind="text: team.displayName, attr: { title: team.displayTitle }"></td>
+                                <td class="name" data-bind="text: team.displayName, title: team.displayTitle"></td>
                                 <td data-bind="text: ptsDisplay"></td>
                                 <td class="ptsDiff" data-bind="html: ptsDiffDisplay"></td>
                             </tr>
@@ -88,11 +88,11 @@
                     </thead>
                     <!-- ko foreach: fixtures -->
                     <tbody class="fixture">
-                        <!-- ko if: $data.venueName || $data.kickoff || $data.liveScoreMode || $data.eventPhase -->
+                        <!-- ko if: $data.venueNameAndCountry || $data.kickoff || $data.liveScoreMode || $data.eventPhase -->
                         <tr class="details">
                             <td class="details-left" colspan="2" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
                             <td class="details-center" colspan="4" data-bind="text: ($data.eventPhase && $data.liveScoreMode) ? ($data.eventPhase + ' (' + $data.liveScoreMode + ')') : ($data.eventPhase || $data.liveScoreMode)"></td>
-                            <td class="details-right" colspan="5" data-bind="text: venueName"></td>
+                            <td class="details-right" colspan="5" data-bind="text: venueNameAndCountry, title: venueCity"></td>
                         </tr>
                         <!-- /ko -->
                         <tr class="teams">

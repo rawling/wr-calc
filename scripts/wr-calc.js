@@ -50,6 +50,17 @@ var loadRankings = function (rankingsSource, startDate, fixtures, event) {
         viewModel.originalMillis = data.effective.millis;
         viewModel.rankingsChoice('original');
 
+        // There's a bug with historical MRU rankings where their effective date is set after the requested date (2020-09-21).
+        // The effective date should never be in the future by more than a day, so we should be able to detect this and guess a date instead.
+        // (It could be a little bit in the future because we ask for midnight but the rankings are published during the day.)
+        ////var requestedStartDateMillis = new Date(startDate).getTime();
+        ////if (viewModel.originalMillis > requestedStartDateMillis + (24 * 60 * 60 * 1000)) {
+        // In fact ignore the millis and just compare the "label" as it's lexicographical and as it's just the date it should never be in the future.
+        if (data.effective.label > startDate) {
+            viewModel.originalDate(startDate);
+            viewModel.originalMillis = new Date(startDate).getTime();
+            viewModel.originalDateIsEstimated(true);
+        }
 
         // When we're done, load fixtures in.
         if (fixturesString) {
@@ -172,7 +183,8 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             });
 
             if (e.venue) {
-                fixture.venueName = [e.venue.name, e.venue.city, e.venue.country].join(', ');
+                fixture.venueNameAndCountry = [e.venue.name, e.venue.country].join(', ');
+                fixture.venueCity = e.venue.city;
                 anyQueries = true;
                 venueQueryCount++;
                 queryVenue(e.teams[0].id).done(function(teamData) {
