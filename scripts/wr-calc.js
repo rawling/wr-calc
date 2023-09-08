@@ -227,7 +227,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                     }
                 });
             }
-            fixture.isRwc((event && event.rankingsWeight == 2) || (e.events.length > 0 && e.events[0].rankingsWeight == 2));
+            fixture.isRwc((event && event.rankingsWeight == 2) || (e.events.length > 0 && e.events[0].rankingsWeight == 2) || (!!e.competition.match(/Rugby World Cup/)));
 
             if (event) {
                 function shortenPhase(name) {
