@@ -130,9 +130,13 @@
                             <th colspan="2">Home team</th>
                             <th colspan="6">Score</th>
                             <th colspan="2">Away team</th>
-                            <th title='No Home Advantage'>NHA</th>
+                            <th title='"Home" team not at home'>NHA</th>
+                            <!-- ko if: showIsRwc -->
                             <th title='Is Rugby World Cup match'>RWC</th>
+                            <!-- /ko -->
+                            <!-- ko ifnot: event -->
                             <th></th>
+                            <!-- /ko -->
                     </tr>
                     </thead>
                     <!-- ko foreach: fixtures -->
@@ -167,8 +171,12 @@
                                 <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
                                 <span data-bind="if: switched" title="Home team is nominally Away">*</span>
                             </td>
+                            <!-- ko if: $parent.showIsRwc -->
                             <td><input type="checkbox" data-bind="checked: isRwc, disabled: alreadyInRankings" /></td>
+                            <!-- /ko -->
+                            <!-- ko ifnot: $parent.event -->
                             <td><button data-bind="click: function () { $parent.fixtures.remove($data); }, disabled: alreadyInRankings">x</button></td>
+                            <!-- /ko -->
                         </tr>
                         <!-- ko if: $data.hasValidTeams() && !$data.alreadyInRankings -->
                         <tr class="possible-changes">
@@ -211,8 +219,12 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <!-- ko if: showIsRwc -->
                             <td></td>
+                            <!-- /ko -->
+                            <!-- ko ifnot: event -->
                             <td></td>
+                            <!-- /ko -->
                         </tr>
                     </tfoot>
                 </table>

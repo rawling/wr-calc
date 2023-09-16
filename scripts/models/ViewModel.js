@@ -1,6 +1,7 @@
 // Overall view model for the page
 var ViewModel = function (source) {
     this.source = source; // mru or wru or event id - doesn't really matter, just goes back into the query
+    this.event = ko.observable();
     this.rankingsSource = ko.observable(source); // in the footer link - should end up as mru or wru
 
     // The base rankings in an object, indexed by the ID of the team.
@@ -124,7 +125,7 @@ var ViewModel = function (source) {
 
     this.poolChoice = ko.observable();
     this.pools = ko.computed(function() {
-        if (this.source == 'mru' || this.source == 'wru') return null;
+        if (!this.event()) return null; // never pools for the normal rankings views
 
         var fixtures = this.deferredFixtures();
 
@@ -326,6 +327,8 @@ var ViewModel = function (source) {
         var usp = new URLSearchParams(params);
         return usp.toString();
     }, this);
+
+    this.showIsRwc = ko.observable(true);
 
     return this;
 };

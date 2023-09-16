@@ -84,6 +84,7 @@ var loadRankings = function (rankingsSource, startDate, fixtures, event) {
 if (sourceString == 'mru' || sourceString == 'wru') {
     loadRankings(sourceString, dateString)
 } else {
+    viewModel.event(sourceString);
     // load the event!
     $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + sourceString + '/schedule?language=en').done(function (data) {
 
@@ -186,6 +187,8 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     }
 
     // Parse each fixture into a view model, which adds it to the array.
+    var allRwc = true;
+    var allNotRwc = true;
     $.each(fixtures, function (i, e) {
         // I don't think we can reliably only request fixtures relevant to loaded teams, so filter here.
         // For knockouts where a team may not be decided yet, allow team to be null or id to be 0
@@ -255,7 +258,13 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                     }
                 });
             }
-            fixture.isRwc((event && event.rankingsWeight == 2) || (e.events.length > 0 && e.events[0].rankingsWeight == 2) || (!!e.competition.match(/Rugby World Cup/)));
+            var isRwc = (event && event.rankingsWeight == 2) || (e.events.length > 0 && e.events[0].rankingsWeight == 2) || (!!e.competition.match(/Rugby World Cup/));
+            fixture.isRwc(isRwc);
+            if (isRwc) {
+                allNotRwc = false;
+            } else {
+                allRwc=  false;
+            }
 
             if (event) {
                 function shortenPhase(name) {
@@ -334,6 +343,10 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             }
         });
     });
+
+    if ((allRwc || allNotRwc) && event) {
+        viewModel.showIsRwc(false);
+    }
 
     if (!anyQueries) {
         viewModel.queryString.subscribe(function (qs) {
