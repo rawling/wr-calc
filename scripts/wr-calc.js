@@ -151,15 +151,32 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     // Keep track of those here, so we can check when all queries are finished and subscribe
     // to the query string then.
     var anyQueries = false;
-    var venueQueryCount = 0;
-    var venueQueries = {};
-    function queryVenue(id) {
-        var query = venueQueries[id];
+    var teamQueryCount = 0;
+    var teamQueries = {};
+    function queryTeam(id) {
+        var query = teamQueries[id];
         if (!query) {
-            query = $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + id);
-            venueQueries[id] = query;
+            query = queryTeamCountryViaCache(id);
+            teamQueries[id] = query;
         }
         return query;
+    }
+
+    // when we ask for "a team" we only want its country. cache that propery here but map it out to "the team object" with just the field we want
+    function queryTeamCountryViaCache(id) {
+        var cacheKey = 'api/v3/team/' + id + '|country';
+        if (localStorage[cacheKey]) {
+            return $.when({ country: localStorage[cacheKey] });
+        }
+        var promise = $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + id).then(function (team) {
+            return team.country;
+        });
+
+        promise.done(function (country) {
+            localStorage[cacheKey] = country;
+        });
+
+        return promise.then(function (country) { return { country: country }; });
     }
 
     // if we're dealing with an event, also query to see if a team got a TBP?
@@ -213,12 +230,12 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                 fixture.venueNameAndCountry = [e.venue.name, e.venue.country].join(', ');
                 fixture.venueCity = e.venue.city;
                 anyQueries = true;
-                venueQueryCount++;
-                queryVenue(e.teams[0].id).done(function(teamData) {
+                teamQueryCount++;
+                queryTeam(e.teams[0].id).done(function(teamData) {
                     if (e.venue.country !== teamData.country) {
                         if (e.teams[1]) {
-                            venueQueryCount++;
-                            queryVenue(e.teams[1].id).done(function(teamData) {
+                            teamQueryCount++;
+                            queryTeam(e.teams[1].id).done(function(teamData) {
                                 if (e.venue.country === teamData.country) {
                                     // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
                                     // but in a home stadium. They seemed to get home nation advantage.
@@ -231,8 +248,8 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                                     }
                                 }
                             }).always(function () {
-                                venueQueryCount--;
-                                if (venueQueryCount === 0) {
+                                teamQueryCount--;
+                                if (teamQueryCount === 0) {
                                     if (!event) {
                                         viewModel.queryString.subscribe(function (qs) {
                                             history.replaceState(null, '', '?' + qs);
@@ -248,8 +265,8 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                         }
                     }
                 }).always(function () {
-                    venueQueryCount--;
-                    if (venueQueryCount === 0) {
+                    teamQueryCount--;
+                    if (teamQueryCount === 0) {
                         if (!event) {
                             viewModel.queryString.subscribe(function (qs) {
                                 history.replaceState(null, '', '?' + qs);
