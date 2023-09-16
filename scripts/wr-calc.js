@@ -150,8 +150,6 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     // if the home team has advantage.
     // Keep track of those here, so we can check when all queries are finished and subscribe
     // to the query string then.
-    var anyQueries = false;
-    var teamQueryCount = 0;
     var teamQueries = {};
     function queryTeam(id) {
         var query = teamQueries[id];
@@ -233,12 +231,9 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             if (e.venue) {
                 fixture.venueNameAndCountry = [e.venue.name, e.venue.country].join(', ');
                 fixture.venueCity = e.venue.city;
-                anyQueries = true;
-                teamQueryCount++;
                 queryTeam(e.teams[0].id).done(function(teamData) {
                     if (e.venue.country !== teamData.country) {
                         if (e.teams[1]) {
-                            teamQueryCount++;
                             queryTeam(e.teams[1].id).done(function(teamData) {
                                 if (e.venue.country === teamData.country) {
                                     // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
@@ -251,30 +246,12 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                                         fixture.noHome(true);
                                     }
                                 }
-                            }).always(function () {
-                                teamQueryCount--;
-                                if (teamQueryCount === 0) {
-                                    if (!event) {
-                                        viewModel.queryString.subscribe(function (qs) {
-                                            history.replaceState(null, '', '?' + qs);
-                                        });
-                                    }
-                                }
                             });
                         } else { // See ANC above
                             // Don't know who the second team is, but we do know the first team isn't at home.
                             if (tournamentRespectsStadiumLocation) {
                                 fixture.noHome(true);
                             }
-                        }
-                    }
-                }).always(function () {
-                    teamQueryCount--;
-                    if (teamQueryCount === 0) {
-                        if (!event) {
-                            viewModel.queryString.subscribe(function (qs) {
-                                history.replaceState(null, '', '?' + qs);
-                            });
                         }
                     }
                 });
@@ -369,14 +346,21 @@ var fixturesLoaded = function (fixtures, rankings, event) {
         });
     });
 
-    if ((allRwc || allNotRwc) && event) {
-        viewModel.showIsRwc(false);
+    // listen until all queries are done - be aware that some queries trigger more queries so we can't just "wait all"
+    if (!event) {
+        var i = setInterval(function() {
+            var promises = Object.values(teamQueries);
+            if (!promises.find(function (p) { return p.state() == 'pending' })) {
+                viewModel.queryString.subscribe(function (qs) {
+                    history.replaceState(null, '', '?' + qs);
+                });
+                clearInterval(i);
+            }
+        }, 1000);
     }
 
-    if (!anyQueries) {
-        viewModel.queryString.subscribe(function (qs) {
-            history.replaceState(null, '', '?' + qs);
-        });
+    if ((allRwc || allNotRwc) && event) {
+        viewModel.showIsRwc(false);
     }
 };
 

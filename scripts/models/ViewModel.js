@@ -218,6 +218,7 @@ var ViewModel = function (source) {
             return {
                 pool: k,
                 table: Object.values(pools[k]).sort(function (a, b) {
+                    // admittedly, this is for RWC2023, and might be different for other tournaments
                     var c1 = b.pts - a.pts;
                     if (c1) return c1;
 
