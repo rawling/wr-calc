@@ -149,10 +149,11 @@ var ViewModel = function (source) {
             var awayId = fixture.awayId();
 
             // ensure the pools and teams exist
-            if (!pools[fixture.pool()]) {
-                pools[fixture.pool()] = {};
+            var poolKey = fixture.pool() || 'NO POOL';
+            if (!pools[poolKey]) {
+                pools[poolKey] = {};
             }
-            var pool = pools[fixture.pool()];
+            var pool = pools[poolKey];
 
             if (!pool[homeId]) {
                 pool[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
@@ -186,7 +187,7 @@ var ViewModel = function (source) {
             if (fixture.status == 'L1' || fixture.status == 'L2' || fixture.status == 'LHT') {
                 home.inProg = true;
                 away.inProg = true;
-                inProgPool = fixture.pool();
+                inProgPool = poolKey;
             }
 
             home.played = home.played + 1;
@@ -202,11 +203,18 @@ var ViewModel = function (source) {
             away.pv[homeId] = awayTablePoints;
         });
 
+        // remove "undefined" if it looks like "knockouts at a world cup" but not if it looks like "all matches in a round robin"
+        var poolKeys = Object.keys(pools);
+        if (poolKeys.length > 1) {
+            poolKeys = poolKeys.filter(function (k) { return k != 'NO POOL' });
+        }
+        poolKeys.sort();
+
         if (!this.poolChoice()) {
-            this.poolChoice(inProgPool || Object.keys(pools).sort()[0]);
+            this.poolChoice(inProgPool || poolKeys[0]);
         }
 
-        return Object.keys(pools).sort().map(function (k) {
+        return poolKeys.map(function (k) {
             return {
                 pool: k,
                 table: Object.values(pools[k]).sort(function (a, b) {

@@ -351,9 +351,13 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             }
 
             if (event) {
-                if (e.eventPhaseId.type == 'Pool') {
-                    fixture.triesMatter(true); // also for e.g. 6 nations but worry about that later
-                    fixture.pool(e.eventPhaseId.subType);
+                // Tries matter if this is the "pool" stage of a large tournament, or
+                // (assume) if the tournament doesn't have more than one phase
+                if ((e.eventPhaseId && e.eventPhaseId.type == 'Pool') || !e.eventPhaseId) {
+                    fixture.triesMatter(true); 
+                    if (e.eventPhaseId) {
+                        fixture.pool(e.eventPhaseId.subType);
+                    }
                     if (e.status != 'U') {
                         queryTries(e.matchId, e.status == 'C').done(function (tries) {
                             fixture.homeTries(tries[0] || 0);
