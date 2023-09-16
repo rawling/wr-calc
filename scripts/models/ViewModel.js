@@ -122,6 +122,7 @@ var ViewModel = function (source) {
         }
     }, this);
 
+    this.poolChoice = ko.observable();
     this.pools = ko.computed(function() {
         if (this.source == 'mru' || this.source == 'wru') return null;
 
@@ -188,6 +189,10 @@ var ViewModel = function (source) {
             away.pv[fixture.homeId()] = awayTablePoints;
         });
 
+        if (!this.poolChoice()) {
+            this.poolChoice(Object.keys(pools).sort()[0]);
+        }
+
         return Object.keys(pools).sort().map(function (k) {
             return {
                 pool: k,
@@ -215,6 +220,13 @@ var ViewModel = function (source) {
                 })
             };
         });
+    }, this);
+
+    this.selectedPool = ko.computed(function () {
+        var pools = this.pools();
+        var poolChoice = this.poolChoice();
+        if (!pools || !poolChoice || !pools.find(function (p) { return p.pool == poolChoice} )) return null;
+        return pools.find(function (p) { return p.pool == poolChoice} );
     }, this);
 
     // Whichever set of rankings is chosen.

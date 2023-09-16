@@ -104,7 +104,7 @@ table {
         }
     }
 }
-#which, #union {
+#which, #union, #whichPool {
     font-size: 14px;
     font-weight: 500;
 }
@@ -180,12 +180,15 @@ table {
             flex: 0;
         }
     }
-    #which,#union {
+    #which,#union,#whichPool {
         flex-shrink: 0;
     }
-    #leftTop, #leftBottom {
+    #leftTop {
         flex: 1;
         flex-shrink: 1;
+        overflow-y: hidden;
+    }
+    #leftBottom {
         overflow-y: hidden;
     }
     #rankings, #tables {
@@ -248,7 +251,7 @@ body {
     }
 }
 
-#which {
+#which,#whichPool {
     display: flex;
     @extend %primary;
 
@@ -419,7 +422,11 @@ body {
     }
 }
 
+#tables {
+    padding: 5px;
+}
 #poolstable {
+    width: 100%;
     th {
         text-align: left;
     }

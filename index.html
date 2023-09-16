@@ -74,14 +74,26 @@
             <!-- ko if: pools -->
             <div id="leftBottom">
                 <div class="header">
-                    <h3>Tables</h3>
+                    <h3>Table<span data-bind="if: $data.pools().length > 1">s</span></h3>
                 </div>
+
+                <!-- ko if: $data.pools().length > 1 -->
+                <div id="whichPool">
+                    <!-- ko foreach: pools -->
+                    <label data-bind="css: $parent.poolChoice() === $data.pool ? 'sel' : ''">
+                        <input type="radio" name="pools" data-bind="checked: $parent.poolChoice, value: pool">
+                        <span data-bind="text: pool" />
+                    </label>
+                    <!-- /ko -->
+                </div>
+                <!-- /ko -->
+
                 <div id="tables">
                     <table id="poolstable">
-                        <!-- ko foreach: pools -->
+                        <!-- ko with: selectedPool -->
                         <thead>
                             <tr>
-                                <th>Pool <span data-bind="text: pool"></span></th>
+                                <th></th>
                                 <th></th>
                                 <th class="right" title="points difference">PD</th>
                                 <th class="right" title="tries difference">TD</th title="points difference">
