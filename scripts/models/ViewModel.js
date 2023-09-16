@@ -138,6 +138,7 @@ var ViewModel = function (source) {
 
         // Apply each fixture in turn.
         var pools = {};
+        var inProgPool = null;
         $.each(fixtures, function (index, fixture) {
             // If the fixture doesn't have teams selected, or is already applied, do nothing.
             if (!fixture.hasValidTeams()) {
@@ -185,6 +186,7 @@ var ViewModel = function (source) {
             if (fixture.status == 'L1' || fixture.status == 'L2' || fixture.status == 'LHT') {
                 home.inProg = true;
                 away.inProg = true;
+                inProgPool = fixture.pool();
             }
 
             home.played = home.played + 1;
@@ -201,7 +203,7 @@ var ViewModel = function (source) {
         });
 
         if (!this.poolChoice()) {
-            this.poolChoice(Object.keys(pools).sort()[0]);
+            this.poolChoice(inProgPool || Object.keys(pools).sort()[0]);
         }
 
         return Object.keys(pools).sort().map(function (k) {
