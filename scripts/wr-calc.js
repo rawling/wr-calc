@@ -161,6 +161,30 @@ var fixturesLoaded = function (fixtures, rankings, event) {
         return query;
     }
 
+    // if we're dealing with an event, also query to see if a team got a TBP?
+    // in this case we ignore the counts about as we're going to disable the query string stuff anyway.
+    function queryTries(id, cache) {
+        // In progress so neither query nor populate cache.
+        if (!cache) {
+            return $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/match/' + id + '/stats');
+        }
+
+        // Finished, so check cache, and populate if we load it.
+        var cacheKey = 'api/v3/match/' + id + '/stats|teamStats[x].stats.Tries';
+        if (localStorage[cacheKey]) {
+            return $.when(JSON.parse(localStorage[cacheKey]));
+        }
+        var promise = $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/match/' + id + '/stats').then(function (stats) {
+            return [stats.teamStats[0].stats.Tries, stats.teamStats[1].stats.Tries];
+        });
+        if (cache) {
+            promise.done(function (stats) {
+                localStorage[cacheKey] = JSON.stringify(stats);
+            });
+        }
+        return promise;
+    }
+
     // Parse each fixture into a view model, which adds it to the array.
     $.each(fixtures, function (i, e) {
         // I don't think we can reliably only request fixtures relevant to loaded teams, so filter here.
@@ -206,9 +230,11 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                             }).always(function () {
                                 venueQueryCount--;
                                 if (venueQueryCount === 0) {
-                                    viewModel.queryString.subscribe(function (qs) {
-                                        history.replaceState(null, '', '?' + qs);
-                                    });
+                                    if (!event) {
+                                        viewModel.queryString.subscribe(function (qs) {
+                                            history.replaceState(null, '', '?' + qs);
+                                        });
+                                    }
                                 }
                             });
                         } else { // See ANC above
@@ -221,9 +247,11 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                 }).always(function () {
                     venueQueryCount--;
                     if (venueQueryCount === 0) {
-                        viewModel.queryString.subscribe(function (qs) {
-                            history.replaceState(null, '', '?' + qs);
-                        });
+                        if (!event) {
+                            viewModel.queryString.subscribe(function (qs) {
+                                history.replaceState(null, '', '?' + qs);
+                            });
+                        }
                     }
                 });
             }
@@ -289,6 +317,19 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                 case 'L1': fixture.liveScoreMode = 'First half'; break;
                 case 'L2': fixture.liveScoreMode = 'Second half'; break;
                 case 'LHT': fixture.liveScoreMode = 'Half time'; break;
+            }
+
+            if (event) {
+                if (e.eventPhaseId.type == 'Pool') {
+                    fixture.triesMatter(true); // also for e.g. 6 nations but worry about that later
+                    fixture.pool(e.eventPhaseId.subType);
+                    if (e.status != 'U') {
+                        queryTries(e.matchId, e.status == 'C').done(function (tries) {
+                            fixture.homeTries(tries[0] || 0);
+                            fixture.awayTries(tries[1] || 0);
+                        });
+                    }
+                }
             }
         });
     });

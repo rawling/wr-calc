@@ -162,6 +162,12 @@ table {
         display: flex;
         flex-direction: column;
     }
+    #leftTop, #leftBottom {
+        @include height(6);
+        flex: 0.5;
+        display: flex;
+        flex-direction: column;
+    }
     #right {
         @include height(0);
         height: 100%;
@@ -170,15 +176,21 @@ table {
         flex: 1;
     }
     #left, #right {
-    .header h3 {
+        .header h3 {
             flex: 0;
         }
     }
     #which,#union {
         flex-shrink: 0;
     }
-    #rankings {
+    #leftTop, #leftBottom {
         flex: 1;
+        flex-shrink: 1;
+        overflow-y: hidden;
+    }
+    #rankings, #tables {
+        flex: 1;
+        flex-shrink: 1;
         overflow-y: scroll;
     }
     #fixtures {
@@ -194,7 +206,15 @@ table {
         display: flex;
         flex-direction: column-reverse;
     }
-    #left, #right {
+    #left {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+    #right {
+        display: flex;
+        flex-direction: column;
+    }
+    #leftTop, #leftBottom {
         display: flex;
         flex-direction: column;
     }
@@ -396,5 +416,18 @@ body {
         background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAABlBMVEX///////9VfPVsAAAAAXRSTlMAQObYZgAAABZJREFUCNdjYLBhYCAG////HwUTqQ8AH00QpSze/owAAAAASUVORK5CYII=');
         background-repeat: no-repeat;
         background-position: 50% 50%;
+    }
+}
+
+#poolstable {
+    th {
+        text-align: left;
+    }
+    th.right {
+        text-align: right;
+    }
+
+    td {
+        text-align: right;
     }
 }

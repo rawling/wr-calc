@@ -25,6 +25,11 @@ var FixtureViewModel = function (parent) {
     this.switched = ko.observable();
     this.isRwc = ko.observable();
 
+    this.triesMatter = ko.observable();
+    this.pool = ko.observable();
+    this.homeTries = ko.observable();
+    this.awayTries = ko.observable();
+
     this.hasValidTeams = ko.computed(function () {
         var rankings = parent.rankingsById();
         var home = rankings[this.homeId()];

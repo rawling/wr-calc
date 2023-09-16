@@ -122,6 +122,113 @@ var ViewModel = function (source) {
         }
     }, this);
 
+    this.pools = ko.computed(function() {
+        if (this.source == 'mru' || this.source == 'wru') return null;
+
+        var fixtures = this.deferredFixtures();
+
+        // Nothing to calculate if the data has not yet loaded.
+        if (!fixtures) {
+            return null;
+        }
+
+        var vm = this;
+
+        // Apply each fixture in turn.
+        var pools = {};
+        $.each(fixtures, function (index, fixture) {
+            // If the fixture doesn't have teams selected, or is already applied, do nothing.
+            if (!fixture.hasValidTeams()) {
+                return;
+            }
+
+            // If the fixture doesn't have scores as well as teams, don't apply it to the rankings.
+            if (!fixture.isValid()) {
+                return;
+            }
+
+            if (!pools[fixture.pool()]) {
+                pools[fixture.pool()] = {};
+            }
+            var pool = pools[fixture.pool()];
+
+            if (!pool[fixture.homeId()]) {
+                pool[fixture.homeId()] = { team: fixture.homeId(), name: vm.rankingsById()[fixture.homeId()].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {} };
+            }
+            var home = pool[fixture.homeId()];
+            if (!pool[fixture.awayId()]) {
+                pool[fixture.awayId()] = { team: fixture.awayId(), name: vm.rankingsById()[fixture.awayId()].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {} };
+            }
+            var away = pool[fixture.awayId()];
+
+            var hs = parseInt(fixture.homeScore());
+            var asc = parseInt(fixture.awayScore());
+            var ht = parseInt(fixture.homeTries());
+            var at = parseInt(fixture.awayTries());
+
+            home.pf = home.pf + hs;
+            away.pa = away.pa + hs;
+            home.tf = home.tf + ht;
+            away.ta = away.ta + ht;
+            home.pa = home.pa + asc;
+            away.pf = away.pf + asc;
+            home.ta = home.ta + at;
+            away.tf = away.tf + at;
+
+            home.played = home.played + 1;
+            away.played = away.played + 1;
+
+            var homeTablePoints = (hs > asc ? 4 : (hs == asc ? 2 : 0)) + (ht >= 4 ? 1 : 0) + ((hs < asc && hs + 7 >= asc) ? 1 : 0);
+            home.pts = home.pts + homeTablePoints;
+
+            var awayTablePoints = (hs < asc ? 4 : (hs == asc ? 2 : 0)) + (at >= 4 ? 1 : 0) + ((hs > asc && hs <= asc + 7) ? 1 : 0);
+            away.pts = away.pts + awayTablePoints;
+
+            home.pv[fixture.awayId()] = homeTablePoints;
+            away.pv[fixture.homeId()] = awayTablePoints;
+        });
+
+        return Object.keys(pools).sort().map(function (k) {
+            return {
+                pool: k,
+                table: Object.values(pools[k]).sort(function (a, b) {
+                    var c1 = b.pts - a.pts;
+                    if (c1) return c1;
+
+                    var c2 = b.pv[a.team] - a.pv[b.team];
+                    if (c2) return c2;
+
+                    var c3 = (b.pf - b.pa) - (a.pf - a.pa);
+                    if (c3) return c3;
+                    
+                    var c4 = (b.tf - b.ta) - (a.tf - a.ta);
+                    if (c4) return c4;
+
+                    var c5 = b.pf - a.pf;
+                    if (c5) return c5;
+
+                    var c6 = b.tf - a.tf;
+                    if (c6) return c6;
+
+                    var c7 = vm.projectedRankings().find(r => r.team.id == b.team).pts() - vm.projectedRankings().find(r => r.team.id == a.team).pts();
+                    return c7;
+                })
+            };
+        });
+    }, this);
+
+    // Whichever set of rankings is chosen.
+    this.shownRankings = ko.computed(function () {
+        switch (this.rankingsChoice()) {
+            case 'original':
+                return this.baseRankings();
+            case 'calculated':
+                return this.projectedRankings();
+            default:
+                return [];
+        }
+    }, this);
+
     // A string representing the selected fixtures and results.
     this.fixturesString = ko.pureComputed({
         read: function () {
