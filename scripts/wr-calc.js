@@ -280,6 +280,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                 fixture.homeScore(e.scores[0]);
                 fixture.awayScore(e.scores[1]);
             }
+            fixture.status = e.status;
             switch (e.status) {
                 case 'U': {
                     // Try to detect if a match should have started by now, and just hasn't been reported by WR.

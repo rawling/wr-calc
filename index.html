@@ -95,16 +95,18 @@
                             <tr>
                                 <th></th>
                                 <th></th>
-                                <th class="right" title="points difference">PD</th>
-                                <th class="right" title="tries difference">TD</th title="points difference">
-                                <th class="right" title="points scored">PF</th title="points difference">
-                                <th class="right" title="tries scored">TF</th title="points scored">
+                                <th style="width: 12%" class="right" title="played">P</th>
+                                <th style="width: 12%" class="right" title="points difference">PD</th>
+                                <th style="width: 12%" class="right" title="tries difference">TD</th title="points difference">
+                                <th style="width: 12%" class="right" title="points scored">PF</th title="points difference">
+                                <th style="width: 12%" class="right" title="tries scored">TF</th title="points scored">
                             </tr>
                         </thead>
                         <tbody data-bind="foreach: table">
                             <tr>
                                 <th data-bind="text: name"></th>
                                 <td data-bind="text: pts"></td>
+                                <td><span data-bind="if: inProg">*</span><span data-bind="text: played"></span></td>
                                 <td data-bind="text: $data.pf - $data.pa"></td>
                                 <td data-bind="text: $data.tf - $data.ta"></td>
                                 <td data-bind="text: pf"></td>

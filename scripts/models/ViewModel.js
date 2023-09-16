@@ -143,50 +143,60 @@ var ViewModel = function (source) {
                 return;
             }
 
-            // If the fixture doesn't have scores as well as teams, don't apply it to the rankings.
-            if (!fixture.isValid()) {
-                return;
-            }
+            var homeId = fixture.homeId();
+            var awayId = fixture.awayId();
 
+            // ensure the pools and teams exist
             if (!pools[fixture.pool()]) {
                 pools[fixture.pool()] = {};
             }
             var pool = pools[fixture.pool()];
 
-            if (!pool[fixture.homeId()]) {
-                pool[fixture.homeId()] = { team: fixture.homeId(), name: vm.rankingsById()[fixture.homeId()].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {} };
+            if (!pool[homeId]) {
+                pool[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
             }
-            var home = pool[fixture.homeId()];
-            if (!pool[fixture.awayId()]) {
-                pool[fixture.awayId()] = { team: fixture.awayId(), name: vm.rankingsById()[fixture.awayId()].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {} };
+            var home = pool[homeId];
+            if (!pool[awayId]) {
+                pool[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
             }
-            var away = pool[fixture.awayId()];
+            var away = pool[awayId];
 
-            var hs = parseInt(fixture.homeScore());
-            var asc = parseInt(fixture.awayScore());
-            var ht = parseInt(fixture.homeTries());
-            var at = parseInt(fixture.awayTries());
+            // If the fixture doesn't have scores as well as teams, don't apply it to the pool
+            if (!fixture.isValid()) {
+                return;
+            }
 
-            home.pf = home.pf + hs;
-            away.pa = away.pa + hs;
-            home.tf = home.tf + ht;
-            away.ta = away.ta + ht;
-            home.pa = home.pa + asc;
-            away.pf = away.pf + asc;
-            home.ta = home.ta + at;
-            away.tf = away.tf + at;
+            // parse ints here as sometimes we end up appending strings
+            var homeScore = parseInt(fixture.homeScore());
+            var awayScore = parseInt(fixture.awayScore());
+            var homeTries = parseInt(fixture.homeTries());
+            var awayTries = parseInt(fixture.awayTries());
+
+            home.pf = home.pf + homeScore;
+            away.pa = away.pa + homeScore;
+            home.tf = home.tf + homeTries;
+            away.ta = away.ta + homeTries;
+            home.pa = home.pa + awayScore;
+            away.pf = away.pf + awayScore;
+            home.ta = home.ta + awayTries;
+            away.tf = away.tf + awayTries;
+
+            if (fixture.status == 'L1' || fixture.status == 'L2' || fixture.status == 'LHT') {
+                home.inProg = true;
+                away.inProg = true;
+            }
 
             home.played = home.played + 1;
             away.played = away.played + 1;
 
-            var homeTablePoints = (hs > asc ? 4 : (hs == asc ? 2 : 0)) + (ht >= 4 ? 1 : 0) + ((hs < asc && hs + 7 >= asc) ? 1 : 0);
+            var homeTablePoints = (homeScore > awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + (homeTries >= 4 ? 1 : 0) + ((homeScore < awayScore && homeScore + 7 >= awayScore) ? 1 : 0);
             home.pts = home.pts + homeTablePoints;
 
-            var awayTablePoints = (hs < asc ? 4 : (hs == asc ? 2 : 0)) + (at >= 4 ? 1 : 0) + ((hs > asc && hs <= asc + 7) ? 1 : 0);
+            var awayTablePoints = (homeScore < awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + (awayTries >= 4 ? 1 : 0) + ((homeScore > awayScore && homeScore <= awayScore + 7) ? 1 : 0);
             away.pts = away.pts + awayTablePoints;
 
-            home.pv[fixture.awayId()] = homeTablePoints;
-            away.pv[fixture.homeId()] = awayTablePoints;
+            home.pv[awayId] = homeTablePoints;
+            away.pv[homeId] = awayTablePoints;
         });
 
         if (!this.poolChoice()) {
