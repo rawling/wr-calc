@@ -139,8 +139,9 @@ var ViewModel = function (source) {
         // Apply each fixture in turn.
         var pools = {};
         var inProgPool = null;
+        var noPool = 'NO POOL';
         $.each(fixtures, function (index, fixture) {
-            // If the fixture doesn't have teams selected, or is already applied, do nothing.
+            // If the fixture doesn't have teams selected do nothing.
             if (!fixture.hasValidTeams()) {
                 return;
             }
@@ -149,20 +150,20 @@ var ViewModel = function (source) {
             var awayId = fixture.awayId();
 
             // ensure the pools and teams exist
-            var poolKey = fixture.pool() || 'NO POOL';
+            var poolKey = fixture.pool() || noPool;
             if (!pools[poolKey]) {
-                pools[poolKey] = {};
+                pools[poolKey] = { anyDraws: false, teams: {} };
             }
             var pool = pools[poolKey];
 
-            if (!pool[homeId]) {
-                pool[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
+            if (!pool.teams[homeId]) {
+                pool.teams[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
             }
-            var home = pool[homeId];
-            if (!pool[awayId]) {
-                pool[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0,pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
+            var home = pool.teams[homeId];
+            if (!pool.teams[awayId]) {
+                pool.teams[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0,pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
             }
-            var away = pool[awayId];
+            var away = pool.teams[awayId];
 
             // If the fixture doesn't have scores as well as teams, don't apply it to the pool
             if (!fixture.isValid()) {
@@ -206,16 +207,17 @@ var ViewModel = function (source) {
             } else {
                 home.drawn += 1;
                 away.drawn += 1;
+                pool.anyDraws = true;
             }
 
             home.pv[awayId] = homeTablePoints;
             away.pv[homeId] = awayTablePoints;
         });
 
-        // remove "undefined" if it looks like "knockouts at a world cup" but not if it looks like "all matches in a round robin"
+        // remove 'NO POOL' if it looks like "knockouts at a world cup" but not if it looks like "all matches in a round robin"
         var poolKeys = Object.keys(pools);
         if (poolKeys.length > 1) {
-            poolKeys = poolKeys.filter(function (k) { return k != 'NO POOL' });
+            poolKeys = poolKeys.filter(function (k) { return k != noPool });
         }
         poolKeys.sort();
 
@@ -226,7 +228,8 @@ var ViewModel = function (source) {
         return poolKeys.map(function (k) {
             return {
                 pool: k,
-                table: Object.values(pools[k]).sort(function (a, b) {
+                anyDraws: pools[k].anyDraws,
+                table: Object.values(pools[k].teams).sort(function (a, b) {
                     // admittedly, this is for RWC2023, and might be different for other tournaments
                     var c1 = b.pts - a.pts;
                     if (c1) return c1;
