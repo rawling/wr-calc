@@ -182,9 +182,15 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     // if we're dealing with an event, also query to see if a team got a TBP?
     // in this case we ignore the counts about as we're going to disable the query string stuff anyway.
     function queryTries(id, cache) {
+        function getTriesForId(id) {
+            return $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/match/' + id + '/stats').then(function (stats) {
+                return [stats.teamStats[0].stats.Tries, stats.teamStats[1].stats.Tries];
+            });
+        }
+
         // In progress so neither query nor populate cache.
         if (!cache) {
-            return $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/match/' + id + '/stats');
+            return getTriesForId(id);
         }
 
         // Finished, so check cache, and populate if we load it.
@@ -192,9 +198,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
         if (localStorage[cacheKey]) {
             return $.when(JSON.parse(localStorage[cacheKey]));
         }
-        var promise = $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/match/' + id + '/stats').then(function (stats) {
-            return [stats.teamStats[0].stats.Tries, stats.teamStats[1].stats.Tries];
-        });
+        var promise = getTriesForId(id);
         if (cache) {
             promise.done(function (stats) {
                 localStorage[cacheKey] = JSON.stringify(stats);
