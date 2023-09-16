@@ -164,7 +164,6 @@ table {
     }
     #leftTop, #leftBottom {
         @include height(6);
-        flex: 0.5;
         display: flex;
         flex-direction: column;
     }
@@ -189,15 +188,16 @@ table {
         overflow-y: hidden;
     }
     #leftBottom {
+        flex-shrink: 0;
         overflow-y: hidden;
     }
-    #rankings, #tables {
-        flex: 1;
-        flex-shrink: 1;
+    #tables {
+        overflow-y: hidden;
+    }
+    #rankings {
         overflow-y: scroll;
     }
     #fixtures {
-        flex: 1;
         overflow-y: scroll;
     }
     #addrow {
@@ -427,6 +427,11 @@ body {
 }
 #poolstable {
     width: 100%;
+
+    tr.inProg {
+        font-style: italic;
+    }
+
     th {
         text-align: left;
     }

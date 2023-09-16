@@ -156,11 +156,11 @@ var ViewModel = function (source) {
             var pool = pools[poolKey];
 
             if (!pool[homeId]) {
-                pool[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
+                pool[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
             }
             var home = pool[homeId];
             if (!pool[awayId]) {
-                pool[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
+                pool[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0,pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
             }
             var away = pool[awayId];
 
@@ -198,6 +198,15 @@ var ViewModel = function (source) {
 
             var awayTablePoints = (homeScore < awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + (awayTries >= 4 ? 1 : 0) + ((homeScore > awayScore && homeScore <= awayScore + 7) ? 1 : 0);
             away.pts = away.pts + awayTablePoints;
+
+            if (homeScore > awayScore) {
+                home.won += 1;
+            } else if (homeScore < awayScore) {
+                away.won += 1;
+            } else {
+                home.drawn += 1;
+                away.drawn += 1;
+            }
 
             home.pv[awayId] = homeTablePoints;
             away.pv[homeId] = awayTablePoints;
