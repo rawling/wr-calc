@@ -179,7 +179,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             // Covid-TRC (noticed in 2021 but apparently also in 2020) ignores the stadium location
             // and treats the nominal home team as always at home
             var tournamentRespectsStadiumLocation = !e.events.some(function (event) {
-                return event.label.match(/^202[01] Rugby Championship$/);
+                return event.label.match(/^The Rugby Championship 202[01]$/);
             });
 
             if (e.venue) {
@@ -227,7 +227,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                     }
                 });
             }
-            fixture.isRwc((event && event.rankingsWeight == 2) || (e.events.length > 0 && e.events[0].rankingsWeight == 2) || (!!e.competition.match(/Rugby World Cup/)));
+            fixture.isRwc((event && event.rankingsWeight == 2) || (e.events.length > 0 && e.events[0].rankingsWeight == 2) || (!!e.competition.match(/Rugby World Cup/) && !e.competition.match(/Qualifying/)));
 
             if (event) {
                 function shortenPhase(name) {
