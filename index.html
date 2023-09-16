@@ -144,7 +144,13 @@
                         <!-- ko if: $data.venueNameAndCountry || $data.kickoff || $data.liveScoreMode || $data.eventPhase -->
                         <tr class="details">
                             <td class="details-left" colspan="2" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
-                            <td class="details-center" colspan="6" data-bind="text: ($data.eventPhase && $data.liveScoreMode) ? ($data.eventPhase + ' (' + $data.liveScoreMode + ')') : ($data.eventPhase || $data.liveScoreMode)"></td>
+                            <!-- ko if: triesMatter -->
+                            <td class="details-center">Tries</td>
+                            <!-- /ko -->
+                            <td class="details-center" colspan="4" data-bind="text: ($data.eventPhase && $data.liveScoreMode) ? ($data.eventPhase + ' (' + $data.liveScoreMode + ')') : ($data.eventPhase || $data.liveScoreMode), attr: { colspan: $data.triesMatter() ? 4 : 6 }"></td>
+                            <!-- ko if: triesMatter -->
+                            <td class="details-center">Tries</td>
+                            <!-- /ko -->
                             <td class="details-right" colspan="5" data-bind="text: venueNameAndCountry, title: venueCity"></td>
                         </tr>
                         <!-- /ko -->
