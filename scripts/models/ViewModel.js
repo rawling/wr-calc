@@ -170,8 +170,8 @@ var ViewModel = function (source) {
             // parse ints here as sometimes we end up appending strings
             var homeScore = parseInt(fixture.homeScore());
             var awayScore = parseInt(fixture.awayScore());
-            var homeTries = parseInt(fixture.homeTries());
-            var awayTries = parseInt(fixture.awayTries());
+            var homeTries = parseInt(fixture.homeTries() || 0);
+            var awayTries = parseInt(fixture.awayTries() || 0);
 
             home.pf = home.pf + homeScore;
             away.pa = away.pa + homeScore;
