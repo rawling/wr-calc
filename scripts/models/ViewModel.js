@@ -226,14 +226,23 @@ var ViewModel = function (source) {
         }
 
         function sortTeamsOnSameTablePoints(teams) {
+            // see if any teams have any points - if so we will set all to at least 0 to make visualisation easier, if not we will leave all blank
+            var anyPoints = false;
             for (var i = 0; i < teams.length; i++) {
-                teams[i].pointsVsTies = 0; // turn null to 0 if any have played
                 for (var j = 0; j < teams.length; j++) {
                     if (i == j) continue;
 
                     if (teams[i].pv[teams[j].team]) {
-                        teams[i].pointsVsTies += teams[i].pv[teams[j].team];
+                        anyPoints = true;
+                        teams[i].pointsVsTies = (teams[i].pointsVsTies || 0) + teams[i].pv[teams[j].team];
                     }
+                }
+            }
+
+            // if any teams have points, make sure the other teams show 0 rather than nothing (null)
+            if (anyPoints) {
+                for (var i = 0; i < teams.length; i++) {
+                    teams[i].pointsVsTies = teams[i].pointsVsTies || 0;
                 }
             }
 
