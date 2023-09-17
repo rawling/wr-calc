@@ -152,16 +152,16 @@ var ViewModel = function (source) {
             // ensure the pools and teams exist
             var poolKey = fixture.pool() || noPool;
             if (!pools[poolKey]) {
-                pools[poolKey] = { anyDraws: false, teams: {} };
+                pools[poolKey] = { anyDraws: false, anyTies: false, teams: {} };
             }
             var pool = pools[poolKey];
 
             if (!pool.teams[homeId]) {
-                pool.teams[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
+                pool.teams[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false, pointsVsTies: null };
             }
             var home = pool.teams[homeId];
             if (!pool.teams[awayId]) {
-                pool.teams[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0,pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false };
+                pool.teams[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false, pointsVsTies: null };
             }
             var away = pool.teams[awayId];
 
@@ -225,33 +225,77 @@ var ViewModel = function (source) {
             this.poolChoice(inProgPool || poolKeys[0]);
         }
 
+        function sortTeamsOnSameTablePoints(teams) {
+            for (var i = 0; i < teams.length; i++) {
+                teams[i].pointsVsTies = 0; // turn null to 0 if any have played
+                for (var j = 0; j < teams.length; j++) {
+                    if (i == j) continue;
+
+                    if (teams[i].pv[teams[j].team]) {
+                        teams[i].pointsVsTies += teams[i].pv[teams[j].team];
+                    }
+                }
+            }
+
+            return teams.sort(function (a, b) {
+                // admittedly, this is for RWC2023, and might be different for other tournaments
+                var c2 = b.pointsVsTies - a.pointsVsTies;
+                if (c2) return c2;
+
+                var c3 = (b.pf - b.pa) - (a.pf - a.pa);
+                if (c3) return c3;
+                
+                var c4 = (b.tf - b.ta) - (a.tf - a.ta);
+                if (c4) return c4;
+
+                var c5 = b.pf - a.pf;
+                if (c5) return c5;
+
+                var c6 = b.tf - a.tf;
+                if (c6) return c6;
+
+                var c7 = vm.projectedRankings().find(r => r.team.id == b.team).pts() - vm.projectedRankings().find(r => r.team.id == a.team).pts();
+                return c7;
+            })
+        }
+
+        function sortPool(teams) {
+            // group by table points.
+            var byTablePoints = [];
+            Object.values(teams).forEach(function (team) {
+                if (!byTablePoints[team.pts]) {
+                    byTablePoints[team.pts] = [];
+                }
+                byTablePoints[team.pts].push(team);
+            });
+
+            // go through groups, taking single teams where they exist
+            // or sorting matching teams where necessary
+            var ordered = [];
+            for (var i = byTablePoints.length - 1; i >= 0; i--) {
+                var btp = byTablePoints[i];
+                if (!btp) continue;
+                if (btp.length == 1) {
+                    ordered.push(btp[0]);
+                    continue;
+                }
+
+                var sortedWithin = sortTeamsOnSameTablePoints(btp);
+                for (var j = 0; j < sortedWithin.length; j++) {
+                    ordered.push(sortedWithin[j]);
+                }
+            }
+
+            return ordered;
+        }
+
         return poolKeys.map(function (k) {
+            var sortedTable = sortPool(pools[k].teams);
             return {
                 pool: k,
                 anyDraws: pools[k].anyDraws,
-                table: Object.values(pools[k].teams).sort(function (a, b) {
-                    // admittedly, this is for RWC2023, and might be different for other tournaments
-                    var c1 = b.pts - a.pts;
-                    if (c1) return c1;
-
-                    var c2 = b.pv[a.team] - a.pv[b.team];
-                    if (c2) return c2;
-
-                    var c3 = (b.pf - b.pa) - (a.pf - a.pa);
-                    if (c3) return c3;
-                    
-                    var c4 = (b.tf - b.ta) - (a.tf - a.ta);
-                    if (c4) return c4;
-
-                    var c5 = b.pf - a.pf;
-                    if (c5) return c5;
-
-                    var c6 = b.tf - a.tf;
-                    if (c6) return c6;
-
-                    var c7 = vm.projectedRankings().find(r => r.team.id == b.team).pts() - vm.projectedRankings().find(r => r.team.id == a.team).pts();
-                    return c7;
-                })
+                anyTies: !!sortedTable.find(function (a) { return a.pointsVsTies; }), // don't bother showing where all are 0 - means they've not played yet
+                table: sortedTable
             };
         });
     }, this);

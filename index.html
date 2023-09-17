@@ -94,22 +94,28 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th></th>
-                                <th style="width: 9%" class="right" title="played">P</th>
+                                <th style="width: 9%" class="right" title="group points">Pts</th>
+                                <!-- ko if: anyTies -->
+                                <th style="width: 9%" class="right" title="group points vs. tied teams">PV</th>
+                                <!-- /ko -->
+                                <th style="width: 9%" class="right" title="played">Pl</th>
                                 <th style="width: 9%" class="right" title="won">W</th>
                                 <!-- ko if: anyDraws -->
                                 <th style="width: 9%" class="right" title="drawn">D</th>
                                 <!-- /ko -->
                                 <th style="width: 9%" class="right" title="points difference">PD</th>
-                                <th style="width: 9%" class="right" title="tries difference">TD</th title="points difference">
-                                <th style="width: 9%" class="right" title="points scored">PF</th title="points difference">
-                                <th style="width: 9%" class="right" title="tries scored">TF</th title="points scored">
+                                <th style="width: 9%" class="right" title="tries difference">TD</th>
+                                <th style="width: 9%" class="right" title="points scored">PF</th>
+                                <th style="width: 9%" class="right" title="tries scored">TF</th>
                             </tr>
                         </thead>
                         <tbody data-bind="foreach: table">
                             <tr data-bind="css: { inProg: inProg }">
                                 <th data-bind="text: name"></th>
                                 <td data-bind="text: pts"></td>
+                                <!-- ko if: $parent.anyTies -->
+                                <td data-bind="text: pointsVsTies"></td>
+                                <!-- /ko -->
                                 <td data-bind="text: played"></td>
                                 <td data-bind="text: won"></td>
                                 <!-- ko if: $parent.anyDraws -->
