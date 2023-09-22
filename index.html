@@ -95,9 +95,6 @@
                             <tr>
                                 <th></th>
                                 <th style="width: 9%" class="right" title="group points">Pts</th>
-                                <!-- ko if: anyTies -->
-                                <th style="width: 9%" class="right" title="group points vs. tied teams">PV</th>
-                                <!-- /ko -->
                                 <th style="width: 9%" class="right" title="played">Pl</th>
                                 <th style="width: 9%" class="right" title="won">W</th>
                                 <!-- ko if: anyDraws -->
@@ -113,9 +110,6 @@
                             <tr data-bind="css: { inProg: inProg }">
                                 <th data-bind="text: name"></th>
                                 <td data-bind="text: pts"></td>
-                                <!-- ko if: $parent.anyTies -->
-                                <td data-bind="text: pointsVsTies"></td>
-                                <!-- /ko -->
                                 <td data-bind="text: played"></td>
                                 <td data-bind="text: won"></td>
                                 <!-- ko if: $parent.anyDraws -->

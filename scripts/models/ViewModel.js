@@ -157,11 +157,11 @@ var ViewModel = function (source) {
             var pool = pools[poolKey];
 
             if (!pool.teams[homeId]) {
-                pool.teams[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false, pointsVsTies: null };
+                pool.teams[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, beat: {}, inProg: false };
             }
             var home = pool.teams[homeId];
             if (!pool.teams[awayId]) {
-                pool.teams[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, pv: {}, inProg: false, pointsVsTies: null };
+                pool.teams[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, beat: {}, inProg: false };
             }
             var away = pool.teams[awayId];
 
@@ -202,16 +202,15 @@ var ViewModel = function (source) {
 
             if (homeScore > awayScore) {
                 home.won += 1;
+                home.beat[awayId] = true;
             } else if (homeScore < awayScore) {
                 away.won += 1;
+                away.beat[homeId] = true;
             } else {
                 home.drawn += 1;
                 away.drawn += 1;
                 pool.anyDraws = true;
             }
-
-            home.pv[awayId] = homeTablePoints;
-            away.pv[homeId] = awayTablePoints;
         });
 
         // remove 'NO POOL' if it looks like "knockouts at a world cup" but not if it looks like "all matches in a round robin"
@@ -225,32 +224,19 @@ var ViewModel = function (source) {
             this.poolChoice(inProgPool || poolKeys[0]);
         }
 
+        // admittedly, this is for RWC2023, and might be different for other tournaments
         function sortTeamsOnSameTablePoints(teams) {
-            // see if any teams have any points - if so we will set all to at least 0 to make visualisation easier, if not we will leave all blank
-            var anyPoints = false;
-            for (var i = 0; i < teams.length; i++) {
-                for (var j = 0; j < teams.length; j++) {
-                    if (i == j) continue;
-
-                    if (teams[i].pv[teams[j].team]) {
-                        anyPoints = true;
-                        teams[i].pointsVsTies = (teams[i].pointsVsTies || 0) + teams[i].pv[teams[j].team];
-                    }
+            // if there are only 2 teams, the winner of the match between them goes top
+            if (teams.length == 2) {
+                if (teams[0].beat[teams[1].team]) {
+                    return [teams[0], teams[1]];
+                } else if (teams[1].beat[teams[0].team]) {
+                    return [teams[1], teams[0]];
                 }
             }
 
-            // if any teams have points, make sure the other teams show 0 rather than nothing (null)
-            if (anyPoints) {
-                for (var i = 0; i < teams.length; i++) {
-                    teams[i].pointsVsTies = teams[i].pointsVsTies || 0;
-                }
-            }
-
-            return teams.sort(function (a, b) {
-                // admittedly, this is for RWC2023, and might be different for other tournaments
-                var c2 = b.pointsVsTies - a.pointsVsTies;
-                if (c2) return c2;
-
+            // if there were more teams, or if that doesn't separate the 2, sort by the other criteria
+            var teamsByOtherCriteria = teams.sort(function (a, b) {
                 var c3 = (b.pf - b.pa) - (a.pf - a.pa);
                 if (c3) return c3;
                 
@@ -265,7 +251,18 @@ var ViewModel = function (source) {
 
                 var c7 = vm.projectedRankings().find(r => r.team.id == b.team).pts() - vm.projectedRankings().find(r => r.team.id == a.team).pts();
                 return c7;
-            })
+            });
+
+            // if there were only 2 teams, these criteria sorted them
+            if (teams.length == 2) {
+                return teamsByOtherCriteria;
+            }
+
+            // otherwise they only picked out the top team; re-sort the remainer
+            var top = teamsByOtherCriteria.shift();
+            var sortedRemainder = sortTeamsOnSameTablePoints(teamsByOtherCriteria);
+            sortedRemainder.unshift(top);
+            return sortedRemainder;
         }
 
         function sortPool(teams) {
@@ -303,7 +300,6 @@ var ViewModel = function (source) {
             return {
                 pool: k,
                 anyDraws: pools[k].anyDraws,
-                anyTies: !!sortedTable.find(function (a) { return a.pointsVsTies; }), // don't bother showing where all are 0 - means they've not played yet
                 table: sortedTable
             };
         });
