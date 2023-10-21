@@ -85,16 +85,50 @@ if (sourceString == 'mru' || sourceString == 'wru') {
     loadRankings(sourceString, dateString)
 } else {
     viewModel.event(sourceString);
-    // load the event!
-    $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + sourceString + '/schedule?language=en').done(function (data) {
+    // load the event(s)!
+    var eventIds = sourceString.split(',').map(function (idAndName) { return idAndName.split(':')[0]; });
 
-        loadRankings(
-            data.event.sport,
-            data.event.start.label,// maybe subtract a day so we don't include rankings on that date?
-            data.matches,
-            data.event
-        );
-    });
+    if (eventIds.length == 1) {
+        // Bit dumb but JQuery seems to treat `when` differently when there is only one promise.
+        // Special-case this with a single load.
+        $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + sourceString + '/schedule?language=en').done(function (data) {
+
+            var events = {};
+            events[data.event.id] = { event: data.event };
+            loadRankings(
+                data.event.sport,
+                data.event.start.label,// maybe subtract a day so we don't include rankings on that date?
+                data.matches,
+                events
+            );
+        });
+    } else {
+        // Load all the events, and aggregate them into one big colelction of matches.
+        var eventNames = sourceString.split(',').map(function (idAndName) { return idAndName.split(':')[1]; });
+        var promises = eventIds.map(function (eventId) {
+            return $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + eventId + '/schedule?language=en');
+        });
+
+        $.when.apply($, promises).then(function () {
+            var datas = [].slice.call(arguments).map(function (arg) { return arg[0]; });
+
+            var sport = datas[0].event.sport;
+            var start = datas.reduce(function (prev, curr) { return prev.event.start.label < curr.event.start.label ? prev : curr }).event.start.label;
+            var matches = datas.map(function (data) { return data.matches; }).flat();
+            matches.sort(function (a, b) { return a.time.millis - b.time.millis; });
+
+            var events = {};
+            datas.forEach (function (data, indx) {
+                events[data.event.id] = { event: data.event, name: eventNames[indx] };
+            });
+            loadRankings(
+                sport,
+                start, // maybe subtract a day so we don't include rankings on that date?
+                matches,
+                events
+            );
+        });
+    }
 }
 
 // Helper to add a fixture to the top/bottom.
@@ -333,7 +367,13 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                 if ((e.eventPhaseId && e.eventPhaseId.type == 'Pool') || !e.eventPhaseId) {
                     fixture.triesMatter(true); 
                     if (e.eventPhaseId) {
-                        fixture.pool(e.eventPhaseId.subType);
+                        // If we have multiple events, give each fixture its event as the pool
+                        if (Object.keys(event).length > 1) {
+                            fixture.pool(event[e.events[0].id].name);
+                            fixture.eventPhase = event[e.events[0].id].name;
+                        } else {
+                            fixture.pool(e.eventPhaseId.subType);
+                        }
                     }
                     if (e.status != 'U') {
                         queryTries(e.matchId, e.status == 'C').done(function (tries) {
