@@ -10,7 +10,7 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script src="//cdn.rawgit.com/agschwender/jquery.formatDateTime/master/dist/jquery.formatDateTime.min.js"></script>
-<script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.4.2.js"></script>
+<script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.5.0.js"></script>
 <link href="//fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet"> 
 <link href="styles/wr-calc.css?v={{site.time|date:'%s'}}" type="text/css" rel="stylesheet">
 <script src="scripts/models/ViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
@@ -159,7 +159,7 @@
                             <!-- ko if: triesMatter -->
                             <td class="details-center">Tries</td>
                             <!-- /ko -->
-                            <td class="details-right" colspan="5" data-bind="text: venueNameAndCountry, title: venueCity"></td>
+                            <td class="details-right" colspan="5" data-bind="text: $data.venueNameAndCountry + ($data.switched() ? '*' : ''), title: $data.venueCity + ($data.switched() ? ' (home advantage to &quot;away&quot; team)' : '')"></td>
                         </tr>
                         <!-- /ko -->
                         <tr class="teams">
@@ -178,12 +178,11 @@
                                 <input type="number" min="0" data-bind="value: awayTries, disabled: alreadyInRankings" />
                             </td>
                             <!-- /ko -->
-                            <td colspan="2" style="text-align: right" data-bind="attr: { colspan: $data.triesMatter() ? 2 : 3 }">
+                            <td colspan="2" style="text-align: right" data-bind="attr: { colspan: $data.triesMatter() ? 2 : 3 }, class: $data.switched() ? 'switched' : ''">
                                 <select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: awayCaption, disabled: alreadyInRankings" style="width:100%"></select>
                             </td>
-                            <td>
+                            <td data-bind="class: $data.switched() ? 'switched' : ''">
                                 <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
-                                <span data-bind="if: switched" title="Home team is nominally Away">*</span>
                             </td>
                             <!-- ko if: $parent.showIsRwc -->
                             <td><input type="checkbox" data-bind="checked: isRwc, disabled: alreadyInRankings" /></td>

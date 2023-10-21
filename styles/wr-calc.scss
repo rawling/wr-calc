@@ -386,6 +386,10 @@ body {
         input[type=number] {
             width: 3em;
         }
+
+        td.switched {
+            background-color: #ddd;
+        }
     }
 }
 
