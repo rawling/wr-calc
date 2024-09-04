@@ -81,8 +81,50 @@ var loadRankings = function (rankingsSource, startDate, fixtures, event) {
     });
 };
 
+
+// Format a date for the fixture or rankings API call.
+var formatDate = function(date) {
+    var d     = new Date(date),
+        month = '' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1),
+        day   = '' + (d.getDate() < 10 ? '0' : '') + d.getDate(),
+        year  = d.getFullYear();
+
+    return [year, month, day].join('-');
+}
+
+var loadEvents = function(sport) {
+    viewModel.eventsCaption(sport.toUpperCase() + ' Event');
+    var start = new Date(new Date(new Date().getFullYear(), 0, 1));
+    var end = new Date(new Date(new Date().getFullYear(), 12, 13));
+    $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/?startDate=' + formatDate(start) + '&endDate=' + formatDate(end) + '&sport=' + sport + '&pageSize=50').done(function (data) {
+        var events = [];
+        for (var i = 0; i < data.content.length; i++) {
+            var event = data.content[i];
+
+            // Don't show the whole year
+            if (event.label.match(/^\d{4} .*en's International$/)) continue;
+
+            // Collect WXV
+            if (event.label.match(/^WXV/)) {
+                var id = event.id + ':' + event.label;
+                var label = event.label;
+                while (i + 1 < data.content.length && data.content[i + 1].label.match(/^WXV/)) {
+                    i++;
+                    id += "," + data.content[i].id + ':' + data.content[i].label;
+                    label += '/' + data.content[i].label;
+                }
+                events.push({ id: id, label: label });
+            } else {
+                events.push({ id: event.id, label: event.label });
+            }
+        }
+        viewModel.events(events);
+    })
+}
+
 if (sourceString == 'mru' || sourceString == 'wru') {
     loadRankings(sourceString, dateString)
+    loadEvents(sourceString)
 } else {
     viewModel.event(sourceString);
     // load the event(s)!
@@ -94,6 +136,7 @@ if (sourceString == 'mru' || sourceString == 'wru') {
         $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + sourceString + '/schedule?language=en').done(function (data) {
 
             var events = {};
+            viewModel.eventName(data.event.label);
             events[data.event.id] = { event: data.event };
             loadRankings(
                 data.event.sport,
@@ -103,8 +146,9 @@ if (sourceString == 'mru' || sourceString == 'wru') {
             );
         });
     } else {
-        // Load all the events, and aggregate them into one big colelction of matches.
+        // Load all the events, and aggregate them into one big collection of matches.
         var eventNames = sourceString.split(',').map(function (idAndName) { return idAndName.split(':')[1]; });
+        viewModel.eventName(eventNames.join('/'));
         var promises = eventIds.map(function (eventId) {
             return $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + eventId + '/schedule?language=en');
         });
@@ -246,6 +290,9 @@ var fixturesLoaded = function (fixtures, rankings, event) {
         // I don't think we can reliably only request fixtures relevant to loaded teams, so filter here.
         // For knockouts where a team may not be decided yet, allow team to be null or id to be 0
         if ((e.teams[0] && (e.teams[0].id != '0') && !rankings[e.teams[0].id]) || (e.teams[1] && (e.teams[1].id != '0') && !rankings[e.teams[1].id])) {
+            if (event) {
+                console.warn('Not including fixture ' + e.teams[0].name + ' vs ' + e.teams[1].name + ' as a team is missing from the rankings');
+            }
             return;
         };
 
@@ -403,16 +450,6 @@ var fixturesLoaded = function (fixtures, rankings, event) {
         viewModel.showIsRwc(false);
     }
 };
-
-// Format a date for the fixture or rankings API call.
-var formatDate = function(date) {
-    var d     = new Date(date),
-        month = '' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1),
-        day   = '' + (d.getDate() < 10 ? '0' : '') + d.getDate(),
-        year  = d.getFullYear();
-
-    return [year, month, day].join('-');
-}
 
 // Add days to a date.
 Date.prototype.addDays = function (d) {

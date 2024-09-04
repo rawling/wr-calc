@@ -2,6 +2,7 @@
 var ViewModel = function (source) {
     this.source = source; // mru or wru or event id - doesn't really matter, just goes back into the query
     this.event = ko.observable();
+    this.eventName = ko.observable();
     this.rankingsSource = ko.observable(source); // in the footer link - should end up as mru or wru
 
     // The base rankings in an object, indexed by the ID of the team.
@@ -21,6 +22,10 @@ var ViewModel = function (source) {
 
     // The fixtures used to calculate projected rankings.
     this.fixtures = ko.observableArray();
+
+    this.events = ko.observableArray();
+    this.eventsCaption = ko.observable('Event');
+    this.selectedEvent = ko.observable();
 
     // A rate-limited set of fixtures. This allows us to add fixtures performantly, by having the fixture list
     // bound to fixtures above but calculations based on this version.
@@ -406,6 +411,10 @@ var ViewModel = function (source) {
     }, this);
 
     this.showIsRwc = ko.observable(true);
+
+    this.selectedEvent.subscribe(function (selectedEvent) {
+        window.location.replace('?s=' + selectedEvent.id);
+    })
 
     return this;
 };

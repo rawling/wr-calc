@@ -285,7 +285,7 @@ body {
     line-height: 24px;
     width: 100%;
 
-    a {
+    a, span {
         flex-grow: 1;
         text-align: center;
         border-bottom: 2px solid $white;
@@ -299,6 +299,10 @@ body {
         &:not(.sel) {
             @extend .secondaryText;
         }
+    }
+
+    select {
+        flex-grow: 1;
     }
 }
 

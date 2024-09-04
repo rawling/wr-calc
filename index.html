@@ -25,12 +25,15 @@
         <a data-bind="css: source == 'wru' ? 'sel' : '', attr: { href: $data.source == 'wru' ? null : '?s=wru' }">
             WRU
         </a>
-        <a data-bind="css: source == '2171' ? 'sel' : '', attr: { href: $data.source == '2171' ? null : '?s=2171' }">
-            M6N2024
-        </a>
-        <a data-bind="css: source == '2175' ? 'sel' : '', attr: { href: $data.source == '2175' ? null : '?s=2175' }">
-            W6N2024
-        </a>
+        <!-- ko ifnot: event -->
+        <span>
+            or pick
+            <select data-bind="options: events, optionsText: 'label', value: selectedEvent, optionsCaption: eventsCaption"></select>
+        </span>
+        <!-- /ko -->
+        <!-- ko if: eventName -->
+        <span class="sel" data-bind="text: eventName"></span>
+        <!-- /ko -->
     </div>
     <div id="leftright">
         <div id="left">
