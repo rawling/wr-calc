@@ -288,6 +288,12 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     var allNotRwc = true;
     $.each(fixtures, function (i, e) {
         // I don't think we can reliably only request fixtures relevant to loaded teams, so filter here.
+        
+        // If we're not querying an event, we're querying a sport; don't include fixtures that don't match
+        if (!event && e.sport.toUpperCase() != sourceString.toUpperCase()) {
+            return;
+        }
+
         // For knockouts where a team may not be decided yet, allow team to be null or id to be 0
         if ((e.teams[0] && (e.teams[0].id != '0') && !rankings[e.teams[0].id]) || (e.teams[1] && (e.teams[1].id != '0') && !rankings[e.teams[1].id])) {
             if (event) {
