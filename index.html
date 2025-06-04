@@ -165,7 +165,7 @@
                             <!-- ko if: triesMatter -->
                             <td class="details-center">Tries</td>
                             <!-- /ko -->
-                            <td class="details-right" colspan="5" data-bind="text: $data.venueNameAndCountry + ($data.switched() ? '*' : ''), title: $data.venueCity + ($data.switched() ? ' (home advantage to &quot;away&quot; team)' : '')"></td>
+                            <td class="details-right" colspan="5" data-bind="text: ($data.venueNameAndCountry || '') + ($data.switched() ? '*' : ''), title: ($data.venueCity || '') + ($data.switched() ? ' (home advantage to &quot;away&quot; team)' : '')"></td>
                         </tr>
                         <!-- /ko -->
                         <tr class="teams">
