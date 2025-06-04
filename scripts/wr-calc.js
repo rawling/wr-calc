@@ -294,13 +294,22 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             return;
         }
 
-        // For knockouts where a team may not be decided yet, allow team to be null or id to be 0
-        if ((e.teams[0] && (e.teams[0].id != '0') && !rankings[e.teams[0].id]) || (e.teams[1] && (e.teams[1].id != '0') && !rankings[e.teams[1].id])) {
-            if (event) {
-                console.warn('Not including fixture ' + e.teams[0].name + ' vs ' + e.teams[1].name + ' as a team is missing from the rankings');
-            }
-            return;
-        };
+        if (event) {
+            // For knockouts where a team may not be decided yet, allow team to be null or id to be 0
+            if ((e.teams[0] && (e.teams[0].id != '0') && !rankings[e.teams[0].id]) || (e.teams[1] && (e.teams[1].id != '0') && !rankings[e.teams[1].id])) {
+                if (event) {
+                    console.warn('Not including fixture ' + e.teams[0].name + ' vs ' + e.teams[1].name + ' as a team is missing from the rankings');
+                }
+                return;
+            };
+        } else {
+            // If we're not looking at an event, don't include such matches.
+            // People might have to insert a row for an upcoming final.
+            // But we were getting matches for non-International tournaments and no easy way to tell that is the case.
+            if (!e.teams[0] || !rankings[e.teams[0].id] || !e.teams[1] || !rankings[e.teams[1].id]) {
+                return;
+            };
+        }
 
         addFixture(true, function (fixture) {
             fixture.homeId(e.teams[0].id);
