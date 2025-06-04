@@ -137,6 +137,7 @@ if (sourceString == 'mru' || sourceString == 'wru') {
 
             var events = {};
             viewModel.eventName(data.event.label);
+            document.title = 'WRRC - ' + data.event.label;
             events[data.event.id] = { event: data.event };
             loadRankings(
                 data.event.sport,
@@ -149,6 +150,7 @@ if (sourceString == 'mru' || sourceString == 'wru') {
         // Load all the events, and aggregate them into one big collection of matches.
         var eventNames = sourceString.split(',').map(function (idAndName) { return idAndName.split(':')[1]; });
         viewModel.eventName(eventNames.join('/'));
+        document.title = 'WRRC - ' + eventNames.join('/');
         var promises = eventIds.map(function (eventId) {
             return $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + eventId + '/schedule?language=en');
         });
