@@ -104,8 +104,21 @@ var ViewModel = function (source) {
             sorted.push(r);
         });
         sorted.sort(function (a, b) { return b.pts() - a.pts(); });
+
+        var last = null;
         $.each(sorted, function (i, r) {
-            r.pos(i + 1);
+            if (last &&
+                last.previousPos() === r.previousPos() &&
+                last.previousPts() == last.pts() &&
+                r.previousPts() == r.pts()) {
+                // This was tied with the previous team before and neither have played so should remain so.
+                // If they played each other and tied this might still work.
+                // If they both played giants and got full 1/2/3 points it won't.
+                r.pos(last.pos());
+            } else {
+                r.pos(i + 1);
+            }
+            last = r;
         });
 
         // If we have calculated rankings, make sure we are showing the calculated ones.
