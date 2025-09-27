@@ -158,6 +158,7 @@ var ViewModel = function (source) {
         var pools = {};
         var inProgPool = null;
         var noPool = 'NO POOL';
+        var usesThreeTryBp = !!/The Rugby Championship/.exec(this.eventName());
         $.each(fixtures, function (index, fixture) {
             // If the fixture doesn't have teams selected do nothing.
             if (!fixture.hasValidTeams()) {
@@ -212,10 +213,10 @@ var ViewModel = function (source) {
             home.played = home.played + 1;
             away.played = away.played + 1;
 
-            var homeTablePoints = (homeScore > awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + (homeTries >= 4 ? 1 : 0) + ((homeScore < awayScore && homeScore + 7 >= awayScore) ? 1 : 0);
+            var homeTablePoints = (homeScore > awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + ((usesThreeTryBp ? (homeTries - awayTries >= 3) : (homeTries >= 4)) ? 1 : 0) + ((homeScore < awayScore && homeScore + 7 >= awayScore) ? 1 : 0);
             home.pts = home.pts + homeTablePoints;
 
-            var awayTablePoints = (homeScore < awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + (awayTries >= 4 ? 1 : 0) + ((homeScore > awayScore && homeScore <= awayScore + 7) ? 1 : 0);
+            var awayTablePoints = (homeScore < awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + ((usesThreeTryBp ? (awayTries - homeTries >= 3) : (awayTries >= 4)) ? 1 : 0) + ((homeScore > awayScore && homeScore <= awayScore + 7) ? 1 : 0);
             away.pts = away.pts + awayTablePoints;
 
             if (homeScore > awayScore) {
