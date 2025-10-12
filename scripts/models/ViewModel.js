@@ -176,11 +176,11 @@ var ViewModel = function (source) {
             var pool = pools[poolKey];
 
             if (!pool.teams[homeId]) {
-                pool.teams[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, beat: {}, inProg: false };
+                pool.teams[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, ptsVs: {}, inProg: false };
             }
             var home = pool.teams[homeId];
             if (!pool.teams[awayId]) {
-                pool.teams[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, beat: {}, inProg: false };
+                pool.teams[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, ptsVs: {}, inProg: false };
             }
             var away = pool.teams[awayId];
 
@@ -215,16 +215,16 @@ var ViewModel = function (source) {
 
             var homeTablePoints = (homeScore > awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + ((usesThreeTryBp ? (homeTries - awayTries >= 3) : (homeTries >= 4)) ? 1 : 0) + ((homeScore < awayScore && homeScore + 7 >= awayScore) ? 1 : 0);
             home.pts = home.pts + homeTablePoints;
+            home.ptsVs[awayId] = (home.ptsVs[awayId] || 0) + homeTablePoints;
 
             var awayTablePoints = (homeScore < awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + ((usesThreeTryBp ? (awayTries - homeTries >= 3) : (awayTries >= 4)) ? 1 : 0) + ((homeScore > awayScore && homeScore <= awayScore + 7) ? 1 : 0);
             away.pts = away.pts + awayTablePoints;
+            away.ptsVs[homeId] = (away.ptsVs[homeId] || 0) + awayTablePoints;
 
             if (homeScore > awayScore) {
                 home.won += 1;
-                home.beat[awayId] = true;
             } else if (homeScore < awayScore) {
                 away.won += 1;
-                away.beat[homeId] = true;
             } else {
                 home.drawn += 1;
                 away.drawn += 1;
@@ -245,11 +245,14 @@ var ViewModel = function (source) {
 
         // admittedly, this is for RWC2023, and might be different for other tournaments
         function sortTeamsOnSameTablePoints(teams) {
-            // if there are only 2 teams, the winner of the match between them goes top
+            // if there are only 2 teams, the one with most vs table points between them goes top
             if (teams.length == 2) {
-                if (teams[0].beat[teams[1].team]) {
+                var pts0vs1 = teams[0].ptsVs[teams[1].team] || 0;
+                var pts1vs0 = teams[1].ptsVs[teams[0].team] || 0;
+
+                if (pts0vs1 > pts1vs0) {
                     return [teams[0], teams[1]];
-                } else if (teams[1].beat[teams[0].team]) {
+                } else if (pts1vs0 > pts0vs1) {
                     return [teams[1], teams[0]];
                 }
             }
