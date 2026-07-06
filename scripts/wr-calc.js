@@ -169,7 +169,10 @@ var formatDate = function(date) {
     return [year, month, day].join('-');
 }
 
-var loadEvents = function(sport) {
+// Load the events for the picker dropdown. Pass currentEvent ({ id, label })
+// when already viewing an event, so it shows as the dropdown's selection
+// (added to the list if it isn't among this year's events).
+var loadEvents = function(sport, currentEvent) {
     viewModel.eventsCaption(sport.toUpperCase() + ' Event');
     var start = new Date(new Date(new Date().getFullYear(), 0, 1));
     var end = new Date(new Date(new Date().getFullYear(), 12, 13));
@@ -195,7 +198,21 @@ var loadEvents = function(sport) {
                 events.push({ id: event.id, label: event.label });
             }
         }
+
+        var current = null;
+        if (currentEvent) {
+            current = events.filter(function (e) { return e.id === currentEvent.id; })[0];
+            if (!current) {
+                // e.g. an event from a previous year - show it at the top.
+                current = currentEvent;
+                events.unshift(current);
+            }
+        }
+
         viewModel.events(events);
+        if (current) {
+            viewModel.selectedEvent(current);
+        }
     })
 }
 
@@ -214,6 +231,7 @@ if (sourceString == 'mru' || sourceString == 'wru') {
             var events = {};
             viewModel.eventName(data.event.label);
             document.title = 'WRRC - ' + data.event.label;
+            loadEvents(data.event.sport, { id: sourceString, label: data.event.label });
             events[data.event.id] = { event: data.event };
             loadRankings(
                 data.event.sport,
@@ -233,6 +251,7 @@ if (sourceString == 'mru' || sourceString == 'wru') {
 
         Promise.all(promises).then(function (datas) {
             var sport = datas[0].event.sport;
+            loadEvents(sport, { id: sourceString, label: eventNames.join('/') });
             var start = datas.reduce(function (prev, curr) { return prev.event.start.label < curr.event.start.label ? prev : curr }).event.start.label;
             var matches = datas.map(function (data) { return data.matches; }).flat();
             matches.sort(function (a, b) { return a.time.millis - b.time.millis; });

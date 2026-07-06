@@ -453,7 +453,10 @@ var ViewModel = function (source) {
     this.showIsRwc = ko.observable(true);
 
     this.selectedEvent.subscribe(function (selectedEvent) {
-        window.location = location.pathname + '#s=' + selectedEvent.id;
+        // Ignore programmatic preselection of the event we are already viewing.
+        if (selectedEvent && selectedEvent.id !== source) {
+            window.location = location.pathname + '#s=' + selectedEvent.id;
+        }
     })
 
     return this;

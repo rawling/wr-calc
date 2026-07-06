@@ -24,15 +24,10 @@
         <a data-bind="css: source == 'wru' ? 'sel' : '', attr: { href: $data.source == 'wru' ? null : '#s=wru' }">
             WRU
         </a>
-        <!-- ko ifnot: event -->
-        <span>
+        <span data-bind="css: event() ? 'sel' : ''">
             or pick
             <select data-bind="options: events, optionsText: 'label', value: selectedEvent, optionsCaption: eventsCaption"></select>
         </span>
-        <!-- /ko -->
-        <!-- ko if: eventName -->
-        <span class="sel" data-bind="text: eventName"></span>
-        <!-- /ko -->
     </div>
     <div id="progress" data-bind="css: { active: isLoading, done: justLoaded }">
         <span class="label" data-bind="text: isLoading() ? 'Loading from World Rugby…' : 'Loaded'"></span>
