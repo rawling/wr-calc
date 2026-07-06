@@ -82,6 +82,14 @@ var loadRankings = function (rankingsSource, startDate, fixtures, event) {
 };
 
 
+// Format a kickoff time for display; produces the same output as the old
+// jquery.formatDateTime 'D dd/mm/yy hh:ii' format.
+var formatKickoff = function (date) {
+    var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    return days[date.getDay()] + ' ' + pad(date.getDate()) + '/' + pad(date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+};
+
 // Format a date for the fixture or rankings API call.
 var formatDate = function(date) {
     var d     = new Date(date),
@@ -323,7 +331,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             var afterEndOfHome = kickoff > endOfHome;
             fixture.noHome(afterEndOfHome);
             fixture.switched(false);
-            fixture.kickoff = $.formatDateTime('D dd/mm/yy hh:ii', kickoff);
+            fixture.kickoff = formatKickoff(kickoff);
 
             // Covid-TRC (noticed in 2021 but apparently also in 2020) ignores the stadium location
             // and treats the nominal home team as always at home
