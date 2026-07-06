@@ -105,20 +105,19 @@ var ViewModel = function (source) {
         });
         sorted.sort(function (a, b) { return b.pts() - a.pts(); });
 
-        var last = null;
+        // Standard competition ranking, as WR uses: teams on equal points share
+        // a rank, and the following rank is skipped (1, 2, 2, 4, ...).
+        // This covers both pre-existing ties that remain untouched, and ties
+        // formed by applying fixtures (e.g. the "both played giants and got
+        // full points" case the previous heuristic couldn't keep tied).
+        var prevPts = null;
+        var prevRank = 0;
         $.each(sorted, function (i, r) {
-            if (last &&
-                last.previousPos() === r.previousPos() &&
-                last.previousPts() == last.pts() &&
-                r.previousPts() == r.pts()) {
-                // This was tied with the previous team before and neither have played so should remain so.
-                // If they played each other and tied this might still work.
-                // If they both played giants and got full 1/2/3 points it won't.
-                r.pos(last.pos());
-            } else {
-                r.pos(i + 1);
-            }
-            last = r;
+            var pts = r.pts();
+            var rank = (pts === prevPts) ? prevRank : i + 1;
+            r.pos(rank);
+            prevPts = pts;
+            prevRank = rank;
         });
 
         // If we have calculated rankings, make sure we are showing the calculated ones.
