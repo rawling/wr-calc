@@ -306,6 +306,45 @@ body {
     }
 }
 
+// Expandable per-fixture panel with the team sheets and match officials.
+#fixtures {
+    .match-detail td {
+        padding: 6px 8px;
+        text-align: left;
+    }
+    .officials > span {
+        display: block;
+        font-size: 12px;
+    }
+    .teamsheets {
+        display: flex;
+        gap: 16px;
+        margin-top: 6px;
+    }
+    .teamsheet {
+        flex: 1;
+
+        h4 {
+            margin: 0 0 4px 0;
+        }
+        table {
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        td {
+            padding: 1px 6px 1px 0;
+        }
+        td.num {
+            text-align: right;
+            @extend .secondaryText;
+        }
+        tr.first-rep td {
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
+            padding-top: 3px;
+        }
+    }
+}
+
 // Team flags, shown in the rankings and beside the fixture team dropdowns.
 #rankings, #fixtures {
     .flag {

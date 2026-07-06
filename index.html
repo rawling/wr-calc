@@ -167,7 +167,8 @@
                             <!-- ko if: triesMatter -->
                             <td class="details-center">Tries</td>
                             <!-- /ko -->
-                            <td class="details-right" colspan="5" data-bind="text: ($data.venueNameAndCountry || '') + ($data.switched() ? '*' : ''), title: ($data.venueCity || '') + ($data.switched() ? ' (home advantage to &quot;away&quot; team)' : '')"></td>
+                            <td class="details-right" colspan="4" data-bind="text: ($data.venueNameAndCountry || '') + ($data.switched() ? '*' : ''), title: ($data.venueCity || '') + ($data.switched() ? ' (home advantage to &quot;away&quot; team)' : '')"></td>
+                            <td class="details-right"><a href="#" title="Team sheets and officials" data-bind="visible: matchId, click: toggleDetail, text: detailVisible() ? 'hide' : 'XV'"></a></td>
                         </tr>
                         <!-- /ko -->
                         <tr class="teams">
@@ -217,6 +218,37 @@
                         <tr class="possible-changes">
                             <td colspan="10" class="details-center" title="The match is complete and kicked off 90 minutes or more before the latest rankings, so assume it is already included">Already ranked*</td>
                             <td colspan="3"></td>
+                        </tr>
+                        <!-- /ko -->
+                        <!-- ko if: detailVisible -->
+                        <tr class="match-detail">
+                            <td colspan="13">
+                                <!-- ko if: detailLoading -->
+                                <span class="secondaryText">Loading match detail&hellip;</span>
+                                <!-- /ko -->
+                                <!-- ko with: detail -->
+                                <!-- ko if: error -->
+                                <span class="secondaryText">Could not load match detail.</span>
+                                <!-- /ko -->
+                                <div class="officials" data-bind="foreach: officials">
+                                    <span class="secondaryText"><span data-bind="text: role"></span>: <span data-bind="text: display"></span></span>
+                                </div>
+                                <div class="teamsheets" data-bind="foreach: teams">
+                                    <div class="teamsheet">
+                                        <h4 data-bind="text: name"></h4>
+                                        <table>
+                                            <tbody data-bind="foreach: players">
+                                                <tr data-bind="css: { 'first-rep': firstReplacement }">
+                                                    <td class="num" data-bind="text: number"></td>
+                                                    <td data-bind="text: name"></td>
+                                                    <td class="secondaryText" data-bind="text: position"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <!-- /ko -->
+                            </td>
                         </tr>
                         <!-- /ko -->
                     </tbody>

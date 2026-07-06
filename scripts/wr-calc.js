@@ -89,6 +89,45 @@ var loadRankings = function (rankingsSource, startDate, fixtures, event) {
 };
 
 
+// Parse a /match/{id}/summary response into what the fixture detail panel shows.
+var parseMatchDetail = function (data) {
+    var teams = (data.teams || []).map(function (t) {
+        var list = (t.teamList && t.teamList.list) || [];
+        var players = list.map(function (e) {
+            return {
+                number: e.number || '',
+                name: (e.player && e.player.name && e.player.name.display) || '',
+                position: e.positionLabel || e.position || '',
+                firstReplacement: false
+            };
+        });
+        // The API list arrives in no useful order; show 1-15 then 16-23.
+        players.sort(function (a, b) {
+            return (parseInt(a.number, 10) || 99) - (parseInt(b.number, 10) || 99);
+        });
+        // Mark where the bench starts so the UI can draw a divider.
+        for (var i = 0; i < players.length; i++) {
+            if ((parseInt(players[i].number, 10) || 0) >= 16) {
+                players[i].firstReplacement = true;
+                break;
+            }
+        }
+        return {
+            name: (t.team && t.team.name) || t.name || '',
+            players: players
+        };
+    });
+    var officials = (data.officials || []).map(function (o) {
+        var name = (o.official && o.official.name && o.official.name.display) || '';
+        var country = (o.official && o.official.country) || '';
+        return {
+            role: o.position || 'Official',
+            display: name + (country ? ' (' + country + ')' : '')
+        };
+    });
+    return { error: false, teams: teams, officials: officials };
+};
+
 // Format a kickoff time for display; produces the same output as the old
 // jquery.formatDateTime 'D dd/mm/yy hh:ii' format.
 var formatKickoff = function (date) {
@@ -407,6 +446,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                 fixture.awayScore(e.scores[1]);
             }
             fixture.status = e.status;
+            fixture.matchId = e.matchId;
             switch (e.status) {
                 case 'U': {
                     // Try to detect if a match should have started by now, and just hasn't been reported by WR.
@@ -444,6 +484,11 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                 case 'L1': fixture.liveScoreMode = 'First half'; break;
                 case 'L2': fixture.liveScoreMode = 'Second half'; break;
                 case 'LHT': fixture.liveScoreMode = 'Half time'; break;
+            }
+
+            // For in-progress matches, show the match clock too.
+            if ((e.status === 'L1' || e.status === 'L2' || e.status === 'LHT') && e.clock && e.clock.label) {
+                fixture.liveScoreMode += ' · ' + e.clock.label;
             }
 
             if (event) {
