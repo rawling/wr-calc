@@ -34,6 +34,9 @@
         <span class="sel" data-bind="text: eventName"></span>
         <!-- /ko -->
     </div>
+    <div id="progress" data-bind="css: { active: isLoading, done: justLoaded }">
+        <span class="label" data-bind="text: isLoading() ? 'Loading from World Rugby…' : 'Loaded'"></span>
+    </div>
     <div id="leftright">
         <div id="left">
             <div id="leftTop">

@@ -39,9 +39,33 @@ var ViewModel = function (source) {
     // Options are null, 'original' or 'calculated'.
     this.rankingsChoice = ko.observable();
 
-    // An indication of whether we have loaded fixtures from WR.
-    // Not actually used yet, but could help show a loading screen.
-    this.fixturesLoaded = ko.observable(false);
+    // The number of API requests in flight; drives the loading indicator.
+    // Incremented/decremented by getJSON, so it covers everything.
+    this.pendingRequests = ko.observable(0);
+    this.isLoading = ko.computed(function () {
+        return this.pendingRequests() > 0;
+    }, this);
+
+    // Briefly true after loading finishes, to flash a 'Loaded' confirmation.
+    this.justLoaded = ko.observable(false);
+    var vm2 = this;
+    var loadedTimer = null;
+    this.isLoading.subscribe(function (loading) {
+        if (loading) {
+            if (loadedTimer) {
+                clearTimeout(loadedTimer);
+                loadedTimer = null;
+            }
+            vm2.justLoaded(false);
+        } else {
+            vm2.justLoaded(true);
+            loadedTimer = setTimeout(function () {
+                vm2.justLoaded(false);
+                loadedTimer = null;
+            }, 1500);
+        }
+    });
+
 
     // The rankings calcualted by taking the original rankings and applying
     // the fixtures.

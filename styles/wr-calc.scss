@@ -306,6 +306,36 @@ body {
     }
 }
 
+// Loading indicator: a floating pill shown while any API request is in
+// flight; flashes green when done.
+#progress .label {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    background-color: $accent;
+    color: $white;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 16px;
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    visibility: hidden;
+}
+#progress.active .label {
+    visibility: visible;
+    animation: progress-pulse 1.2s ease-in-out infinite alternate;
+}
+#progress.done .label {
+    visibility: visible;
+    background-color: $primary;
+}
+@keyframes progress-pulse {
+    0% { opacity: 1; }
+    100% { opacity: 0.75; }
+}
+
 // Expandable per-fixture panel with the team sheets and match officials.
 #fixtures {
     .match-detail td {

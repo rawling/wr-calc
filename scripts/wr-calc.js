@@ -31,13 +31,20 @@ var viewModel = new ViewModel(sourceString);
 ko.applyBindings(viewModel);
 
 // Fetch JSON, rejecting on HTTP errors (like jQuery's $.get did).
+// Also counts in-flight requests so the UI can show a loading indicator.
 var getJSON = function (url) {
-    return fetch(url).then(function (response) {
+    viewModel.pendingRequests(viewModel.pendingRequests() + 1);
+    var done = function () {
+        viewModel.pendingRequests(viewModel.pendingRequests() - 1);
+    };
+    var promise = fetch(url).then(function (response) {
         if (!response.ok) {
             throw new Error('HTTP ' + response.status + ' for ' + url);
         }
         return response.json();
     });
+    promise.then(done, done);
+    return promise;
 };
 
 // Load rankings from World Rugby.
