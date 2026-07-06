@@ -14,12 +14,22 @@ if (!sourceString) {
 var viewModel = new ViewModel(sourceString);
 ko.applyBindings(viewModel);
 
+// Fetch JSON, rejecting on HTTP errors (like jQuery's $.get did).
+var getJSON = function (url) {
+    return fetch(url).then(function (response) {
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status + ' for ' + url);
+        }
+        return response.json();
+    });
+};
+
 // Load rankings from World Rugby.
 var loadRankings = function (rankingsSource, startDate, fixtures, event) {
     viewModel.rankingsSource(rankingsSource);
-    $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/rankings/' + rankingsSource + (startDate ? ('?date=' + startDate) : '')).done(function (data) {
+    getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/rankings/' + rankingsSource + (startDate ? ('?date=' + startDate) : '')).then(function (data) {
         var rankings = {};
-        $.each(data.entries, function (i, e) {
+        data.entries.forEach(function (e) {
             var maxLength = 15;
             e.team.displayName = e.team.name.length > maxLength ? e.team.abbreviation : e.team.name;
             e.team.displayTitle = e.team.name.length > maxLength ? e.team.name : null;
@@ -32,17 +42,14 @@ var loadRankings = function (rankingsSource, startDate, fixtures, event) {
         if (event) {
             // Restrict selectable teams to those in the event
             var eventTeamIds = {};
-            $.each(fixtures, function (i, e) {
+            fixtures.forEach(function (e) {
                 if (e.teams[0] && e.teams[0].id != '0') eventTeamIds[e.teams[0].id] = true;
                 if (e.teams[1] && e.teams[1].id != '0') eventTeamIds[e.teams[1].id] = true;
             });
             viewModel.teams.remove(function (t) { return !eventTeamIds[t.id]});
         }
 
-        var sorted = [];
-        $.each(rankings, function (i, r) {
-            sorted.push(r);
-        });
+        var sorted = Object.values(rankings);
         sorted.sort(function (a, b) { return b.pts() - a.pts(); });
 
         viewModel.baseRankings(sorted);
@@ -104,7 +111,7 @@ var loadEvents = function(sport) {
     viewModel.eventsCaption(sport.toUpperCase() + ' Event');
     var start = new Date(new Date(new Date().getFullYear(), 0, 1));
     var end = new Date(new Date(new Date().getFullYear(), 12, 13));
-    $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/?startDate=' + formatDate(start) + '&endDate=' + formatDate(end) + '&sport=' + sport + '&pageSize=50').done(function (data) {
+    getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/?startDate=' + formatDate(start) + '&endDate=' + formatDate(end) + '&sport=' + sport + '&pageSize=50').then(function (data) {
         var events = [];
         for (var i = 0; i < data.content.length; i++) {
             var event = data.content[i];
@@ -139,9 +146,8 @@ if (sourceString == 'mru' || sourceString == 'wru') {
     var eventIds = sourceString.split(',').map(function (idAndName) { return idAndName.split(':')[0]; });
 
     if (eventIds.length == 1) {
-        // Bit dumb but JQuery seems to treat `when` differently when there is only one promise.
-        // Special-case this with a single load.
-        $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + sourceString + '/schedule?language=en').done(function (data) {
+        // Special-case a single event so we can use its real label for the title.
+        getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + sourceString + '/schedule?language=en').then(function (data) {
 
             var events = {};
             viewModel.eventName(data.event.label);
@@ -160,12 +166,10 @@ if (sourceString == 'mru' || sourceString == 'wru') {
         viewModel.eventName(eventNames.join('/'));
         document.title = 'WRRC - ' + eventNames.join('/');
         var promises = eventIds.map(function (eventId) {
-            return $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + eventId + '/schedule?language=en');
+            return getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/' + eventId + '/schedule?language=en');
         });
 
-        $.when.apply($, promises).then(function () {
-            var datas = [].slice.call(arguments).map(function (arg) { return arg[0]; });
-
+        Promise.all(promises).then(function (datas) {
             var sport = datas[0].event.sport;
             var start = datas.reduce(function (prev, curr) { return prev.event.start.label < curr.event.start.label ? prev : curr }).event.start.label;
             var matches = datas.map(function (data) { return data.matches; }).flat();
@@ -219,7 +223,7 @@ var loadFixtures = function(rankings, specifiedDate) {
     // We load all fixtures and eventually filter by matching teams.
     var url = "https://api.wr-rims-prod.pulselive.com/rugby/v3/match?startDate="+from+"&endDate="+to+"&sort=asc&pageSize=100&page=";
     var getFixtures = function (fixtures, page, then) {
-        $.get(url + page).done(function(data) {
+        getJSON(url + page).then(function(data) {
             if (data.content.length == 100) {
                 getFixtures(fixtures.concat(data.content), page + 1, then);
             } else {
@@ -240,6 +244,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     // Keep track of those here, so we can check when all queries are finished and subscribe
     // to the query string then.
     var teamQueries = {};
+    var pendingTeamQueries = 0;
     function queryTeam(id) {
         var query = teamQueries[id];
         if (!query) {
@@ -253,15 +258,18 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     function queryTeamCountryViaCache(id) {
         var cacheKey = 'api/v3/team/' + id + '|country';
         if (localStorage[cacheKey]) {
-            return $.when({ country: localStorage[cacheKey] });
+            return Promise.resolve({ country: localStorage[cacheKey] });
         }
-        var promise = $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + id).then(function (team) {
+        pendingTeamQueries++;
+        var settled = function () { pendingTeamQueries--; };
+        var promise = getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/team/' + id).then(function (team) {
             return team.country;
         });
+        promise.then(settled, settled);
 
-        promise.done(function (country) {
+        promise.then(function (country) {
             localStorage[cacheKey] = country;
-        });
+        }).catch(function () {});
 
         return promise.then(function (country) { return { country: country }; });
     }
@@ -270,7 +278,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     // in this case we ignore the counts about as we're going to disable the query string stuff anyway.
     function queryTries(id, cache) {
         function getTriesForId(id) {
-            return $.get('https://api.wr-rims-prod.pulselive.com/rugby/v3/match/' + id + '/stats').then(function (stats) {
+            return getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/match/' + id + '/stats').then(function (stats) {
                 return [stats.teamStats[0].stats.Tries, stats.teamStats[1].stats.Tries];
             });
         }
@@ -283,13 +291,13 @@ var fixturesLoaded = function (fixtures, rankings, event) {
         // Finished, so check cache, and populate if we load it.
         var cacheKey = 'api/v3/match/' + id + '/stats|teamStats[x].stats.Tries';
         if (localStorage[cacheKey]) {
-            return $.when(JSON.parse(localStorage[cacheKey]));
+            return Promise.resolve(JSON.parse(localStorage[cacheKey]));
         }
         var promise = getTriesForId(id);
         if (cache) {
-            promise.done(function (stats) {
+            promise.then(function (stats) {
                 localStorage[cacheKey] = JSON.stringify(stats);
-            });
+            }).catch(function () {});
         }
         return promise;
     }
@@ -298,7 +306,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     var allRwc = true;
     var allNotRwc = true;
     var endOfHome = new Date(2026, 6, 1); // WR stopped applying home advantage.
-    $.each(fixtures, function (i, e) {
+    fixtures.forEach(function (e) {
         // I don't think we can reliably only request fixtures relevant to loaded teams, so filter here.
         
         // If we're not querying an event, we're querying a sport; don't include fixtures that don't match
@@ -342,10 +350,10 @@ var fixturesLoaded = function (fixtures, rankings, event) {
             if (e.venue) {
                 fixture.venueNameAndCountry = [e.venue.name, e.venue.country].join(', ');
                 fixture.venueCity = e.venue.city;
-                queryTeam(e.teams[0].id).done(function(homeTeamData) {
+                queryTeam(e.teams[0].id).then(function(homeTeamData) {
                     if (e.venue.country !== homeTeamData.country && !(e.venue.country == 'Northern Ireland' && homeTeamData.country == 'Ireland')) {
                         if (e.teams[1]) {
-                            queryTeam(e.teams[1].id).done(function(awayTeamData) {
+                            queryTeam(e.teams[1].id).then(function(awayTeamData) {
                                 if (e.venue.country === awayTeamData.country && !(e.venue.country == 'Northern Ireland' && awayTeamData.country == 'Ireland')) {
                                     // Saw this in the Pacific Nations Cup 2019 - a team was nominally Away
                                     // but in a home stadium. They seemed to get home nation advantage.
@@ -357,7 +365,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                                         fixture.noHome(true);
                                     }
                                 }
-                            });
+                            }).catch(function () {});
                         } else { // See ANC above
                             // Don't know who the second team is, but we do know the first team isn't at home.
                             if (tournamentRespectsStadiumLocation) {
@@ -365,7 +373,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                             }
                         }
                     }
-                });
+                }).catch(function () {});
             }
             var isRwc = (event && event.rankingsWeight == 2) || (e.events.length > 0 && e.events[0].rankingsWeight == 2) || (!!e.competition.match(/Rugby World Cup/) && !e.competition.match(/Qualifying/));
             fixture.isRwc(isRwc);
@@ -453,10 +461,10 @@ var fixturesLoaded = function (fixtures, rankings, event) {
                         }
                     }
                     if (e.status != 'U') {
-                        queryTries(e.matchId, e.status == 'C').done(function (tries) {
+                        queryTries(e.matchId, e.status == 'C').then(function (tries) {
                             fixture.homeTries(tries[0] || 0);
                             fixture.awayTries(tries[1] || 0);
-                        });
+                        }).catch(function () {});
                     }
                 }
             }
@@ -466,8 +474,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     // listen until all queries are done - be aware that some queries trigger more queries so we can't just "wait all"
     if (!event) {
         var i = setInterval(function() {
-            var promises = Object.values(teamQueries);
-            if (!promises.find(function (p) { return p.state() == 'pending' })) {
+            if (pendingTeamQueries === 0) {
                 viewModel.queryString.subscribe(function (qs) {
                     history.replaceState(null, '', '?' + qs);
                 });
