@@ -1,6 +1,22 @@
-// Read query string before we do any binding as it may remove it.
-var s = location.search;
-var usp = new URLSearchParams(s);
+// Read parameters before we do any binding as it may remove them.
+// Parameters live in the hash (the app is entirely client-side, so the server
+// never needs them), but the query string is still accepted for older links;
+// hash wins if both are present.
+var usp = new URLSearchParams(location.search);
+new URLSearchParams(location.hash.replace(/^#/, '')).forEach(function (value, key) {
+    usp.set(key, value);
+});
+
+// If we arrived via a legacy query-string link, normalise the address bar to
+// the hash form so only # URLs are ever shown or copied from here on.
+if (location.search) {
+    history.replaceState(null, '', location.pathname + '#' + usp.toString());
+}
+
+// The app only reads its parameters at startup, so reload when the hash changes
+// (e.g. via the MRU/WRU links). history.replaceState doesn't fire this event,
+// so our own address bar updates don't cause reloads.
+window.addEventListener('hashchange', function () { location.reload(); });
 
 var dateString = usp.get('d');
 var fixturesString = usp.get('f');
@@ -74,7 +90,7 @@ var loadRankings = function (rankingsSource, startDate, fixtures, event) {
             viewModel.fixturesString(fixturesString);
             viewModel.rankingsChoice('calculated');
             viewModel.queryString.subscribe(function (qs) {
-                history.replaceState(null, '', '?' + qs);
+                history.replaceState(null, '', location.pathname + '#' + qs);
             });
         } else {
             // This should be parallelisable if we have our observables set up properly. (Fixture validity depends on teams.)
@@ -521,7 +537,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
         var i = setInterval(function() {
             if (pendingTeamQueries === 0) {
                 viewModel.queryString.subscribe(function (qs) {
-                    history.replaceState(null, '', '?' + qs);
+                    history.replaceState(null, '', location.pathname + '#' + qs);
                 });
                 clearInterval(i);
             }

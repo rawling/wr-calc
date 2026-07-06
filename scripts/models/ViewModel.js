@@ -429,7 +429,7 @@ var ViewModel = function (source) {
     this.showIsRwc = ko.observable(true);
 
     this.selectedEvent.subscribe(function (selectedEvent) {
-        window.location = '?s=' + selectedEvent.id;
+        window.location = location.pathname + '#s=' + selectedEvent.id;
     })
 
     return this;
