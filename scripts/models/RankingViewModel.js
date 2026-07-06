@@ -6,7 +6,8 @@ var RankingViewModel = function (rawRanking) {
     // Basic data. Unwrap in case we were passed another view model.
     // I think "previous" values are only observable because we bind the VM before we set
     // "previous" to "current" during calculation - we should be able to avoid this.
-    this.team = rawRanking.team; // id, name, abbreviation
+    this.team = rawRanking.team; // id, name, abbreviation, countryCode
+    this.flagSrc = flagFor(this.team);
     this.pts = ko.observable(ko.utils.unwrapObservable(rawRanking.pts));
     this.pos = ko.observable(ko.utils.unwrapObservable(rawRanking.pos));
     this.previousPts = ko.observable(ko.utils.unwrapObservable(rawRanking.previousPts));

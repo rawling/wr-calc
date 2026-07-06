@@ -30,6 +30,18 @@ var FixtureViewModel = function (parent) {
     this.homeTries = ko.observable();
     this.awayTries = ko.observable();
 
+    // Flags for the currently selected teams.
+    this.homeFlagSrc = ko.computed(function () {
+        var rankings = parent.rankingsById();
+        var home = rankings && rankings[this.homeId()];
+        return home ? flagFor(home.team) : null;
+    }, this);
+    this.awayFlagSrc = ko.computed(function () {
+        var rankings = parent.rankingsById();
+        var away = rankings && rankings[this.awayId()];
+        return away ? flagFor(away.team) : null;
+    }, this);
+
     this.hasValidTeams = ko.computed(function () {
         var rankings = parent.rankingsById();
         var home = rankings[this.homeId()];

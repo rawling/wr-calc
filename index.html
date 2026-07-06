@@ -9,6 +9,7 @@
 <meta name="viewport" content="width=480"/>
 
 <script src="scripts/lib/knockout-3.5.3.js"></script>
+<script src="scripts/flags.js" type="text/javascript" ></script>
 <link href="styles/fonts.css" rel="stylesheet">
 <link href="styles/wr-calc.css?v={{site.time|date:'%s'}}" type="text/css" rel="stylesheet">
 <script src="scripts/models/ViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
@@ -66,7 +67,10 @@
                                 <tr data-bind="css: changeCls">
                                     <td class="pos" data-bind="text: pos"></td>
                                     <td class="posDiff" data-bind="html: previousPosDisplay"></td>
-                                    <td class="name" data-bind="text: team.displayName, title: team.displayTitle"></td>
+                                    <td class="name" data-bind="title: team.displayTitle">
+                                        <img class="flag" alt="" data-bind="visible: flagSrc, attr: { src: flagSrc }" />
+                                        <span data-bind="text: team.displayName"></span>
+                                    </td>
                                     <td data-bind="text: ptsDisplay"></td>
                                     <td class="ptsDiff" data-bind="html: ptsDiffDisplay"></td>
                                 </tr>
@@ -168,7 +172,8 @@
                         <!-- /ko -->
                         <tr class="teams">
                             <td colspan="2" style="text-align: left" data-bind="attr: { colspan: $data.triesMatter() ? 2 : 3 }">
-                                <select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: homeCaption, disabled: alreadyInRankings" style="width:100%"></select>
+                                <img class="flag" alt="" data-bind="visible: homeFlagSrc, attr: { src: homeFlagSrc }" />
+                                <select class="beside-flag" data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: homeCaption, disabled: alreadyInRankings"></select>
                             </td>
                             <!-- ko if: triesMatter -->
                             <td>
@@ -183,7 +188,8 @@
                             </td>
                             <!-- /ko -->
                             <td colspan="2" style="text-align: right" data-bind="attr: { colspan: $data.triesMatter() ? 2 : 3 }, class: $data.switched() ? 'switched' : ''">
-                                <select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: awayCaption, disabled: alreadyInRankings" style="width:100%"></select>
+                                <select class="beside-flag" data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: awayCaption, disabled: alreadyInRankings"></select>
+                                <img class="flag" alt="" data-bind="visible: awayFlagSrc, attr: { src: awayFlagSrc }" />
                             </td>
                             <td data-bind="class: $data.switched() ? 'switched' : ''">
                                 <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
@@ -257,6 +263,8 @@
         <span class="secondaryText">
             Rankings and ranking algorithm are the property of <a data-bind="attr: { href: 'https://www.world.rugby/tournaments/rankings/' + $data.rankingsSource() }">World Rugby</a>.
             See <a href="https://github.com/rawling/wr-calc/">GitHub</a> for source, contributors and license.
+            Flags from <a href="https://github.com/lipis/flag-icons">flag-icons</a> (MIT);
+            Ireland flag from <a href="https://commons.wikimedia.org/wiki/File:IRFU_flag.svg">Wikimedia Commons</a> (CC BY-SA 3.0).
         </span>
     </div>
     <script src="scripts/wr-calc.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>

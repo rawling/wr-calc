@@ -306,6 +306,24 @@ body {
     }
 }
 
+// Team flags, shown in the rankings and beside the fixture team dropdowns.
+#rankings, #fixtures {
+    .flag {
+        width: 20px;
+        height: 15px;
+        margin-right: 4px;
+        vertical-align: -2px;
+    }
+}
+#fixtures {
+    select + .flag {
+        margin: 0 0 0 4px;
+    }
+    select.beside-flag {
+        width: calc(100% - 26px);
+    }
+}
+
 #rankings {
     padding: 5px;
 
