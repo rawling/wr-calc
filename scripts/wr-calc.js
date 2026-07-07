@@ -181,6 +181,7 @@ if (sourceString == 'mru' || sourceString == 'wru') {
 // If we had up/down buttons we could maybe get rid of this.
 var addFixture = function (top, process) {
     var fixture = new FixtureViewModel(viewModel);
+    fixture.noHome(true);
     if (process) {
         process(fixture);
     }
@@ -288,6 +289,7 @@ var fixturesLoaded = function (fixtures, rankings, event) {
     // Parse each fixture into a view model, which adds it to the array.
     var allRwc = true;
     var allNotRwc = true;
+    var endOfHome = new Date(2026, 6, 1); // WR stopped applying home advantage.
     $.each(fixtures, function (i, e) {
         // I don't think we can reliably only request fixtures relevant to loaded teams, so filter here.
         
@@ -316,9 +318,12 @@ var fixturesLoaded = function (fixtures, rankings, event) {
         addFixture(true, function (fixture) {
             fixture.homeId(e.teams[0].id);
             if (e.teams[1]) fixture.awayId(e.teams[1].id); // See ANC above
-            fixture.noHome(false);
+
+            var kickoff = new Date(e.time.millis);
+            var afterEndOfHome = kickoff > endOfHome;
+            fixture.noHome(afterEndOfHome);
             fixture.switched(false);
-            fixture.kickoff = $.formatDateTime('D dd/mm/yy hh:ii', new Date(e.time.millis));
+            fixture.kickoff = $.formatDateTime('D dd/mm/yy hh:ii', kickoff);
 
             // Covid-TRC (noticed in 2021 but apparently also in 2020) ignores the stadium location
             // and treats the nominal home team as always at home
