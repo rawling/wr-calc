@@ -171,8 +171,10 @@
                         <!-- /ko -->
                         <tr class="teams">
                             <td colspan="2" style="text-align: left" data-bind="attr: { colspan: $data.triesMatter() ? 2 : 3 }">
-                                <img class="flag" alt="" data-bind="visible: homeFlagSrc, attr: { src: homeFlagSrc }" />
-                                <select class="beside-flag" data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: homeCaption, disabled: alreadyInRankings"></select>
+                                <span class="team-select">
+                                    <img class="flag" alt="" data-bind="visible: homeFlagSrc, attr: { src: homeFlagSrc }" />
+                                    <select class="beside-flag" data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: homeCaption, disabled: alreadyInRankings"></select>
+                                </span>
                             </td>
                             <!-- ko if: triesMatter -->
                             <td>
@@ -187,8 +189,10 @@
                             </td>
                             <!-- /ko -->
                             <td colspan="2" style="text-align: right" data-bind="attr: { colspan: $data.triesMatter() ? 2 : 3 }, class: $data.switched() ? 'switched' : ''">
-                                <select class="beside-flag" data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: awayCaption, disabled: alreadyInRankings"></select>
-                                <img class="flag" alt="" data-bind="visible: awayFlagSrc, attr: { src: awayFlagSrc }" />
+                                <span class="team-select">
+                                    <select class="beside-flag" data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: awayCaption, disabled: alreadyInRankings"></select>
+                                    <img class="flag" alt="" data-bind="visible: awayFlagSrc, attr: { src: awayFlagSrc }" />
+                                </span>
                             </td>
                             <td data-bind="class: $data.switched() ? 'switched' : ''">
                                 <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />

@@ -385,11 +385,28 @@ body {
     }
 }
 #fixtures {
+    .team-select {
+        display: flex;
+        align-items: center;
+
+        .flag {
+            flex: none;
+        }
+    }
     select + .flag {
         margin: 0 0 0 4px;
     }
     select.beside-flag {
-        width: calc(100% - 26px);
+        flex: 1;
+        min-width: 0;
+        width: auto;
+
+        &:disabled {
+            background-color: transparent;
+            color: inherit;
+            -webkit-appearance: none;
+            appearance: none;
+        }
     }
 }
 
