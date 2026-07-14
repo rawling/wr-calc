@@ -1,6 +1,8 @@
 // Overall view model for the page
 var ViewModel = function (source) {
     this.source = source; // mru or wru or event id - doesn't really matter, just goes back into the query
+    this.event = ko.observable();
+    this.eventName = ko.observable();
     this.rankingsSource = ko.observable(source); // in the footer link - should end up as mru or wru
 
     // The base rankings in an object, indexed by the ID of the team.
@@ -20,6 +22,10 @@ var ViewModel = function (source) {
 
     // The fixtures used to calculate projected rankings.
     this.fixtures = ko.observableArray();
+
+    this.events = ko.observableArray();
+    this.eventsCaption = ko.observable('Event');
+    this.selectedEvent = ko.observable();
 
     // A rate-limited set of fixtures. This allows us to add fixtures performantly, by having the fixture list
     // bound to fixtures above but calculations based on this version.
@@ -98,8 +104,21 @@ var ViewModel = function (source) {
             sorted.push(r);
         });
         sorted.sort(function (a, b) { return b.pts() - a.pts(); });
+
+        var last = null;
         $.each(sorted, function (i, r) {
-            r.pos(i + 1);
+            if (last &&
+                last.previousPos() === r.previousPos() &&
+                last.previousPts() == last.pts() &&
+                r.previousPts() == r.pts()) {
+                // This was tied with the previous team before and neither have played so should remain so.
+                // If they played each other and tied this might still work.
+                // If they both played giants and got full 1/2/3 points it won't.
+                r.pos(last.pos());
+            } else {
+                r.pos(i + 1);
+            }
+            last = r;
         });
 
         // If we have calculated rankings, make sure we are showing the calculated ones.
@@ -108,6 +127,216 @@ var ViewModel = function (source) {
         }
 
         return sorted;
+    }, this);
+
+    // Whichever set of rankings is chosen.
+    this.shownRankings = ko.computed(function () {
+        switch (this.rankingsChoice()) {
+            case 'original':
+                return this.baseRankings();
+            case 'calculated':
+                return this.projectedRankings();
+            default:
+                return [];
+        }
+    }, this);
+
+    this.poolChoice = ko.observable();
+    this.pools = ko.computed(function() {
+        if (!this.event()) return null; // never pools for the normal rankings views
+
+        var fixtures = this.deferredFixtures();
+
+        // Nothing to calculate if the data has not yet loaded.
+        if (!fixtures) {
+            return null;
+        }
+
+        var vm = this;
+
+        // Apply each fixture in turn.
+        var pools = {};
+        var inProgPool = null;
+        var noPool = 'NO POOL';
+        var usesThreeTryBp = !!/The Rugby Championship/.exec(this.eventName());
+        $.each(fixtures, function (index, fixture) {
+            // If the fixture doesn't have teams selected do nothing.
+            if (!fixture.hasValidTeams()) {
+                return;
+            }
+
+            var homeId = fixture.homeId();
+            var awayId = fixture.awayId();
+
+            // ensure the pools and teams exist
+            var poolKey = fixture.pool() || noPool;
+            if (!pools[poolKey]) {
+                pools[poolKey] = { anyDraws: false, anyTies: false, teams: {} };
+            }
+            var pool = pools[poolKey];
+
+            if (!pool.teams[homeId]) {
+                pool.teams[homeId] = { team: homeId, name: vm.rankingsById()[homeId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, ptsVs: {}, inProg: false };
+            }
+            var home = pool.teams[homeId];
+            if (!pool.teams[awayId]) {
+                pool.teams[awayId] = { team: awayId, name: vm.rankingsById()[awayId].team.name, played: 0, won: 0, drawn: 0, pts: 0, pf: 0, pa: 0, tf: 0, ta: 0, ptsVs: {}, inProg: false };
+            }
+            var away = pool.teams[awayId];
+
+            // If the fixture doesn't have scores as well as teams, don't apply it to the pool
+            if (!fixture.isValid()) {
+                return;
+            }
+
+            // parse ints here as sometimes we end up appending strings
+            var homeScore = parseInt(fixture.homeScore());
+            var awayScore = parseInt(fixture.awayScore());
+            var homeTries = parseInt(fixture.homeTries() || 0);
+            var awayTries = parseInt(fixture.awayTries() || 0);
+
+            home.pf = home.pf + homeScore;
+            away.pa = away.pa + homeScore;
+            home.tf = home.tf + homeTries;
+            away.ta = away.ta + homeTries;
+            home.pa = home.pa + awayScore;
+            away.pf = away.pf + awayScore;
+            home.ta = home.ta + awayTries;
+            away.tf = away.tf + awayTries;
+
+            if (fixture.status == 'L1' || fixture.status == 'L2' || fixture.status == 'LHT') {
+                home.inProg = true;
+                away.inProg = true;
+                inProgPool = poolKey;
+            }
+
+            home.played = home.played + 1;
+            away.played = away.played + 1;
+
+            var homeTablePoints = (homeScore > awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + ((usesThreeTryBp ? (homeTries - awayTries >= 3) : (homeTries >= 4)) ? 1 : 0) + ((homeScore < awayScore && homeScore + 7 >= awayScore) ? 1 : 0);
+            home.pts = home.pts + homeTablePoints;
+            home.ptsVs[awayId] = (home.ptsVs[awayId] || 0) + homeTablePoints;
+
+            var awayTablePoints = (homeScore < awayScore ? 4 : (homeScore == awayScore ? 2 : 0)) + ((usesThreeTryBp ? (awayTries - homeTries >= 3) : (awayTries >= 4)) ? 1 : 0) + ((homeScore > awayScore && homeScore <= awayScore + 7) ? 1 : 0);
+            away.pts = away.pts + awayTablePoints;
+            away.ptsVs[homeId] = (away.ptsVs[homeId] || 0) + awayTablePoints;
+
+            if (homeScore > awayScore) {
+                home.won += 1;
+            } else if (homeScore < awayScore) {
+                away.won += 1;
+            } else {
+                home.drawn += 1;
+                away.drawn += 1;
+                pool.anyDraws = true;
+            }
+        });
+
+        // remove 'NO POOL' if it looks like "knockouts at a world cup" but not if it looks like "all matches in a round robin"
+        var poolKeys = Object.keys(pools);
+        if (poolKeys.length > 1) {
+            poolKeys = poolKeys.filter(function (k) { return k != noPool });
+        }
+        poolKeys.sort();
+
+        if (!this.poolChoice()) {
+            this.poolChoice(inProgPool || poolKeys[0]);
+        }
+
+        // admittedly, this is for RWC2023, and might be different for other tournaments
+        function sortTeamsOnSameTablePoints(teams) {
+            // if there are only 2 teams, the one with most vs table points between them goes top
+            if (teams.length == 2) {
+                var pts0vs1 = teams[0].ptsVs[teams[1].team] || 0;
+                var pts1vs0 = teams[1].ptsVs[teams[0].team] || 0;
+
+                if (pts0vs1 > pts1vs0) {
+                    return [teams[0], teams[1]];
+                } else if (pts1vs0 > pts0vs1) {
+                    return [teams[1], teams[0]];
+                }
+            }
+
+            // if there were more teams, or if that doesn't separate the 2, sort by the other criteria
+            var teamsByOtherCriteria = teams.sort(function (a, b) {
+                var c3 = (b.pf - b.pa) - (a.pf - a.pa);
+                if (c3) return c3;
+                
+                var c4 = (b.tf - b.ta) - (a.tf - a.ta);
+                if (c4) return c4;
+
+                var c5 = b.pf - a.pf;
+                if (c5) return c5;
+
+                var c6 = b.tf - a.tf;
+                if (c6) return c6;
+
+                var c7 = vm.projectedRankings().find(r => r.team.id == b.team).pts() - vm.projectedRankings().find(r => r.team.id == a.team).pts();
+                return c7;
+            });
+
+            // if there were only 2 teams, these criteria sorted them
+            if (teams.length == 2) {
+                return teamsByOtherCriteria;
+            }
+
+            // otherwise they only picked out the top team; re-sort the remainer
+            var top = teamsByOtherCriteria.shift();
+            var sortedRemainder = sortTeamsOnSameTablePoints(teamsByOtherCriteria);
+            sortedRemainder.unshift(top);
+            return sortedRemainder;
+        }
+
+        function sortPool(teams) {
+            // group by table points.
+            var byTablePoints = [];
+            Object.values(teams).forEach(function (team) {
+                if (!byTablePoints[team.pts]) {
+                    byTablePoints[team.pts] = [];
+                }
+                byTablePoints[team.pts].push(team);
+            });
+
+            // go through groups, taking single teams where they exist
+            // or sorting matching teams where necessary
+            var ordered = [];
+            for (var i = byTablePoints.length - 1; i >= 0; i--) {
+                var btp = byTablePoints[i];
+                if (!btp) continue;
+                if (btp.length == 1) {
+                    ordered.push(btp[0]);
+                    continue;
+                }
+
+                var sortedWithin = sortTeamsOnSameTablePoints(btp);
+                for (var j = 0; j < sortedWithin.length; j++) {
+                    ordered.push(sortedWithin[j]);
+                }
+            }
+
+            return ordered;
+        }
+
+        return poolKeys.map(function (k) {
+            var sortedTable = sortPool(pools[k].teams);
+            return {
+                pool: k,
+                anyDraws: pools[k].anyDraws,
+                table: sortedTable
+            };
+        });
+    }, this);
+
+    this.selectedPool = ko.computed(function () {
+        var pools = this.pools();
+        var poolChoice = this.poolChoice();
+        if (!pools || !poolChoice || !pools.find(function (p) { return p.pool == poolChoice} )) return null;
+        return pools.find(function (p) { return p.pool == poolChoice} );
+    }, this);
+    
+    this.multiplePools = ko.computed(function () {
+        var pools = this.pools();
+        return pools && pools.length > 1;
     }, this);
 
     // Whichever set of rankings is chosen.
@@ -197,6 +426,12 @@ var ViewModel = function (source) {
         var usp = new URLSearchParams(params);
         return usp.toString();
     }, this);
+
+    this.showIsRwc = ko.observable(true);
+
+    this.selectedEvent.subscribe(function (selectedEvent) {
+        window.location = '?s=' + selectedEvent.id;
+    })
 
     return this;
 };

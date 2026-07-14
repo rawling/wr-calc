@@ -23,11 +23,11 @@ var RankingViewModel = function (rawRanking) {
         var pos = this.pos();
         var previousPos = this.previousPos();
         if (pos < previousPos) {
-            return '(&uarr;' + previousPos + ')';
+            return '<span title="was ' + previousPos + '">(&uarr;' + (previousPos - pos) + ')</span>';
         } else if (pos > previousPos) {
-            return '(&darr;' + previousPos + ')';
+            return '<span title="was ' + previousPos + '">(&darr;' + (pos - previousPos) + ')</span>';
         } else {
-            return '<span style="visibility: hidden;" aria-hidden="true">(&rarr;' + previousPos + ')</span>';
+            return '<span style="visibility: hidden;" aria-hidden="true">(&rarr;' + 0 + ')</span>';
         }
     }, this);
 

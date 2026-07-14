@@ -10,7 +10,7 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script src="//cdn.rawgit.com/agschwender/jquery.formatDateTime/master/dist/jquery.formatDateTime.min.js"></script>
-<script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.4.2.js"></script>
+<script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-3.5.0.js"></script>
 <link href="//fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet"> 
 <link href="styles/wr-calc.css?v={{site.time|date:'%s'}}" type="text/css" rel="stylesheet">
 <script src="scripts/models/ViewModel.js?v={{site.time|date:'%s'}}" type="text/javascript" ></script>
@@ -25,50 +25,113 @@
         <a data-bind="css: source == 'wru' ? 'sel' : '', attr: { href: $data.source == 'wru' ? null : '?s=wru' }">
             WRU
         </a>
-        <a data-bind="css: source == '1893' ? 'sel' : '', attr: { href: $data.source == '1893' ? null : '?s=1893' }">
-            RWC2023
-        </a>
+        <!-- ko ifnot: event -->
+        <span>
+            or pick
+            <select data-bind="options: events, optionsText: 'label', value: selectedEvent, optionsCaption: eventsCaption"></select>
+        </span>
+        <!-- /ko -->
+        <!-- ko if: eventName -->
+        <span class="sel" data-bind="text: eventName"></span>
+        <!-- /ko -->
     </div>
     <div id="leftright">
         <div id="left">
-            <div class="header">
-                <h3>Rankings</h3>
-            </div>
-            <div id="which" data-bind="if: rankingsChoice">
-                <label data-bind="css: $data.rankingsChoice() === 'original' ? 'sel' : ''">
-                    <input type="radio" name="rankings" value="original" data-bind="checked: rankingsChoice">
-                    <span data-bind="text: $data.originalDate() + ($data.originalDateIsEstimated() ? '*' : ''), title: $data.originalDateIsEstimated() ? 'Last published rankings on or before this date' : ''" />
-                </label>
-                <label data-bind="css: $data.rankingsChoice() === 'calculated' ? 'sel' : ''">
-                    <input type="radio" name="rankings" value="calculated" data-bind="checked: rankingsChoice">
-                    CALCULATED
-                </label>
-            </div>
+            <div id="leftTop">
+                <div class="header">
+                    <h3>Rankings</h3>
+                </div>
+                <div id="which" data-bind="if: rankingsChoice">
+                    <label data-bind="css: $data.rankingsChoice() === 'original' ? 'sel' : ''">
+                        <input type="radio" name="rankings" value="original" data-bind="checked: rankingsChoice">
+                        <span data-bind="text: $data.originalDate() + ($data.originalDateIsEstimated() ? '*' : ''), title: $data.originalDateIsEstimated() ? 'Last published rankings on or before this date' : ''" />
+                    </label>
+                    <label data-bind="css: $data.rankingsChoice() === 'calculated' ? 'sel' : ''">
+                        <input type="radio" name="rankings" value="calculated" data-bind="checked: rankingsChoice">
+                        CALCULATED
+                    </label>
+                </div>
 
-            <div id="rankings">
-                <!-- ko ifnot: rankingsChoice -->
-                <h4>
-                    Loading rankings from WR</a>
-                </h4>
+                <div id="rankings">
+                    <!-- ko ifnot: rankingsChoice -->
+                    <h4>
+                        Loading rankings from WR</a>
+                    </h4>
+                    <!-- /ko -->
+
+                    <div data-bind="if: rankingsChoice">
+                        <table>
+                            <thead>
+                                <tr><th class="pos">#</th><th /><th class="name">Team</th><th colspan=2>Points</th></tr>
+                            </thead>
+                            <tbody data-bind="foreach: shownRankings">
+                                <tr data-bind="css: changeCls">
+                                    <td class="pos" data-bind="text: pos"></td>
+                                    <td class="posDiff" data-bind="html: previousPosDisplay"></td>
+                                    <td class="name" data-bind="text: team.displayName, title: team.displayTitle"></td>
+                                    <td data-bind="text: ptsDisplay"></td>
+                                    <td class="ptsDiff" data-bind="html: ptsDiffDisplay"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- ko if: pools -->
+            <div id="leftBottom">
+                <div class="header">
+                    <h3>Table<span data-bind="if: $data.pools().length > 1">s</span></h3>
+                </div>
+
+                <!-- ko if: $data.pools().length > 1 -->
+                <div id="whichPool">
+                    <!-- ko foreach: pools -->
+                    <label data-bind="css: $parent.poolChoice() === $data.pool ? 'sel' : ''">
+                        <input type="radio" name="pools" data-bind="checked: $parent.poolChoice, value: pool">
+                        <span data-bind="text: pool" />
+                    </label>
+                    <!-- /ko -->
+                </div>
                 <!-- /ko -->
 
-                <div data-bind="if: rankingsChoice">
-                    <table>
+                <div id="tables">
+                    <table id="poolstable">
+                        <!-- ko with: selectedPool -->
                         <thead>
-                            <tr><th class="pos">#</th><th /><th class="name">Team</th><th colspan=2>Points</th></tr>
+                            <tr>
+                                <th></th>
+                                <th style="width: 9%" class="right" title="group points">Pts</th>
+                                <th style="width: 9%" class="right" title="played">Pl</th>
+                                <th style="width: 9%" class="right" title="won">W</th>
+                                <!-- ko if: anyDraws -->
+                                <th style="width: 9%" class="right" title="drawn">D</th>
+                                <!-- /ko -->
+                                <th style="width: 9%" class="right" title="points difference">PD</th>
+                                <th style="width: 9%" class="right" title="tries difference">TD</th>
+                                <th style="width: 9%" class="right" title="points scored">PF</th>
+                                <th style="width: 9%" class="right" title="tries scored">TF</th>
+                            </tr>
                         </thead>
-                        <tbody data-bind="foreach: shownRankings">
-                            <tr data-bind="css: changeCls">
-                                <td class="pos" data-bind="text: pos"></td>
-                                <td class="posDiff" data-bind="html: previousPosDisplay"></td>
-                                <td class="name" data-bind="text: team.displayName, title: team.displayTitle"></td>
-                                <td data-bind="text: ptsDisplay"></td>
-                                <td class="ptsDiff" data-bind="html: ptsDiffDisplay"></td>
+                        <tbody data-bind="foreach: table">
+                            <tr data-bind="css: { inProg: inProg }">
+                                <th data-bind="text: name"></th>
+                                <td data-bind="text: pts"></td>
+                                <td data-bind="text: played"></td>
+                                <td data-bind="text: won"></td>
+                                <!-- ko if: $parent.anyDraws -->
+                                <td data-bind="text: drawn"></td>
+                                <!-- /ko -->
+                                <td data-bind="text: $data.pf - $data.pa"></td>
+                                <td data-bind="text: $data.tf - $data.ta"></td>
+                                <td data-bind="text: pf"></td>
+                                <td data-bind="text: tf"></td>
                             </tr>
                         </tbody>
+                        <!-- /ko -->
                     </table>
                 </div>
             </div>
+            <!-- /ko -->
         </div>
         <div id="right">
             <div class="header">
@@ -79,11 +142,15 @@
                     <thead>
                         <tr>
                             <th colspan="2">Home team</th>
-                            <th colspan="4">Score</th>
+                            <th colspan="6">Score</th>
                             <th colspan="2">Away team</th>
-                            <th title='No Home Advantage'>NHA</th>
+                            <th title='"Home" team not at home, or match after 2026-07-01'>NHA</th>
+                            <!-- ko if: showIsRwc -->
                             <th title='Is Rugby World Cup match'>RWC</th>
+                            <!-- /ko -->
+                            <!-- ko ifnot: event -->
                             <th></th>
+                            <!-- /ko -->
                     </tr>
                     </thead>
                     <!-- ko foreach: fixtures -->
@@ -91,37 +158,60 @@
                         <!-- ko if: $data.venueNameAndCountry || $data.kickoff || $data.liveScoreMode || $data.eventPhase -->
                         <tr class="details">
                             <td class="details-left" colspan="2" data-bind="text: kickoff" title="Kickoff in your browser time"></td>
-                            <td class="details-center" colspan="4" data-bind="text: ($data.eventPhase && $data.liveScoreMode) ? ($data.eventPhase + ' (' + $data.liveScoreMode + ')') : ($data.eventPhase || $data.liveScoreMode)"></td>
-                            <td class="details-right" colspan="5" data-bind="text: venueNameAndCountry, title: venueCity"></td>
+                            <!-- ko if: triesMatter -->
+                            <td class="details-center">Tries</td>
+                            <!-- /ko -->
+                            <td class="details-center" colspan="4" data-bind="text: ($parent.multiplePools() && $data.eventPhase && $data.liveScoreMode) ? ($data.eventPhase + ' (' + $data.liveScoreMode + ')') : (($parent.multiplePools() && $data.eventPhase) || $data.liveScoreMode), attr: { colspan: $data.triesMatter() ? 4 : 6 }"></td>
+                            <!-- ko if: triesMatter -->
+                            <td class="details-center">Tries</td>
+                            <!-- /ko -->
+                            <td class="details-right" colspan="5" data-bind="text: ($data.venueNameAndCountry || '') + ($data.switched() ? '*' : ''), title: ($data.venueCity || '') + ($data.switched() ? ' (home advantage to &quot;away&quot; team)' : '')"></td>
                         </tr>
                         <!-- /ko -->
                         <tr class="teams">
-                            <td colspan="2" style="text-align: left"><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: homeCaption, disabled: alreadyInRankings"></select></td colspan="2">
+                            <td colspan="2" style="text-align: left" data-bind="attr: { colspan: $data.triesMatter() ? 2 : 3 }">
+                                <select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: homeId, optionsCaption: homeCaption, disabled: alreadyInRankings" style="width:100%"></select>
+                            </td>
+                            <!-- ko if: triesMatter -->
+                            <td>
+                                <input type="number" min="0" data-bind="value: homeTries, disabled: alreadyInRankings" />
+                            </td>
+                            <!-- /ko -->
                             <td colspan="2" style="text-align: right"><input type="number" min="0" data-bind="value: homeScore, disabled: alreadyInRankings" /></td colspan="2">
                             <td colspan="2" style="text-align: left"><input type="number" min="0" data-bind="value: awayScore, disabled: alreadyInRankings" /></td colspan="5">
-                            <td colspan="2" style="text-align: right"><select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: awayCaption, disabled: alreadyInRankings"></select></td colspan="2">
+                            <!-- ko if: triesMatter -->
                             <td>
-                                <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
-                                <span data-bind="if: switched" title="Home team is nominally Away">*</span>
+                                <input type="number" min="0" data-bind="value: awayTries, disabled: alreadyInRankings" />
                             </td>
+                            <!-- /ko -->
+                            <td colspan="2" style="text-align: right" data-bind="attr: { colspan: $data.triesMatter() ? 2 : 3 }, class: $data.switched() ? 'switched' : ''">
+                                <select data-bind="options: $parent.teams, optionsText: 'displayName', optionsValue: 'id', value: awayId, optionsCaption: awayCaption, disabled: alreadyInRankings" style="width:100%"></select>
+                            </td>
+                            <td data-bind="class: $data.switched() ? 'switched' : ''">
+                                <input type="checkbox" data-bind="checked: noHome, disabled: alreadyInRankings" />
+                            </td>
+                            <!-- ko if: $parent.showIsRwc -->
                             <td><input type="checkbox" data-bind="checked: isRwc, disabled: alreadyInRankings" /></td>
+                            <!-- /ko -->
+                            <!-- ko ifnot: $parent.event -->
                             <td><button data-bind="click: function () { $parent.fixtures.remove($data); }, disabled: alreadyInRankings">x</button></td>
+                            <!-- /ko -->
                         </tr>
                         <!-- ko if: $data.hasValidTeams() && !$data.alreadyInRankings -->
                         <tr class="possible-changes">
-                            <td class="details-left" data-bind="text: $data.homeRankingBefore() ? $data.homeRankingBefore().toFixed(2) : ''"></td>
+                            <td colspan="2" class="details-left" data-bind="text: $data.homeRankingBefore() ? $data.homeRankingBefore().toFixed(2) : ''"></td colspan="2">
                             <td class="details-right" data-bind="text: $data.getDisplayChange(0), style: { 'text-decoration': $data.activeChange() == 0 ?  'underline' : 'inherit'}"></td class="details-center">
                             <td class="details-center" data-bind="text: $data.getDisplayChange(1), style: { 'text-decoration': $data.activeChange() == 1 ?  'underline' : 'inherit'}"></td class="details-center">
                             <td colspan="2" class="details-center" data-bind="text: $data.getDisplayChange(2), style: { 'text-decoration': $data.activeChange() == 2 ?  'underline' : 'inherit'}"></td class="details-center">
                             <td class="details-center" data-bind="text: $data.getDisplayChange(3), style: { 'text-decoration': $data.activeChange() == 3 ?  'underline' : 'inherit'}"></td class="details-center">
                             <td class="details-left" data-bind="text: $data.getDisplayChange(4), style: { 'text-decoration': $data.activeChange() == 4 ?  'underline' : 'inherit'}"></td class="details-center">
-                            <td class="details-right" data-bind="text: $data.awayRankingBefore() ? $data.awayRankingBefore().toFixed(2) : ''"></td>
+                            <td colspan="2" class="details-right" data-bind="text: $data.awayRankingBefore() ? $data.awayRankingBefore().toFixed(2) : ''"></td>
                             <td colspan="3"></td>
                         </tr>
                         <!-- /ko -->
                         <!-- ko if: alreadyInRankings -->
                         <tr class="possible-changes">
-                            <td colspan="8" class="details-center" title="The match is complete and kicked off 90 minutes or more before the latest rankings, so assume it is already included">Already ranked*</td>
+                            <td colspan="10" class="details-center" title="The match is complete and kicked off 90 minutes or more before the latest rankings, so assume it is already included">Already ranked*</td>
                             <td colspan="3"></td>
                         </tr>
                         <!-- /ko -->
@@ -148,13 +238,21 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <!-- ko if: showIsRwc -->
+                            <td></td>
+                            <!-- /ko -->
+                            <!-- ko ifnot: event -->
+                            <td></td>
+                            <!-- /ko -->
                         </tr>
                     </tfoot>
                 </table>
             </div>
+            <!-- ko ifnot: event -->
             <div id="addrow">
                 <button onclick='addFixture();'></button>
             </div>
+            <!-- /ko -->
         </div>
     </div>
     <div id="footer">

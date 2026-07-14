@@ -104,7 +104,7 @@ table {
         }
     }
 }
-#which, #union {
+#which, #union, #whichPool {
     font-size: 14px;
     font-weight: 500;
 }
@@ -162,6 +162,11 @@ table {
         display: flex;
         flex-direction: column;
     }
+    #leftTop, #leftBottom {
+        @include height(6);
+        display: flex;
+        flex-direction: column;
+    }
     #right {
         @include height(0);
         height: 100%;
@@ -170,19 +175,29 @@ table {
         flex: 1;
     }
     #left, #right {
-    .header h3 {
+        .header h3 {
             flex: 0;
         }
     }
-    #which,#union {
+    #which,#union,#whichPool {
         flex-shrink: 0;
     }
-    #rankings {
+    #leftTop {
         flex: 1;
+        flex-shrink: 1;
+        overflow-y: hidden;
+    }
+    #leftBottom {
+        flex-shrink: 0;
+        overflow-y: hidden;
+    }
+    #tables {
+        overflow-y: hidden;
+    }
+    #rankings {
         overflow-y: scroll;
     }
     #fixtures {
-        flex: 1;
         overflow-y: scroll;
     }
     #addrow {
@@ -194,7 +209,15 @@ table {
         display: flex;
         flex-direction: column-reverse;
     }
-    #left, #right {
+    #left {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+    #right {
+        display: flex;
+        flex-direction: column;
+    }
+    #leftTop, #leftBottom {
         display: flex;
         flex-direction: column;
     }
@@ -228,7 +251,7 @@ body {
     }
 }
 
-#which {
+#which,#whichPool {
     display: flex;
     @extend %primary;
 
@@ -262,7 +285,7 @@ body {
     line-height: 24px;
     width: 100%;
 
-    a {
+    a, span {
         flex-grow: 1;
         text-align: center;
         border-bottom: 2px solid $white;
@@ -276,6 +299,10 @@ body {
         &:not(.sel) {
             @extend .secondaryText;
         }
+    }
+
+    select {
+        flex-grow: 1;
     }
 }
 
@@ -363,6 +390,10 @@ body {
         input[type=number] {
             width: 3em;
         }
+
+        td.switched {
+            background-color: #ddd;
+        }
     }
 }
 
@@ -396,5 +427,27 @@ body {
         background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAABlBMVEX///////9VfPVsAAAAAXRSTlMAQObYZgAAABZJREFUCNdjYLBhYCAG////HwUTqQ8AH00QpSze/owAAAAASUVORK5CYII=');
         background-repeat: no-repeat;
         background-position: 50% 50%;
+    }
+}
+
+#tables {
+    padding: 5px;
+}
+#poolstable {
+    width: 100%;
+
+    tr.inProg {
+        font-style: italic;
+    }
+
+    th {
+        text-align: left;
+    }
+    th.right {
+        text-align: right;
+    }
+
+    td {
+        text-align: right;
     }
 }
