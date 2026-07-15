@@ -30,6 +30,44 @@ var FixtureViewModel = function (parent) {
     this.homeTries = ko.observable();
     this.awayTries = ko.observable();
 
+    // Set when the fixture was loaded from the WR match API.
+    this.matchId = null;
+
+    // On-demand match detail (team sheets and officials) from the summary API.
+    this.detail = ko.observable(null);
+    this.detailVisible = ko.observable(false);
+    this.detailLoading = ko.observable(false);
+    var self = this;
+    this.toggleDetail = function () {
+        if (self.detailVisible()) {
+            self.detailVisible(false);
+            return;
+        }
+        self.detailVisible(true);
+        if (!self.detail() && !self.detailLoading() && self.matchId) {
+            self.detailLoading(true);
+            getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/match/' + self.matchId + '/summary').then(function (data) {
+                self.detail(parseMatchDetail(data));
+            }).catch(function () {
+                self.detail({ error: true, officials: [], teams: [] });
+            }).then(function () {
+                self.detailLoading(false);
+            });
+        }
+    };
+
+    // Flags for the currently selected teams.
+    this.homeFlagSrc = ko.computed(function () {
+        var rankings = parent.rankingsById();
+        var home = rankings && rankings[this.homeId()];
+        return home ? flagFor(home.team) : null;
+    }, this);
+    this.awayFlagSrc = ko.computed(function () {
+        var rankings = parent.rankingsById();
+        var away = rankings && rankings[this.awayId()];
+        return away ? flagFor(away.team) : null;
+    }, this);
+
     this.hasValidTeams = ko.computed(function () {
         var rankings = parent.rankingsById();
         var home = rankings[this.homeId()];

@@ -39,9 +39,33 @@ var ViewModel = function (source) {
     // Options are null, 'original' or 'calculated'.
     this.rankingsChoice = ko.observable();
 
-    // An indication of whether we have loaded fixtures from WR.
-    // Not actually used yet, but could help show a loading screen.
-    this.fixturesLoaded = ko.observable(false);
+    // The number of API requests in flight; drives the loading indicator.
+    // Incremented/decremented by getJSON, so it covers everything.
+    this.pendingRequests = ko.observable(0);
+    this.isLoading = ko.computed(function () {
+        return this.pendingRequests() > 0;
+    }, this);
+
+    // Briefly true after loading finishes, to flash a 'Loaded' confirmation.
+    this.justLoaded = ko.observable(false);
+    var vm2 = this;
+    var loadedTimer = null;
+    this.isLoading.subscribe(function (loading) {
+        if (loading) {
+            if (loadedTimer) {
+                clearTimeout(loadedTimer);
+                loadedTimer = null;
+            }
+            vm2.justLoaded(false);
+        } else {
+            vm2.justLoaded(true);
+            loadedTimer = setTimeout(function () {
+                vm2.justLoaded(false);
+                loadedTimer = null;
+            }, 1500);
+        }
+    });
+
 
     // The rankings calcualted by taking the original rankings and applying
     // the fixtures.
@@ -58,7 +82,7 @@ var ViewModel = function (source) {
         // and set the "old" values to the "current" values so we can 
         // show changes at the end.
         var projectedRankings = {};
-        $.each(rankingsById, function (k, v) {
+        Object.values(rankingsById).forEach(function (v) {
             var cr = new RankingViewModel(v);
             cr.previousPos(cr.pos());
             cr.previousPts(cr.pts());
@@ -67,7 +91,7 @@ var ViewModel = function (source) {
 
         // Apply each fixture in turn.
         var anyApplied = false;
-        $.each(fixtures, function (index, fixture) {
+        fixtures.forEach(function (fixture) {
             // If the fixture doesn't have teams selected, or is already applied, do nothing.
             if (!fixture.hasValidTeams() || fixture.alreadyInRankings) {
                 return;
@@ -100,25 +124,24 @@ var ViewModel = function (source) {
 
         // Sort the rankings for display and update the "current" positions.
         var sorted = [];
-        $.each(projectedRankings, function (i, r) {
+        Object.values(projectedRankings).forEach(function (r) {
             sorted.push(r);
         });
         sorted.sort(function (a, b) { return b.pts() - a.pts(); });
 
-        var last = null;
-        $.each(sorted, function (i, r) {
-            if (last &&
-                last.previousPos() === r.previousPos() &&
-                last.previousPts() == last.pts() &&
-                r.previousPts() == r.pts()) {
-                // This was tied with the previous team before and neither have played so should remain so.
-                // If they played each other and tied this might still work.
-                // If they both played giants and got full 1/2/3 points it won't.
-                r.pos(last.pos());
-            } else {
-                r.pos(i + 1);
-            }
-            last = r;
+        // Standard competition ranking, as WR uses: teams on equal points share
+        // a rank, and the following rank is skipped (1, 2, 2, 4, ...).
+        // This covers both pre-existing ties that remain untouched, and ties
+        // formed by applying fixtures (e.g. the "both played giants and got
+        // full points" case the previous heuristic couldn't keep tied).
+        var prevPts = null;
+        var prevRank = 0;
+        sorted.forEach(function (r, i) {
+            var pts = r.pts();
+            var rank = (pts === prevPts) ? prevRank : i + 1;
+            r.pos(rank);
+            prevPts = pts;
+            prevRank = rank;
         });
 
         // If we have calculated rankings, make sure we are showing the calculated ones.
@@ -159,7 +182,7 @@ var ViewModel = function (source) {
         var inProgPool = null;
         var noPool = 'NO POOL';
         var usesThreeTryBp = !!/The Rugby Championship/.exec(this.eventName());
-        $.each(fixtures, function (index, fixture) {
+        fixtures.forEach(function (fixture) {
             // If the fixture doesn't have teams selected do nothing.
             if (!fixture.hasValidTeams()) {
                 return;
@@ -354,7 +377,7 @@ var ViewModel = function (source) {
     // A string representing the selected fixtures and results.
     this.fixturesString = ko.pureComputed({
         read: function () {
-            return '2_' + $.map(this.fixtures(), function (e) {
+            return '2_' + this.fixtures().map(function (e) {
                 // In theory we should exclude matches that are already in the rankings, because otherwise we will include them a second time.
                 // But in practice, when we ask for "today's" rankings, we will get the previous rankings, as "today's" rankings were posted after midnight.
                 // These matches, played on top of the previous rankings, should reconstruct the same end result..
@@ -365,7 +388,7 @@ var ViewModel = function (source) {
                 var f = (e.noHome() || e.isRwc() || e.switched()) ? ('f' + ((e.noHome() ? 1 : 0) + (e.isRwc() ? 2 : 0) + (e.switched() ? 4 : 0))) : '';
 
                 return (t || s || f) ? (t + s + f) : null;
-            }).join(';');
+            }).filter(function (e) { return e !== null; }).join(';');
         },
         write: function (value) {
             var versionAndString = value.split(/[:_]/); // old was : but URLSearchParams %-encodes that so switched to underscore
@@ -373,7 +396,7 @@ var ViewModel = function (source) {
                 case '1':
                     var fs = [];
                     var me = this;
-                    $.each(versionAndString[1].split(';'), function (i, e) {
+                    versionAndString[1].split(';').forEach(function (e) {
                         var rs = e.split(',');
                         var fixture = new FixtureViewModel(me);
                         fixture.homeId(rs[0]);
@@ -390,7 +413,7 @@ var ViewModel = function (source) {
                 case '2':
                     var fs = [];
                     var me = this;
-                    $.each(versionAndString[1].split(';'), function (i, e) {
+                    versionAndString[1].split(';').forEach(function (e) {
                         var m = e.match(/^(t(\d*)v(\d*))?(s(\d*)-(\d*))?(f(\d+))?$/);
                         if (!m) return;
                         var fixture = new FixtureViewModel(me);
@@ -430,7 +453,10 @@ var ViewModel = function (source) {
     this.showIsRwc = ko.observable(true);
 
     this.selectedEvent.subscribe(function (selectedEvent) {
-        window.location = '?s=' + selectedEvent.id;
+        // Ignore programmatic preselection of the event we are already viewing.
+        if (selectedEvent && selectedEvent.id !== source) {
+            window.location = location.pathname + '#s=' + selectedEvent.id;
+        }
     })
 
     return this;

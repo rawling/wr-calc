@@ -1,6 +1,20 @@
 # wr-calc
 World Rugby rankings calculator
 
+## Third-party assets
+
+- Team flags in `styles/flags/` are from [flag-icons](https://github.com/lipis/flag-icons),
+  MIT licensed (see `LICENSE.flag-icons.txt` in that directory).
+- The Ireland flag (`ie-rugby.svg`) is the all-island four-provinces rugby flag,
+  from [IRFU flag.svg on Wikimedia Commons](https://commons.wikimedia.org/wiki/File:IRFU_flag.svg)
+  by IRFU and User:Setanta Saki. Flag design public domain; SVG file licensed
+  [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- The Chinese Taipei flag (`tpe.svg`) is from
+  [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Flag_of_Chinese_Taipei_for_Olympic_games.svg)
+  (public domain as an official ROC work).
+- Roboto font files in `styles/fonts/` via [Fontsource](https://fontsource.org/)
+  (font: Apache License 2.0).
+
 ## Release notes
 
 ### 0.14
