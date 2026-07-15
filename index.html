@@ -165,8 +165,7 @@
                             <!-- ko if: triesMatter -->
                             <td class="details-center">Tries</td>
                             <!-- /ko -->
-                            <td class="details-right" colspan="4" data-bind="text: ($data.venueNameAndCountry || '') + ($data.switched() ? '*' : ''), title: ($data.venueCity || '') + ($data.switched() ? ' (home advantage to &quot;away&quot; team)' : '')"></td>
-                            <td class="details-right"><a href="#" title="Team sheets and officials" data-bind="visible: matchId, click: toggleDetail, text: detailVisible() ? 'hide' : 'XV'"></a></td>
+                            <td class="details-right" colspan="5" data-bind="text: ($data.venueNameAndCountry || '') + ($data.switched() ? '*' : ''), title: ($data.venueCity || '') + ($data.switched() ? ' (home advantage to &quot;away&quot; team)' : '')"></td>
                         </tr>
                         <!-- /ko -->
                         <tr class="teams">
@@ -213,13 +212,15 @@
                             <td class="details-center" data-bind="text: $data.getDisplayChange(3), style: { 'text-decoration': $data.activeChange() == 3 ?  'underline' : 'inherit'}"></td>
                             <td class="details-left" data-bind="text: $data.getDisplayChange(4), style: { 'text-decoration': $data.activeChange() == 4 ?  'underline' : 'inherit'}"></td>
                             <td colspan="2" class="details-right" data-bind="text: $data.awayRankingBefore() ? $data.awayRankingBefore().toFixed(2) : ''"></td>
-                            <td colspan="3"></td>
+                            <td colspan="2"></td>
+                            <td class="details-right"><a href="#" title="Team sheets and officials" data-bind="visible: matchId, click: toggleDetail, text: detailVisible() ? 'hide' : 'Teams'"></a></td>
                         </tr>
                         <!-- /ko -->
                         <!-- ko if: alreadyInRankings -->
                         <tr class="possible-changes">
                             <td colspan="10" class="details-center" title="The match is complete and kicked off 90 minutes or more before the latest rankings, so assume it is already included">Already ranked*</td>
-                            <td colspan="3"></td>
+                            <td colspan="2"></td>
+                            <td class="details-right"><a href="#" title="Team sheets and officials" data-bind="visible: matchId, click: toggleDetail, text: detailVisible() ? 'hide' : 'Teams'"></a></td>
                         </tr>
                         <!-- /ko -->
                         <!-- ko if: detailVisible -->
