@@ -176,7 +176,7 @@ var loadEvents = function(sport, currentEvent) {
     viewModel.eventsCaption(sport.toUpperCase() + ' Event');
     var start = new Date(new Date(new Date().getFullYear(), 0, 1));
     var end = new Date(new Date(new Date().getFullYear(), 12, 13));
-    getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/event/?startDate=' + formatDate(start) + '&endDate=' + formatDate(end) + '&sport=' + sport + '&pageSize=50').then(function (data) {
+    getJSON('https://api.wr-rims-prod.pulselive.com/rugby/v3/event?startDate=' + formatDate(start) + '&endDate=' + formatDate(end) + '&sport=' + sport + '&pageSize=50').then(function (data) {
         var events = [];
         for (var i = 0; i < data.content.length; i++) {
             var event = data.content[i];
